@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 
 
+## [1.7.3] - 2026-03-04
+
+### Fixed
+- **Windows**: Fixed `service.IsRunning()` using unsupported `syscall.Signal(0)` on Windows; now uses platform-specific build tags with `OpenProcess`/`GetExitCodeProcess`.
+- **Windows**: Fixed path separator mismatch in skill install arguments on Windows by normalizing to forward slashes.
+- **Crash**: Fixed potential panic in `benchmark` command when no repos are configured.
+- **Crash**: Fixed potential panic in `info` command when file name is empty.
+- **Install**: Fixed confusing fetch fallback logic that could silently swallow errors or skip API-based fetch.
+- **Init**: `ensureInitialized()` now correctly returns `false` when initialization fails.
+- **Server**: Replaced fragile error string comparison with `errors.Is(err, http.ErrServerClosed)`.
+- **Server**: Strengthened path traversal defense using `filepath.Rel` verification.
+- **Cache**: `ListSkills` walk now propagates non-permission filesystem errors instead of silently ignoring all errors.
+- **Repo**: Fixed overly permissive repository name matching that could match substrings (e.g., "repo" matching "another-repo").
+- **Completion**: Shell completion generation errors are now reported instead of silently ignored.
+
+### Changed
+- **Offline Mode**: Consolidated duplicate `OfflineMode` globals (`config.OfflineMode` and `github.OfflineMode`) into single source of truth (`config.OfflineMode`).
+- **Config**: Extracted shared `loadConfigFromPath`/`mergeDefaults` helpers to eliminate code duplication between `LoadConfig` and `LoadGlobalConfig`.
+- **Build**: Added `.PHONY` declarations to Makefile.
+- **Server**: Removed dead no-op code in skill search handler.
+
 ## [1.7.2] - 2026-02-19
 
 ### Fixed

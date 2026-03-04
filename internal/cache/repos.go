@@ -111,7 +111,11 @@ func (c *ReposCache) ListSkills(repoName string) ([]SkillEntry, error) {
 	// Walk the repo looking for SKILL.md files
 	err := filepath.Walk(repoPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			return nil
+			// Skip permission errors but continue walking
+			if os.IsPermission(err) {
+				return nil
+			}
+			return err
 		}
 		// Skip .git directory
 		if info.IsDir() && info.Name() == ".git" {

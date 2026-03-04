@@ -105,6 +105,8 @@ func ScanSkills(baseDir, subPath, owner, repoName string) ([]github.Repository, 
 		if relPathFromRoot == "." {
 			relPathFromRoot = ""
 		}
+		// Normalize to forward slashes for URL-like install arguments
+		relPathFromRoot = filepath.ToSlash(relPathFromRoot)
 
 		installArg := fmt.Sprintf("%s/%s", owner, repoName)
 		if relPathFromRoot != "" {

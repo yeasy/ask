@@ -201,43 +201,52 @@ func DefaultConfig() Config {
 	}
 }
 
-// LoadConfig loads the current ask.yaml configuration
-func LoadConfig() (*Config, error) {
-	data, err := os.ReadFile("ask.yaml")
+// loadConfigFromPath loads and merges a config from the given file path
+func loadConfigFromPath(path string) (*Config, error) {
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
-	var config Config
-	err = yaml.Unmarshal(data, &config)
+	var cfg Config
+	err = yaml.Unmarshal(data, &cfg)
 	if err != nil {
 		return nil, err
 	}
 
+	mergeDefaults(&cfg)
+	return &cfg, nil
+}
+
+// mergeDefaults merges default repos and tool targets into the config
+func mergeDefaults(cfg *Config) {
 	// Merge default repos with existing (add missing defaults)
 	defaultRepos := DefaultConfig().Repos
 	existingNames := make(map[string]bool)
-	for _, r := range config.Repos {
+	for _, r := range cfg.Repos {
 		existingNames[r.Name] = true
 	}
 	for _, dr := range defaultRepos {
 		if !existingNames[dr.Name] {
-			config.Repos = append(config.Repos, dr)
+			cfg.Repos = append(cfg.Repos, dr)
 		}
 	}
 
 	// Merge default tool targets with existing
 	defaultTargets := DefaultToolTargets()
 	existingTargets := make(map[string]bool)
-	for _, t := range config.ToolTargets {
+	for _, t := range cfg.ToolTargets {
 		existingTargets[t.Name] = true
 	}
 	for _, dt := range defaultTargets {
 		if !existingTargets[dt.Name] {
-			config.ToolTargets = append(config.ToolTargets, dt)
+			cfg.ToolTargets = append(cfg.ToolTargets, dt)
 		}
 	}
+}
 
-	return &config, nil
+// LoadConfig loads the current ask.yaml configuration
+func LoadConfig() (*Config, error) {
+	return loadConfigFromPath("ask.yaml")
 }
 
 // Save saves the configuration to ask.yaml
@@ -313,48 +322,16 @@ func CreateDefaultConfig() error {
 
 // LoadGlobalConfig loads the global config file (~/.ask/config.yaml)
 func LoadGlobalConfig() (*Config, error) {
-	configPath := GetGlobalConfigPath()
-	data, err := os.ReadFile(configPath)
+	cfg, err := loadConfigFromPath(GetGlobalConfigPath())
 	if err != nil {
 		if os.IsNotExist(err) {
 			// Return default config if doesn't exist
-			cfg := DefaultConfig()
-			return &cfg, nil
+			def := DefaultConfig()
+			return &def, nil
 		}
 		return nil, err
 	}
-
-	var config Config
-	err = yaml.Unmarshal(data, &config)
-	if err != nil {
-		return nil, err
-	}
-
-	// Merge default repos with existing (add missing defaults)
-	defaultRepos := DefaultConfig().Repos
-	existingNames := make(map[string]bool)
-	for _, r := range config.Repos {
-		existingNames[r.Name] = true
-	}
-	for _, dr := range defaultRepos {
-		if !existingNames[dr.Name] {
-			config.Repos = append(config.Repos, dr)
-		}
-	}
-
-	// Merge default tool targets with existing
-	defaultTargets := DefaultToolTargets()
-	existingTargets := make(map[string]bool)
-	for _, t := range config.ToolTargets {
-		existingTargets[t.Name] = true
-	}
-	for _, dt := range defaultTargets {
-		if !existingTargets[dt.Name] {
-			config.ToolTargets = append(config.ToolTargets, dt)
-		}
-	}
-
-	return &config, nil
+	return cfg, nil
 }
 
 // SaveGlobal saves the configuration to the global config file (~/.ask/config.yaml)

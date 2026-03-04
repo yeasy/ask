@@ -312,10 +312,6 @@ func (s *Server) handleSkillSearch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 2. Search GitHub
-	if query == "" {
-		query = ""
-	}
-
 	ghRepos, err := github.SearchTopic(topic, query)
 	if err != nil {
 		if len(results) > 0 {
@@ -587,14 +583,15 @@ func (s *Server) handleSkillFiles(w http.ResponseWriter, r *http.Request) {
 
 		// Security check: prevent ../ traversal
 		cleanRel := filepath.Clean(relPath)
-		if strings.Contains(cleanRel, "..") || strings.HasPrefix(cleanRel, "/") {
+		if strings.Contains(cleanRel, "..") || strings.HasPrefix(cleanRel, "/") || strings.HasPrefix(cleanRel, string(filepath.Separator)) {
 			jsonError(w, "Invalid path", http.StatusForbidden)
 			return
 		}
 
 		absPath := filepath.Join(skillPath, cleanRel)
-		// Double check it's still inside skillPath
-		if !strings.HasPrefix(absPath, skillPath) {
+		// Verify the resolved path is still inside skillPath
+		rel, err := filepath.Rel(skillPath, absPath)
+		if err != nil || strings.HasPrefix(rel, "..") {
 			jsonError(w, "Access denied", http.StatusForbidden)
 			return
 		}

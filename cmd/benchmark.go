@@ -45,7 +45,14 @@ var benchmarkCmd = &cobra.Command{
 
 		// Mock search execution (Cold)
 		// We'll search for "browser" which should trigger network requests
-		repo := cfg.Repos[0] // Use first repo
+		if len(cfg.Repos) == 0 {
+			fmt.Println("No repos configured. Skipping search benchmarks.")
+			_ = w.Flush()
+			fmt.Println()
+			fmt.Println("Done.")
+			return
+		}
+		repo := cfg.Repos[0]
 		if repo.Type == "topic" {
 			_, _ = github.SearchTopic(repo.URL, "browser")
 		}

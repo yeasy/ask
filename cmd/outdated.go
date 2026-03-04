@@ -10,7 +10,6 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/yeasy/ask/internal/config"
-	"github.com/yeasy/ask/internal/github"
 	"github.com/yeasy/ask/internal/ui"
 )
 
@@ -77,7 +76,7 @@ Use --global to check global skills.`,
 			remoteCommit := ""
 			status := "✓ Up to date"
 
-			if !github.OfflineMode {
+			if !config.OfflineMode {
 				fetchCmd := exec.Command("git", "fetch", "--quiet")
 				fetchCmd.Dir = skillPath
 				_ = fetchCmd.Run()
@@ -98,7 +97,7 @@ Use --global to check global skills.`,
 
 			// Compare
 			// Compare
-			if !github.OfflineMode {
+			if !config.OfflineMode {
 				status = "✓ Up to date"
 				if currentCommit != remoteCommit && remoteCommit != "" {
 					status = "⬆ Update available"

@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/yeasy/ask/internal/config"
-	"github.com/yeasy/ask/internal/github"
 	"github.com/yeasy/ask/internal/ui"
 )
 
@@ -180,7 +179,6 @@ func init() {
 func initConfig() {
 	if vid := rootCmd.PersistentFlags().Lookup("offline"); vid != nil && vid.Changed {
 		if val, _ := rootCmd.PersistentFlags().GetBool("offline"); val {
-			github.SetOffline(true)
 			config.SetOffline(true)
 		}
 	}

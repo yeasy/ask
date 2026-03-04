@@ -74,7 +74,7 @@ func Install(input string, opts InstallOptions) error {
 				if reposCache.HasRepo(repoName) {
 					// Check for staleness (24 hours)
 					// Only refresh if NOT in offline mode
-					if !github.OfflineMode && reposCache.IsStale(repoName, 24*time.Hour) {
+					if !config.OfflineMode && reposCache.IsStale(repoName, 24*time.Hour) {
 						ui.Debug(fmt.Sprintf("Repo '%s' is stale, refreshing...", repoName))
 						// We need to fetch the repo URL from config to refresh
 						var refreshURL string

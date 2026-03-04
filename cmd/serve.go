@@ -2,7 +2,9 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -97,11 +99,9 @@ func runServe(_ *cobra.Command, args []string) {
 	fmt.Printf("\n🌐 ASK Web UI starting at http://127.0.0.1:%d\n", servePort)
 	fmt.Println("   Press Ctrl+C to stop the server")
 
-	if err := srv.Start(); err != nil {
-		if err.Error() != "http: Server closed" {
-			ui.Error("Server error", "error", err)
-			os.Exit(1)
-		}
+	if err := srv.Start(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		ui.Error("Server error", "error", err)
+		os.Exit(1)
 	}
 
 	<-done

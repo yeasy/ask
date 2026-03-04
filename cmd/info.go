@@ -137,7 +137,7 @@ Use --global to check global skills.`,
 		fmt.Println()
 		fmt.Println("Files:")
 		for _, file := range info.Files {
-			if file[len(file)-1] == '/' {
+			if len(file) > 0 && file[len(file)-1] == '/' {
 				fmt.Printf("  📁 %s\n", file)
 			} else {
 				fmt.Printf("  📄 %s\n", file)

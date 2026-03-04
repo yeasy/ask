@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/yeasy/ask/internal/cache"
+	"github.com/yeasy/ask/internal/config"
 )
 
 const (
@@ -22,12 +23,10 @@ const (
 // Global cache instance
 var searchCache *cache.Cache
 
-// OfflineMode controls whether to skip network requests
-var OfflineMode = false
-
-// SetOffline sets the offline mode
-func SetOffline(offline bool) {
-	OfflineMode = offline
+// OfflineMode returns whether the application is in offline mode.
+// Delegates to config.OfflineMode as the single source of truth.
+func isOffline() bool {
+	return config.OfflineMode
 }
 
 func init() {
@@ -82,7 +81,7 @@ func SearchTopic(topic, keyword string) ([]Repository, error) {
 		}
 	}
 
-	if OfflineMode {
+	if isOffline() {
 		return nil, fmt.Errorf("offline mode: data not found in cache")
 	}
 
@@ -150,7 +149,7 @@ func SearchDir(owner, repo, path string) ([]Repository, error) {
 		}
 	}
 
-	if OfflineMode {
+	if isOffline() {
 		return nil, fmt.Errorf("offline mode: data not found in cache")
 	}
 

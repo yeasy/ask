@@ -1,5 +1,7 @@
 BINARY_NAME=ask
 
+.PHONY: all build build-desktop install-wails check-wails test clean run deps fmt vet lint install coverage
+
 all: test build
 
 build:

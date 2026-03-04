@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"syscall"
 )
 
 const (
@@ -58,17 +57,6 @@ func (m *Manager) ReadPID() (int, error) {
 // ClearPID removes the PID file
 func (m *Manager) ClearPID() error {
 	return os.Remove(m.GetPIDFilePath())
-}
-
-// IsRunning checks if the process with the given PID is running
-func (m *Manager) IsRunning(pid int) bool {
-	process, err := os.FindProcess(pid)
-	if err != nil {
-		return false
-	}
-	// On Unix systems, FindProcess always succeeds, so we need to send signal 0 to check existence
-	err = process.Signal(syscall.Signal(0))
-	return err == nil
 }
 
 // GetStatus returns the status of the service (pid, running, error)

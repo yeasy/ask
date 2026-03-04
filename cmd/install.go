@@ -62,7 +62,7 @@ const maxInputLength = 255
 
 func runInstall(cmd *cobra.Command, args []string) {
 	// Check for offline mode
-	if offline, _ := cmd.Flags().GetBool("offline"); offline || github.OfflineMode {
+	if offline, _ := cmd.Flags().GetBool("offline"); offline || config.OfflineMode {
 		fmt.Println("Error: Cannot install skills in offline mode.")
 		os.Exit(1)
 	}
@@ -270,15 +270,18 @@ func runInstall(cmd *cobra.Command, args []string) {
 
 				if targetRepo.Type == "dir" {
 					repos, err = repository.FetchSkillsViaGit(*targetRepo)
+					if err != nil {
+						// Fallback to API-based fetch
+						repos, err = repository.FetchSkills(*targetRepo)
+					}
+				} else {
+					repos, err = repository.FetchSkills(*targetRepo)
 				}
 
-				if err != nil || targetRepo.Type != "dir" {
-					repos, err = repository.FetchSkills(*targetRepo)
-					if err != nil {
-						fmt.Printf("Failed to fetch skills from repo '%s': %v\n", input, err)
-						failed = append(failed, input)
-						continue
-					}
+				if err != nil {
+					fmt.Printf("Failed to fetch skills from repo '%s': %v\n", input, err)
+					failed = append(failed, input)
+					continue
 				}
 
 				if len(repos) == 0 {

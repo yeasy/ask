@@ -250,10 +250,8 @@ Examples:
 
 			// Match if:
 			// - Input is exactly the normalized URL (e.g. "owner/repo")
-			// - Input is contained in the normalized URL (e.g. "repo" in "owner/repo") -- maybe too aggressive?
-			// Let's stick to: Input matches owner/repo in URL
-
-			if normalizedURL == repoName || strings.HasSuffix(normalizedURL, "/"+repoName) || strings.Contains(normalizedURL, repoName) {
+			// - Input matches the last segment(s) of the URL path (e.g. "skills" in "anthropics/skills")
+			if normalizedURL == repoName || strings.HasSuffix(normalizedURL, "/"+repoName) {
 				matchedRepos = append(matchedRepos, r)
 			}
 		}

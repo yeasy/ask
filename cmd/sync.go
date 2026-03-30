@@ -208,21 +208,26 @@ func buildRepoURL(repoURL string) string {
 }
 
 // buildRepoName constructs a filesystem-safe name from repo URL.
-// Strips path traversal patterns to prevent directory escape.
+// Rejects path traversal patterns to prevent directory escape.
 func buildRepoName(repoURL string) string {
 	// Handle owner/repo/path format
 	parts := strings.Split(repoURL, "/")
 	if len(parts) >= 2 {
-		owner := strings.ReplaceAll(parts[0], "..", "")
-		repo := strings.ReplaceAll(parts[1], "..", "")
-		if owner == "" || repo == "" {
+		owner := parts[0]
+		repo := parts[1]
+		if strings.Contains(owner, "..") || strings.Contains(repo, "..") {
+			return "unknown-repo"
+		}
+		if owner == "" || repo == "" || owner == "." || repo == "." {
 			return "unknown-repo"
 		}
 		return owner + "-" + repo
 	}
+	if strings.Contains(repoURL, "..") {
+		return "unknown-repo"
+	}
 	name := strings.ReplaceAll(repoURL, "/", "-")
-	name = strings.ReplaceAll(name, "..", "")
-	if name == "" {
+	if name == "" || name == "." {
 		return "unknown-repo"
 	}
 	return name

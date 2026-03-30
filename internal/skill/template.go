@@ -103,7 +103,11 @@ func createSkillDir(data TemplateData, destDir string) error {
 	// 2. Create SKILL.md
 	funcMap := template.FuncMap{
 		"yamlEscape": func(s string) string {
-			return strings.ReplaceAll(s, `"`, `\"`)
+			s = strings.ReplaceAll(s, `\`, `\\`)
+			s = strings.ReplaceAll(s, `"`, `\"`)
+			s = strings.ReplaceAll(s, "\n", `\n`)
+			s = strings.ReplaceAll(s, "\r", `\r`)
+			return s
 		},
 	}
 	tmpl, err := template.New("skill").Funcs(funcMap).Parse(skillMDTemplate)

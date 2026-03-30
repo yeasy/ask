@@ -14,7 +14,7 @@ jobs:
     name: Test
     strategy:
       matrix:
-        go-version: ['1.24']
+        go-version: ['1.25']
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     
@@ -36,8 +36,8 @@ jobs:
         run: go tool cover -func=coverage.out
       
       - name: Upload coverage to Codecov
-        if: matrix.os == 'ubuntu-latest' && matrix.go-version == '1.24'
-        uses: codecov/codecov-action@v4
+        if: matrix.os == 'ubuntu-latest' && matrix.go-version == '1.25'
+        uses: codecov/codecov-action@v6
         with:
           file: ./coverage.out
           flags: unittests

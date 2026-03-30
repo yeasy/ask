@@ -60,7 +60,7 @@ Codex, etc.) with a familiar CLI experience, just like Homebrew or npm.`,
 }
 
 // Version is the current version of the application
-const Version = "1.8.1"
+const Version = "1.9.0"
 
 // Top-level aliases (Docker-style)
 var installRootCmd = &cobra.Command{

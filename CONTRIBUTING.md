@@ -20,7 +20,7 @@ By participating in this project, you agree to maintain a respectful and inclusi
 
 ### Prerequisites
 
-- Go 1.24 or higher
+- Go 1.25 or higher
 - Git
 - A GitHub account
 

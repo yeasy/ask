@@ -371,8 +371,9 @@ func fetchRepoContents(owner, repo, path string) ([]githubRepoContent, error) {
 	if err != nil {
 		return nil, err
 	}
+	limitedBody := io.LimitReader(resp.Body, maxResponseBodySize)
 	defer func() {
-		_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, maxResponseBodySize))
+		_, _ = io.Copy(io.Discard, limitedBody)
 		_ = resp.Body.Close()
 	}()
 
@@ -381,7 +382,7 @@ func fetchRepoContents(owner, repo, path string) ([]githubRepoContent, error) {
 	}
 
 	var contents []githubRepoContent
-	if err := json.NewDecoder(io.LimitReader(resp.Body, maxResponseBodySize)).Decode(&contents); err != nil {
+	if err := json.NewDecoder(limitedBody).Decode(&contents); err != nil {
 		return nil, err
 	}
 

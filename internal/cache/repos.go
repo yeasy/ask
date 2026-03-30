@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -220,13 +221,19 @@ func sanitizeRepoName(name string) string {
 const maxDescriptionFileSize = 8192
 
 // extractDescription reads SKILL.md and extracts description from frontmatter.
-// Uses Lstat to avoid following symlinks.
+// Opens the file then stats via the fd to avoid TOCTOU between check and read.
 func extractDescription(skillMDPath string) string {
-	info, err := os.Lstat(skillMDPath)
-	if err != nil || info.Size() > maxDescriptionFileSize || info.Mode()&os.ModeSymlink != 0 {
+	f, err := os.Open(skillMDPath)
+	if err != nil {
 		return ""
 	}
-	data, err := os.ReadFile(skillMDPath)
+	defer func() { _ = f.Close() }()
+
+	info, err := f.Stat()
+	if err != nil || info.Size() > maxDescriptionFileSize || !info.Mode().IsRegular() {
+		return ""
+	}
+	data, err := io.ReadAll(io.LimitReader(f, maxDescriptionFileSize))
 	if err != nil {
 		return ""
 	}

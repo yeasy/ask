@@ -3,6 +3,7 @@ package skill
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -88,19 +89,26 @@ func ParseSkillMD(skillPath string) (*Meta, error) {
 	return &meta, nil
 }
 
-// parseFromContent attempts to extract metadata from SKILL.md content
+// parseFromContent attempts to extract metadata from SKILL.md content.
+// Opens the file then stats via the fd to avoid TOCTOU between check and read.
 func parseFromContent(skillMDPath string) (*Meta, error) {
-	info, err := os.Lstat(skillMDPath)
+	f, err := os.Open(skillMDPath)
 	if err != nil {
 		return nil, err
 	}
-	if info.Mode()&os.ModeSymlink != 0 {
-		return nil, fmt.Errorf("refusing to read symlink: %s", skillMDPath)
+	defer func() { _ = f.Close() }()
+
+	info, err := f.Stat()
+	if err != nil {
+		return nil, err
+	}
+	if !info.Mode().IsRegular() {
+		return nil, fmt.Errorf("refusing to read non-regular file: %s", skillMDPath)
 	}
 	if info.Size() > maxSkillFileSize {
 		return nil, fmt.Errorf("skill file too large: %d bytes (max %d)", info.Size(), maxSkillFileSize)
 	}
-	content, err := os.ReadFile(skillMDPath)
+	content, err := io.ReadAll(io.LimitReader(f, maxSkillFileSize))
 	if err != nil {
 		return nil, err
 	}

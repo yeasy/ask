@@ -38,7 +38,7 @@ var (
 	cacheMu     sync.RWMutex
 )
 
-// OfflineMode returns whether the application is in offline mode.
+// isOffline returns whether the application is in offline mode.
 // Delegates to config.IsOffline as the single source of truth.
 func isOffline() bool {
 	return config.IsOffline()

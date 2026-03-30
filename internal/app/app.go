@@ -3,7 +3,7 @@ package app
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"os"
 
 	"github.com/yeasy/ask/internal/config"
@@ -27,12 +27,12 @@ func (a *App) Startup(ctx context.Context) {
 	// 0. Ensure global config exists
 	globalPath := config.GetGlobalConfigPath()
 	if _, err := os.Stat(globalPath); os.IsNotExist(err) {
-		fmt.Println("Global config not found, initializing default...")
+		log.Println("Global config not found, initializing default...")
 		defaultCfg := config.DefaultConfig()
 		if err := defaultCfg.SaveGlobal(); err != nil {
-			fmt.Fprintf(os.Stderr, "Failed to initialize global config: %v\n", err)
+			log.Printf("Failed to initialize global config: %v", err)
 		} else {
-			fmt.Printf("Initialized global config at %s\n", globalPath)
+			log.Printf("Initialized global config at %s", globalPath)
 		}
 	}
 
@@ -41,11 +41,11 @@ func (a *App) Startup(ctx context.Context) {
 	if err == nil && globalCfg.LastProjectRoot != "" {
 		// 2. Try to switch to LastProjectRoot
 		if err := os.Chdir(globalCfg.LastProjectRoot); err != nil {
-			fmt.Fprintf(os.Stderr, "Failed to switch to last project root: %v\n", err)
+			log.Printf("Failed to switch to last project root: %v", err)
 			// If failed, fall back to home
 			fallbackToHome()
 		} else {
-			fmt.Printf("Restored project root: %s\n", globalCfg.LastProjectRoot)
+			log.Printf("Restored project root: %s", globalCfg.LastProjectRoot)
 		}
 	} else {
 		// 3. Default to user home if no last root or config load failed
@@ -56,9 +56,9 @@ func (a *App) Startup(ctx context.Context) {
 func fallbackToHome() {
 	if home, err := os.UserHomeDir(); err == nil {
 		if err := os.Chdir(home); err != nil {
-			fmt.Fprintf(os.Stderr, "Failed to switch to home dir: %v\n", err)
+			log.Printf("Failed to switch to home dir: %v", err)
 		} else {
-			fmt.Printf("Switched to home dir: %s\n", home)
+			log.Printf("Switched to home dir: %s", home)
 		}
 	}
 }

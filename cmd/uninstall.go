@@ -66,7 +66,11 @@ Use --all to remove both symlinks AND the source files in .agent/skills/.`,
 		if len(agents) > 0 {
 			// Uninstall from specific agent directories
 			for _, agentName := range agents {
-				agentType, _ := config.ResolveAgentType(agentName)
+				agentType, ok := config.ResolveAgentType(agentName)
+				if !ok {
+					fmt.Fprintf(os.Stderr, "Error: cannot resolve agent '%s'\n", agentName)
+					continue
+				}
 				dir, err := config.GetAgentSkillsDir(agentType, global)
 				if err != nil {
 					ui.Debug(fmt.Sprintf("Error getting skills dir for agent %s: %v", agentName, err))

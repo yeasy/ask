@@ -31,13 +31,27 @@ Skill Commands (ask skill <command>):
   update      Update skills to latest versions
   outdated    Check for available updates
   check       Check a skill for security issues
+  score       Compute trust score for a skill
+  test        Run validation checks on a skill
   create      Create a new skill template
+  publish     Validate and prepare skill for publishing
+  prompt      Generate XML skill listing for agent prompts
 
 Repository Commands (ask repo <command>):
   list        List configured repositories or skills in a repo
   add         Add a custom skill repository
   remove      Remove a repository
   sync        Clone/update repos to local cache (~/.ask/repos/)
+
+System Commands:
+  doctor       Diagnose and report on ASK health
+  serve        Start web UI for visual skill management
+  audit        Generate security audit report
+  lock-install Install exact versions from ask.lock
+  init         Initialize ASK project configuration
+  benchmark    Run performance benchmarks
+  quickstart   Install recommended skill packs
+  version      Show current version
 
 Supported Agents: %s
 `

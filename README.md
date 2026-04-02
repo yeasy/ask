@@ -78,7 +78,7 @@ ASK provides a beautiful web interface for skill discovery and management — av
 | **📦 Repository Manager** | Add and sync skill sources from GitHub |
 | **🛡️ Security Audit** | View generated safety reports |
 
-### Quick Start
+### Launch
 ```bash
 # Web Server
 ask serve
@@ -89,6 +89,7 @@ wails build && ./build/bin/ask-desktop
 
 📖 [Explore the Web UI Documentation →](docs/web-ui.md)
 
+## 🚀 Quick Start
 
 ### 1. Install
 
@@ -160,19 +161,25 @@ ask skill install --repo anthropics
 | Command | Description |
 | :--- | :--- |
 | `ask skill search <keyword>` | Search across all sources |
-| `ask skill install <name>` | Install skill(s) |
+| `ask skill install <name>` | Install skill(s) (aliases: `add`, `i`) |
 | `ask skill list` | List installed skills |
 | `ask skill uninstall <name>` | Remove a skill |
 | `ask skill update` | Update skills to latest version |
 | `ask skill outdated` | Check for newer versions |
+| `ask skill info <name>` | Show detailed skill information |
 | `ask skill check <path>` | Security scan + SKILL.md format validation |
+| `ask skill score <path>` | Compute trust score for a skill |
+| `ask skill test <path>` | Run validation checks on a skill |
 | `ask skill prompt [paths]` | Generate XML for agent system prompts |
+| `ask skill create <name>` | Create a new skill from template |
+| `ask skill publish <path>` | Validate and prepare skill for publishing |
 
 ### Repository Management
 | Command | Description |
 | :--- | :--- |
 | `ask repo list` | Show configured repositories |
-| `ask repo add <url>` | Add a custom skill source (run `ask repo sync` after to download) |
+| `ask repo add <url>` | Add a custom skill source (use `--sync` or run `ask repo sync` after to download) |
+| `ask repo remove <name>` | Remove a repository |
 | `ask repo sync` | Download/update repos to local cache (`~/.ask/repos`) |
 
 ### System Commands
@@ -180,6 +187,12 @@ ask skill install --repo anthropics
 | :--- | :--- |
 | `ask doctor` | Diagnose and report on ASK health (config, skills, cache, system) |
 | `ask serve` | Start web UI for visual skill management |
+| `ask audit` | Generate security audit report for installed skills |
+| `ask lock-install` | Install exact versions from `ask.lock` (like `npm ci`) |
+| `ask init` | Initialize ASK project configuration |
+| `ask benchmark` | Run performance benchmarks on configured repos |
+| `ask quickstart` | Install recommended skill packs |
+| `ask version` | Show current version |
 
 ## 🌐 Skill Sources
 

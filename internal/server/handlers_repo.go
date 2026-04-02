@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -37,7 +38,7 @@ func (s *Server) handleRepos(w http.ResponseWriter, r *http.Request) {
 			def := config.DefaultConfig()
 			cfg = &def
 		} else {
-			jsonError(w, err.Error(), http.StatusInternalServerError)
+			jsonError(w, "failed to load configuration", http.StatusInternalServerError)
 			return
 		}
 	}
@@ -175,7 +176,7 @@ func (s *Server) handleRepoRemove(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := validateSkillName(req.Name); err != nil {
-		jsonError(w, err.Error(), http.StatusBadRequest)
+		jsonError(w, "Invalid repository name", http.StatusBadRequest)
 		return
 	}
 
@@ -219,8 +220,8 @@ func (s *Server) handleRepoSync(w http.ResponseWriter, r *http.Request) {
 		Name string `json:"name"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		// Empty body is OK (sync all), but reject malformed JSON
-		if r.ContentLength > 0 {
+		// Empty body (io.EOF) is OK (sync all), but reject malformed JSON
+		if err != io.EOF {
 			jsonError(w, "Invalid request body", http.StatusBadRequest)
 			return
 		}
@@ -235,7 +236,7 @@ func (s *Server) handleRepoSync(w http.ResponseWriter, r *http.Request) {
 	args := []string{"repo", "sync"}
 	if req.Name != "" {
 		if err := validateSkillName(req.Name); err != nil {
-			jsonError(w, err.Error(), http.StatusBadRequest)
+			jsonError(w, "Invalid repository name", http.StatusBadRequest)
 			return
 		}
 		args = append(args, "--", req.Name)

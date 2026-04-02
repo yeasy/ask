@@ -258,16 +258,27 @@ func getExecutable(w http.ResponseWriter) (string, bool) {
 	return exe, true
 }
 
-// JSON response helpers
+// JSON response helpers.
+// Marshals to buffer first to avoid partial writes on encoding errors.
 func jsonResponse(w http.ResponseWriter, data interface{}) {
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(data); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	buf, err := json.Marshal(data)
+	if err != nil {
+		jsonError(w, "failed to encode response", http.StatusInternalServerError)
+		return
 	}
+	w.Header().Set("Content-Type", "application/json")
+	buf = append(buf, '\n')
+	_, _ = w.Write(buf)
 }
 
 func jsonError(w http.ResponseWriter, message string, code int) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	_ = json.NewEncoder(w).Encode(map[string]string{"error": message})
+	buf, err := json.Marshal(map[string]string{"error": message})
+	if err != nil {
+		_, _ = w.Write([]byte(`{"error":"internal error"}` + "\n"))
+		return
+	}
+	_, _ = w.Write(buf)
+	_, _ = w.Write([]byte("\n"))
 }

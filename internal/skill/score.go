@@ -3,6 +3,7 @@ package skill
 
 import (
 	"fmt"
+	"io"
 	"math"
 	"os"
 	"path/filepath"
@@ -412,12 +413,22 @@ func scoreTransparencyCategory(skillPath string) ScoreCategory {
 			return nil
 		}
 
-		// Double-check for symlink to narrow TOCTOU window
-		if fi, lErr := os.Lstat(path); lErr != nil || fi.Mode()&os.ModeSymlink != 0 {
-			return nil
-		}
-		content, readErr := os.ReadFile(path)
-		if readErr != nil {
+		// Open file and check via fd to avoid TOCTOU race.
+		// Use a helper closure so defer fires per file instead of accumulating.
+		content, readErr := func() ([]byte, error) {
+			f, fErr := os.Open(path)
+			if fErr != nil {
+				return nil, fErr
+			}
+			defer func() { _ = f.Close() }()
+
+			fi, fErr := f.Stat()
+			if fErr != nil || !fi.Mode().IsRegular() || fi.Size() > maxSkillFileSize {
+				return nil, nil
+			}
+			return io.ReadAll(io.LimitReader(f, maxSkillFileSize))
+		}()
+		if readErr != nil || content == nil {
 			return nil
 		}
 
@@ -552,6 +563,6 @@ func fileExists(path string) bool {
 	if err != nil {
 		return false
 	}
-	// Reject symlinks
-	return fi.Mode()&os.ModeSymlink == 0
+	// Reject symlinks and non-regular files
+	return fi.Mode()&os.ModeSymlink == 0 && fi.Mode().IsRegular()
 }

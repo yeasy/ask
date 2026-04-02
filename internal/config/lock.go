@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"time"
 
@@ -31,18 +32,37 @@ type LockFile struct {
 const maxLockFileSize = 1024 * 1024 // 1MB
 
 // loadLockFromPath loads a lock file from the given path with size validation.
+// Uses Lstat pre-check for symlinks, then open-then-fstat for size validation.
 func loadLockFromPath(path string) (*LockFile, error) {
-	info, err := os.Stat(path)
+	// Pre-check for symlinks (Lstat does not follow symlinks)
+	linfo, err := os.Lstat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return &LockFile{Version: 1, Skills: []LockEntry{}}, nil
 		}
 		return nil, fmt.Errorf("read lock file: %w", err)
 	}
+	if linfo.Mode()&os.ModeSymlink != 0 || !linfo.Mode().IsRegular() {
+		return nil, fmt.Errorf("refusing to read non-regular file: %s", path)
+	}
+
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("read lock file: %w", err)
+	}
+	defer func() { _ = f.Close() }()
+
+	info, err := f.Stat()
+	if err != nil {
+		return nil, fmt.Errorf("stat lock file: %w", err)
+	}
+	if !info.Mode().IsRegular() {
+		return nil, fmt.Errorf("refusing to read non-regular file: %s", path)
+	}
 	if info.Size() > maxLockFileSize {
 		return nil, fmt.Errorf("lock file too large: %d bytes (max %d)", info.Size(), maxLockFileSize)
 	}
-	data, err := os.ReadFile(path)
+	data, err := io.ReadAll(io.LimitReader(f, maxLockFileSize))
 	if err != nil {
 		return nil, fmt.Errorf("read lock file: %w", err)
 	}

@@ -25,15 +25,18 @@ type Meta struct {
 	AllowedTools  []string          `yaml:"allowed-tools"`
 }
 
-// ParseSkillMD parses a SKILL.md file and extracts frontmatter metadata
+// ParseSkillMD parses a SKILL.md file and extracts frontmatter metadata.
+// Uses Lstat pre-check for symlinks, then open-then-fstat for size validation.
 func ParseSkillMD(skillPath string) (*Meta, error) {
 	skillMDPath := filepath.Join(skillPath, "SKILL.md")
 
-	// Reject symlinks to prevent path traversal
-	if info, err := os.Lstat(skillMDPath); err != nil {
+	// Pre-check for symlinks (Lstat does not follow symlinks)
+	linfo, err := os.Lstat(skillMDPath)
+	if err != nil {
 		return nil, err
-	} else if info.Mode()&os.ModeSymlink != 0 {
-		return nil, fmt.Errorf("symlink rejected: %s", skillMDPath)
+	}
+	if linfo.Mode()&os.ModeSymlink != 0 || !linfo.Mode().IsRegular() {
+		return nil, fmt.Errorf("refusing to read non-regular file: %s", skillMDPath)
 	}
 
 	file, err := os.Open(skillMDPath)
@@ -42,7 +45,19 @@ func ParseSkillMD(skillPath string) (*Meta, error) {
 	}
 	defer func() { _ = file.Close() }()
 
+	fi, err := file.Stat()
+	if err != nil {
+		return nil, err
+	}
+	if !fi.Mode().IsRegular() {
+		return nil, fmt.Errorf("refusing to read non-regular file: %s", skillMDPath)
+	}
+	if fi.Size() > maxSkillFileSize {
+		return nil, fmt.Errorf("skill file too large: %d bytes (max %d)", fi.Size(), maxSkillFileSize)
+	}
+
 	scanner := bufio.NewScanner(file)
+	scanner.Buffer(make([]byte, 0, 64*1024), int(maxSkillFileSize))
 	var frontmatter []string
 	inFrontmatter := false
 	lineCount := 0
@@ -90,8 +105,17 @@ func ParseSkillMD(skillPath string) (*Meta, error) {
 }
 
 // parseFromContent attempts to extract metadata from SKILL.md content.
-// Opens the file then stats via the fd to avoid TOCTOU between check and read.
+// Uses Lstat pre-check, then opens the file and stats via the fd to avoid TOCTOU.
 func parseFromContent(skillMDPath string) (*Meta, error) {
+	// Pre-check for symlinks before opening (Lstat does not follow symlinks)
+	linfo, err := os.Lstat(skillMDPath)
+	if err != nil {
+		return nil, err
+	}
+	if linfo.Mode()&os.ModeSymlink != 0 || !linfo.Mode().IsRegular() {
+		return nil, fmt.Errorf("refusing to read non-regular file: %s", skillMDPath)
+	}
+
 	f, err := os.Open(skillMDPath)
 	if err != nil {
 		return nil, err
@@ -140,6 +164,6 @@ func FindSkillMD(skillPath string) bool {
 	if err != nil {
 		return false
 	}
-	// Reject symlinks
-	return fi.Mode()&os.ModeSymlink == 0
+	// Reject symlinks and non-regular files
+	return fi.Mode()&os.ModeSymlink == 0 && fi.Mode().IsRegular()
 }

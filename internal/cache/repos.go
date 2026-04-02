@@ -374,17 +374,36 @@ func atomicWriteFile(path string, data []byte, perm os.FileMode) error {
 // maxIndexFileSize limits the index file size to prevent OOM on malformed files
 const maxIndexFileSize = 5 * 1024 * 1024 // 5MB
 
-// LoadIndex loads the repo index from disk
+// LoadIndex loads the repo index from disk.
+// Uses Lstat pre-check for symlinks, then open-then-fstat for size validation.
 func (c *ReposCache) LoadIndex() ([]RepoInfo, error) {
 	indexPath := filepath.Join(c.baseDir, "index.json")
-	info, err := os.Stat(indexPath)
+	// Pre-check for symlinks (Lstat does not follow symlinks)
+	linfo, err := os.Lstat(indexPath)
 	if err != nil {
 		return nil, err
+	}
+	if linfo.Mode()&os.ModeSymlink != 0 || !linfo.Mode().IsRegular() {
+		return nil, fmt.Errorf("refusing to read non-regular file: %s", indexPath)
+	}
+
+	f, err := os.Open(indexPath)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = f.Close() }()
+
+	info, err := f.Stat()
+	if err != nil {
+		return nil, err
+	}
+	if !info.Mode().IsRegular() {
+		return nil, fmt.Errorf("refusing to read non-regular file: %s", indexPath)
 	}
 	if info.Size() > maxIndexFileSize {
 		return nil, fmt.Errorf("index file too large: %d bytes (max %d)", info.Size(), maxIndexFileSize)
 	}
-	data, err := os.ReadFile(indexPath)
+	data, err := io.ReadAll(io.LimitReader(f, maxIndexFileSize))
 	if err != nil {
 		return nil, err
 	}

@@ -288,15 +288,32 @@ func isSuspiciousExt(ext string) bool {
 }
 
 func scanFile(path, rootPath string, rules []Rule) ([]Finding, error) {
-	// Check for symlink to prevent following links
-	if fi, lErr := os.Lstat(path); lErr != nil || fi.Mode()&os.ModeSymlink != 0 {
+	// Pre-check for symlinks (Lstat does not follow symlinks)
+	linfo, err := os.Lstat(path)
+	if err != nil {
+		if os.IsPermission(err) || os.IsNotExist(err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	if linfo.Mode()&os.ModeSymlink != 0 || !linfo.Mode().IsRegular() {
 		return nil, nil
 	}
+
+	// Open file and verify via fd to avoid TOCTOU race
 	file, err := os.Open(path)
 	if err != nil {
+		if os.IsPermission(err) || os.IsNotExist(err) {
+			return nil, nil
+		}
 		return nil, err
 	}
 	defer func() { _ = file.Close() }()
+
+	fi, err := file.Stat()
+	if err != nil || !fi.Mode().IsRegular() || fi.Size() > maxSkillFileSize {
+		return nil, nil
+	}
 
 	var findings []Finding
 	relPath, relErr := filepath.Rel(rootPath, path)
@@ -304,6 +321,7 @@ func scanFile(path, rootPath string, rules []Rule) ([]Finding, error) {
 		relPath = filepath.Base(path)
 	}
 	scanner := bufio.NewScanner(file)
+	scanner.Buffer(make([]byte, 0, 64*1024), int(maxSkillFileSize))
 	lineNum := 0
 
 	for scanner.Scan() {

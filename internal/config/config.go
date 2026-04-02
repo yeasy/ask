@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"sort"
@@ -281,16 +282,35 @@ func DefaultConfig() Config {
 // maxConfigFileSize limits the config file size to prevent OOM on malformed files
 const maxConfigFileSize = 1024 * 1024 // 1MB
 
-// loadConfigFromPath loads and merges a config from the given file path
+// loadConfigFromPath loads and merges a config from the given file path.
+// Uses Lstat pre-check for symlinks, then open-then-fstat for size validation.
 func loadConfigFromPath(path string) (*Config, error) {
-	info, err := os.Stat(path)
+	// Pre-check for symlinks (Lstat does not follow symlinks)
+	linfo, err := os.Lstat(path)
 	if err != nil {
 		return nil, err
+	}
+	if linfo.Mode()&os.ModeSymlink != 0 || !linfo.Mode().IsRegular() {
+		return nil, fmt.Errorf("refusing to read non-regular file: %s", path)
+	}
+
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = f.Close() }()
+
+	info, err := f.Stat()
+	if err != nil {
+		return nil, err
+	}
+	if !info.Mode().IsRegular() {
+		return nil, fmt.Errorf("refusing to read non-regular file: %s", path)
 	}
 	if info.Size() > maxConfigFileSize {
 		return nil, fmt.Errorf("config file too large: %d bytes (max %d)", info.Size(), maxConfigFileSize)
 	}
-	data, err := os.ReadFile(path)
+	data, err := io.ReadAll(io.LimitReader(f, maxConfigFileSize))
 	if err != nil {
 		return nil, err
 	}

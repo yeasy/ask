@@ -1047,14 +1047,14 @@ func TestHandleSkillReadme_Validation(t *testing.T) {
 			method:     "GET",
 			query:      "",
 			wantStatus: http.StatusBadRequest,
-			wantErr:    "skill name is required",
+			wantErr:    "Invalid skill name",
 		},
 		{
 			name:       "GET with empty name param",
 			method:     "GET",
 			query:      "?name=",
 			wantStatus: http.StatusBadRequest,
-			wantErr:    "skill name is required",
+			wantErr:    "Invalid skill name",
 		},
 		{
 			name:       "GET with invalid name containing semicolon",

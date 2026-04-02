@@ -11,6 +11,10 @@ import (
 
 const maxCopyDepth = 20
 
+// maxCopyFileSize limits the maximum file size during copy operations to prevent
+// denial of service via malicious skill packages with extremely large files.
+const maxCopyFileSize = 100 * 1024 * 1024 // 100MB
+
 // CopyDir recursively copies a directory tree, attempting to preserve permissions.
 // Source directory must exist, destination directory must *not* exist.
 // Uses Lstat on the source root to reject symlinks and prevent following links
@@ -65,12 +69,14 @@ func copyDirRecursive(source, destination string, depth int) error {
 
 // CopyFile copies a single file from src to dst.
 // Rejects symlinks as source to prevent symlink-based attacks.
+// Uses Lstat pre-check for symlinks, then open-then-fstat for size validation.
 func CopyFile(src, dst string) (retErr error) {
-	fi, err := os.Lstat(src)
+	// Pre-check for symlinks before opening (Lstat does not follow symlinks)
+	linfo, err := os.Lstat(src)
 	if err != nil {
 		return err
 	}
-	if fi.Mode()&os.ModeSymlink != 0 {
+	if linfo.Mode()&os.ModeSymlink != 0 {
 		return fmt.Errorf("source is a symlink: rejecting for safety")
 	}
 
@@ -80,6 +86,17 @@ func CopyFile(src, dst string) (retErr error) {
 	}
 	defer func() { _ = sourceFile.Close() }()
 
+	fi, err := sourceFile.Stat()
+	if err != nil {
+		return err
+	}
+	if !fi.Mode().IsRegular() {
+		return fmt.Errorf("source is not a regular file: %s", src)
+	}
+	if fi.Size() > maxCopyFileSize {
+		return fmt.Errorf("file too large to copy: %d bytes (max %d)", fi.Size(), maxCopyFileSize)
+	}
+
 	destFile, err := os.Create(dst)
 	if err != nil {
 		return err
@@ -88,19 +105,26 @@ func CopyFile(src, dst string) (retErr error) {
 		if cerr := destFile.Close(); retErr == nil {
 			retErr = cerr
 		}
+		if retErr != nil {
+			_ = os.Remove(dst)
+		}
 	}()
 
-	if _, err := io.Copy(destFile, sourceFile); err != nil {
+	expectedSize := fi.Size()
+	written, err := io.Copy(destFile, io.LimitReader(sourceFile, expectedSize+1))
+	if err != nil {
 		return err
+	}
+	if written != expectedSize {
+		return fmt.Errorf("file size changed during copy: expected %d, wrote %d", expectedSize, written)
 	}
 
 	// Preserve permissions but strip setuid, setgid, sticky bits and
 	// group/other write bits for security.
 	// Execute bits are preserved so shell scripts remain runnable.
-	info, err := os.Stat(src)
-	if err == nil {
-		mode := info.Mode() & 0755 // Keep owner rwx, group/other r-x only
-		_ = os.Chmod(dst, mode)
+	mode := fi.Mode() & 0755 // Keep owner rwx, group/other r-x only
+	if err := os.Chmod(dst, mode); err != nil {
+		return fmt.Errorf("set permissions on %s: %w", dst, err)
 	}
 
 	return nil
@@ -130,8 +154,8 @@ func CreateSymlinkOrCopy(source, target string) error {
 	// On Windows, symlinks require special permissions.
 	// We can try a junction or just copy.
 	if runtime.GOOS == "windows" {
-		// Try deep copy
-		fi, err := os.Stat(source)
+		// Try deep copy; use Lstat to avoid following symlinks
+		fi, err := os.Lstat(source)
 		if err == nil && fi.IsDir() {
 			return CopyDir(source, target)
 		} else if err == nil {
@@ -141,7 +165,8 @@ func CreateSymlinkOrCopy(source, target string) error {
 
 	// Fallback for other OS or file types
 	// If symlink failed (permission denied?), try copy
-	fi, err := os.Stat(source)
+	// Use Lstat to avoid following symlinks (CopyFile/CopyDir have their own symlink checks)
+	fi, err := os.Lstat(source)
 	if err != nil {
 		return fmt.Errorf("failed to stat source %s: %w", source, err)
 	}

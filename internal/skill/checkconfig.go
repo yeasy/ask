@@ -2,6 +2,7 @@ package skill
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -32,18 +33,35 @@ type CustomRuleDef struct {
 const maxCheckConfigSize = 256 * 1024 // 256KB
 
 // readFileIfSafe reads a file after verifying it is not a symlink and within size limit.
+// Uses Lstat pre-check for symlinks, then open-then-fstat for size validation.
 func readFileIfSafe(path string, maxSize int64) ([]byte, error) {
-	info, err := os.Lstat(path)
+	// Pre-check for symlinks before opening (Lstat does not follow symlinks)
+	linfo, err := os.Lstat(path)
 	if err != nil {
 		return nil, err
 	}
-	if info.Mode()&os.ModeSymlink != 0 {
-		return nil, fmt.Errorf("refusing to read symlink: %s", path)
+	if linfo.Mode()&os.ModeSymlink != 0 {
+		return nil, fmt.Errorf("refusing to read non-regular file: %s", path)
+	}
+
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = f.Close() }()
+
+	// Verify via fd (fstat) for size to avoid TOCTOU on size check
+	info, err := f.Stat()
+	if err != nil {
+		return nil, err
+	}
+	if !info.Mode().IsRegular() {
+		return nil, fmt.Errorf("refusing to read non-regular file: %s", path)
 	}
 	if info.Size() > maxSize {
 		return nil, fmt.Errorf("file too large: %d bytes (max %d)", info.Size(), maxSize)
 	}
-	return os.ReadFile(path)
+	return io.ReadAll(io.LimitReader(f, maxSize))
 }
 
 // LoadCheckConfig loads .askcheck.yaml from the given directory.

@@ -119,7 +119,7 @@ func (s *Server) handleSkills(w http.ResponseWriter, r *http.Request) {
 			def := config.DefaultConfig()
 			cfg = &def
 		} else {
-			jsonError(w, err.Error(), http.StatusInternalServerError)
+			jsonError(w, "failed to load configuration", http.StatusInternalServerError)
 			return
 		}
 	}
@@ -372,7 +372,7 @@ func (s *Server) handleSkillSearch(w http.ResponseWriter, r *http.Request) {
 			jsonResponse(w, results)
 			return
 		}
-		jsonError(w, err.Error(), http.StatusInternalServerError)
+		jsonError(w, "search failed", http.StatusInternalServerError)
 		return
 	}
 
@@ -417,7 +417,7 @@ func (s *Server) handleSkillInstall(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := validateSkillName(req.Name); err != nil {
-		jsonError(w, err.Error(), http.StatusBadRequest)
+		jsonError(w, "Invalid skill name", http.StatusBadRequest)
 		return
 	}
 
@@ -475,7 +475,7 @@ func (s *Server) handleSkillUninstall(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := validateSkillName(req.Name); err != nil {
-		jsonError(w, err.Error(), http.StatusBadRequest)
+		jsonError(w, "Invalid skill name", http.StatusBadRequest)
 		return
 	}
 
@@ -590,7 +590,7 @@ func (s *Server) handleSkillImport(w http.ResponseWriter, r *http.Request) {
 	}
 	if req.Name != "" {
 		if err := validateSkillName(req.Name); err != nil {
-			jsonError(w, err.Error(), http.StatusBadRequest)
+			jsonError(w, "Invalid skill name", http.StatusBadRequest)
 			return
 		}
 	}
@@ -667,7 +667,7 @@ func (s *Server) handleSkillFiles(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := validateSkillName(skillName); err != nil {
-		jsonError(w, err.Error(), http.StatusBadRequest)
+		jsonError(w, "Invalid skill name", http.StatusBadRequest)
 		return
 	}
 
@@ -850,7 +850,7 @@ func (s *Server) handleSkillReadme(w http.ResponseWriter, r *http.Request) {
 
 	name := r.URL.Query().Get("name")
 	if err := validateSkillName(name); err != nil {
-		jsonError(w, err.Error(), http.StatusBadRequest)
+		jsonError(w, "Invalid skill name", http.StatusBadRequest)
 		return
 	}
 

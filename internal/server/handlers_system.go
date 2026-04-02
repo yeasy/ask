@@ -2,7 +2,6 @@ package server
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -40,7 +39,7 @@ func (s *Server) handleConfig(w http.ResponseWriter, r *http.Request) {
 			def := config.DefaultConfig()
 			cfg = &def
 		} else {
-			jsonError(w, err.Error(), http.StatusInternalServerError)
+			jsonError(w, "failed to load configuration", http.StatusInternalServerError)
 			return
 		}
 	}
@@ -79,11 +78,13 @@ func (s *Server) handleCacheClear(w http.ResponseWriter, r *http.Request) {
 	// Clear Repos Cache
 	reposCache, err := cache.New(cache.GetReposCacheDir(), 0)
 	if err != nil {
-		jsonError(w, fmt.Sprintf("Failed to access repos cache: %v", err), http.StatusInternalServerError)
+		log.Printf("failed to access repos cache: %v", err)
+		jsonError(w, "Failed to access repos cache", http.StatusInternalServerError)
 		return
 	}
 	if err := reposCache.Clear(); err != nil {
-		jsonError(w, fmt.Sprintf("Failed to clear repos cache: %v", err), http.StatusInternalServerError)
+		log.Printf("failed to clear repos cache: %v", err)
+		jsonError(w, "Failed to clear repos cache", http.StatusInternalServerError)
 		return
 	}
 
@@ -170,7 +171,7 @@ func (s *Server) handleConfigUpdate(w http.ResponseWriter, r *http.Request) {
 				def := config.DefaultConfig()
 				cfg = &def
 			} else {
-				jsonError(w, "Failed to load config in new root: "+err.Error(), http.StatusInternalServerError)
+				jsonError(w, "failed to load config in new root", http.StatusInternalServerError)
 				return
 			}
 		} else {
@@ -246,7 +247,7 @@ func (s *Server) handleConfigUpdate(w http.ResponseWriter, r *http.Request) {
 
 	if updated {
 		if err := cfg.Save(); err != nil {
-			jsonError(w, "Failed to save config: "+err.Error(), http.StatusInternalServerError)
+			jsonError(w, "failed to save configuration", http.StatusInternalServerError)
 			return
 		}
 	}
@@ -276,7 +277,7 @@ func (s *Server) handleStats(w http.ResponseWriter, r *http.Request) {
 			def := config.DefaultConfig()
 			cfg = &def
 		} else {
-			jsonError(w, err.Error(), http.StatusInternalServerError)
+			jsonError(w, "failed to load configuration", http.StatusInternalServerError)
 			return
 		}
 	}

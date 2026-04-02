@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/yeasy/ask/internal/config"
 	"github.com/yeasy/ask/internal/git"
@@ -14,6 +15,9 @@ import (
 	"github.com/yeasy/ask/internal/skill"
 	"github.com/yeasy/ask/internal/skillhub"
 )
+
+// gitCloneTimeout is the maximum time allowed for a git clone operation.
+const gitCloneTimeout = 5 * time.Minute
 
 // FetchSkills returns a list of skills available in the given repository
 func FetchSkills(repo config.Repo) ([]github.Repository, error) {
@@ -75,9 +79,10 @@ func FetchSkillsViaGit(repo config.Repo) ([]github.Repository, error) {
 	}
 	defer func() { _ = os.RemoveAll(tempDir) }()
 
-	// Clone repo
-	// Using generic Clone (depth 1)
-	if err := git.Clone(context.Background(), cloneURL, tempDir); err != nil {
+	// Clone repo with timeout to prevent indefinite hangs
+	cloneCtx, cloneCancel := context.WithTimeout(context.Background(), gitCloneTimeout)
+	defer cloneCancel()
+	if err := git.Clone(cloneCtx, cloneURL, tempDir); err != nil {
 		return nil, fmt.Errorf("failed to clone repo: %w", err)
 	}
 

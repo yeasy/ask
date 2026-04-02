@@ -23,6 +23,12 @@ import (
 // maxInstallDepth is the maximum recursion depth for Install to prevent circular resolution.
 const maxInstallDepth = 3
 
+// gitCloneTimeout is the maximum time allowed for a git clone operation.
+const gitCloneTimeout = 5 * time.Minute
+
+// gitOpTimeout is the maximum time allowed for lightweight git operations (checkout, rev-parse).
+const gitOpTimeout = 30 * time.Second
+
 // InstallOptions contains options for installing a skill
 type InstallOptions struct {
 	Global    bool
@@ -369,10 +375,12 @@ func Install(input string, opts InstallOptions) error {
 	} else if repoURL == "" {
 		return fmt.Errorf("could not resolve repository URL for %q", originalInput)
 	} else {
+		cloneCtx, cloneCancel := context.WithTimeout(context.Background(), gitCloneTimeout)
+		defer cloneCancel()
 		if subDir != "" {
-			err = git.InstallSubdir(context.Background(), repoURL, branch, subDir, tempSkillPath)
+			err = git.InstallSubdir(cloneCtx, repoURL, branch, subDir, tempSkillPath)
 		} else {
-			err = git.Clone(context.Background(), repoURL, tempSkillPath)
+			err = git.Clone(cloneCtx, repoURL, tempSkillPath)
 		}
 
 		if err != nil {
@@ -414,7 +422,9 @@ func Install(input string, opts InstallOptions) error {
 	// Checkout version
 	if version != "" && subDir == "" {
 		fmt.Printf("Checking out version %s...\n", version)
-		if err := git.Checkout(context.Background(), tempSkillPath, version); err != nil {
+		checkoutCtx, checkoutCancel := context.WithTimeout(context.Background(), gitOpTimeout)
+		defer checkoutCancel()
+		if err := git.Checkout(checkoutCtx, tempSkillPath, version); err != nil {
 			fmt.Fprintf(os.Stderr, "Warning: Failed to checkout version %s: %v\n", version, err)
 		}
 	}
@@ -422,7 +432,9 @@ func Install(input string, opts InstallOptions) error {
 	// Get commit hash
 	var commitHash string
 	if subDir == "" {
-		commitHash, _ = git.GetCurrentCommit(context.Background(), tempSkillPath)
+		commitCtx, commitCancel := context.WithTimeout(context.Background(), gitOpTimeout)
+		defer commitCancel()
+		commitHash, _ = git.GetCurrentCommit(commitCtx, tempSkillPath)
 	}
 
 	// Get metadata

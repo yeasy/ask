@@ -2,8 +2,10 @@
 package deps
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -210,6 +212,53 @@ func TestGetDependenciesNoSkillMD(t *testing.T) {
 	// Should return nil/empty when no SKILL.md exists
 	if len(deps) > 0 {
 		t.Errorf("Expected no dependencies, got %v", deps)
+	}
+}
+
+func TestResolve_PathTraversalDependency(t *testing.T) {
+	cases := []struct {
+		name string
+		dep  string
+	}{
+		{"dot-dot-slash", "../escape"},
+		{"forward-slash", "foo/bar"},
+		{"backslash", "foo\\bar"},
+		{"bare-dot-dot", ".."},
+		{"single-dot", "."},
+		{"empty-string", `""`},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			tmpDir := t.TempDir()
+
+			skillDir := filepath.Join(tmpDir, "bad-skill")
+			if err := os.Mkdir(skillDir, 0755); err != nil {
+				t.Fatalf("Failed to create skill directory: %v", err)
+			}
+
+			skillMD := fmt.Sprintf(`---
+name: bad-skill
+version: 1.0.0
+dependencies:
+  - %s
+---
+
+# Bad Skill
+`, tc.dep)
+			if err := os.WriteFile(filepath.Join(skillDir, "SKILL.md"), []byte(skillMD), 0644); err != nil {
+				t.Fatalf("Failed to write SKILL.md: %v", err)
+			}
+
+			resolver := NewResolver()
+			_, err := resolver.Resolve(skillDir)
+			if err == nil {
+				t.Fatalf("expected error for path traversal dependency %q, got nil", tc.dep)
+			}
+			if !strings.Contains(err.Error(), "invalid dependency name") {
+				t.Errorf("expected error to contain 'invalid dependency name', got: %v", err)
+			}
+		})
 	}
 }
 

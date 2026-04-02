@@ -3,6 +3,7 @@ package deps
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"github.com/yeasy/ask/internal/skill"
 )
@@ -48,6 +49,10 @@ func (r *Resolver) resolve(name, path string, chain []string) ([]string, error) 
 		meta, err := skill.ParseSkillMD(path)
 		if err == nil && meta != nil && len(meta.Dependencies) > 0 {
 			for _, dep := range meta.Dependencies {
+				// Reject dependency names with path separators or traversal to prevent escape
+				if dep == "" || dep == "." || strings.ContainsAny(dep, "/\\") || strings.Contains(dep, "..") {
+					return nil, fmt.Errorf("invalid dependency name %q: must be a simple name without path separators", dep)
+				}
 				depPath := filepath.Join(filepath.Dir(path), dep)
 				_, err := r.resolve(dep, depPath, chain)
 				if err != nil {

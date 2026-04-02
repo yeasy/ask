@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 )
@@ -140,6 +141,58 @@ func TestGetEntry_ReturnsMutablePointer(t *testing.T) {
 	entry.Version = "9.9.9"
 	if lf.Skills[0].Version != "9.9.9" {
 		t.Fatalf("expected mutation through pointer to affect original, got %s", lf.Skills[0].Version)
+	}
+}
+
+func TestLoadLockFromSymlink(t *testing.T) {
+	dir := t.TempDir()
+
+	// Create a subdirectory to use as a symlink target.
+	// The Lstat pre-check in loadLockFromPath detects the symlink and
+	// rejects it before opening the file.
+	targetDir := filepath.Join(dir, "target-dir")
+	if err := os.Mkdir(targetDir, 0755); err != nil {
+		t.Fatalf("Failed to create target directory: %v", err)
+	}
+
+	// Create a symlink pointing to the directory
+	symlinkPath := filepath.Join(dir, "symlink-lock.yaml")
+	if err := os.Symlink(targetDir, symlinkPath); err != nil {
+		t.Fatalf("Failed to create symlink: %v", err)
+	}
+
+	// loadLockFromPath should reject this because the resolved target is not a regular file
+	_, err := loadLockFromPath(symlinkPath)
+	if err == nil {
+		t.Fatal("expected error when loading lock from symlink to non-regular file, got nil")
+	}
+	if !strings.Contains(err.Error(), "non-regular file") {
+		t.Errorf("expected error to contain 'non-regular file', got: %v", err)
+	}
+}
+
+func TestLoadLockFromSymlinkToRegularFile(t *testing.T) {
+	dir := t.TempDir()
+
+	// Create a regular file as the symlink target
+	targetFile := filepath.Join(dir, "real-lock.yaml")
+	if err := os.WriteFile(targetFile, []byte("version: 1\nskills: []\n"), 0644); err != nil {
+		t.Fatalf("Failed to create target file: %v", err)
+	}
+
+	// Create a symlink pointing to the regular file
+	symlinkPath := filepath.Join(dir, "symlink-lock.yaml")
+	if err := os.Symlink(targetFile, symlinkPath); err != nil {
+		t.Fatalf("Failed to create symlink: %v", err)
+	}
+
+	// loadLockFromPath should reject this because the Lstat detects a symlink
+	_, err := loadLockFromPath(symlinkPath)
+	if err == nil {
+		t.Fatal("expected error when loading lock from symlink to regular file, got nil")
+	}
+	if !strings.Contains(err.Error(), "non-regular file") {
+		t.Errorf("expected error to contain 'non-regular file', got: %v", err)
 	}
 }
 

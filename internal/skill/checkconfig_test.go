@@ -3,6 +3,7 @@ package skill
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -66,6 +67,54 @@ func TestLoadCheckConfig_YmlExtension(t *testing.T) {
 	}
 	if cfg == nil || len(cfg.Ignore) != 1 {
 		t.Fatalf("expected 1 ignore from .yml, got %v", cfg)
+	}
+}
+
+func TestLoadCheckConfig_Symlink(t *testing.T) {
+	dir := t.TempDir()
+
+	// Create a real config file
+	realFile := filepath.Join(dir, "real-config.yaml")
+	if err := os.WriteFile(realFile, []byte("ignore: []\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create a symlink at .askcheck.yaml pointing to the real file
+	symlinkPath := filepath.Join(dir, ".askcheck.yaml")
+	if err := os.Symlink(realFile, symlinkPath); err != nil {
+		t.Fatalf("Failed to create symlink: %v", err)
+	}
+
+	_, err := LoadCheckConfig(dir)
+	if err == nil {
+		t.Fatal("expected error when loading config from symlink, got nil")
+	}
+	if !strings.Contains(err.Error(), "non-regular file") {
+		t.Errorf("expected error to mention 'non-regular file', got: %v", err)
+	}
+}
+
+func TestLoadCheckConfig_SymlinkToDir(t *testing.T) {
+	dir := t.TempDir()
+
+	// Create a subdirectory to use as symlink target
+	subDir := filepath.Join(dir, "subdir")
+	if err := os.Mkdir(subDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create a symlink at .askcheck.yaml pointing to a directory
+	symlinkPath := filepath.Join(dir, ".askcheck.yaml")
+	if err := os.Symlink(subDir, symlinkPath); err != nil {
+		t.Fatalf("Failed to create symlink: %v", err)
+	}
+
+	_, err := LoadCheckConfig(dir)
+	if err == nil {
+		t.Fatal("expected error when .askcheck.yaml is a symlink to a directory, got nil")
+	}
+	if !strings.Contains(err.Error(), "non-regular file") {
+		t.Errorf("expected error to mention 'non-regular file', got: %v", err)
 	}
 }
 

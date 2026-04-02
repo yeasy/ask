@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -275,6 +276,58 @@ func TestAtomicWriteFile_InvalidDir(t *testing.T) {
 	err := atomicWriteFile(path, []byte("data"), 0644)
 	if err == nil {
 		t.Fatal("Expected error for non-existent directory, got nil")
+	}
+}
+
+func TestLoadConfigFromSymlink(t *testing.T) {
+	dir := t.TempDir()
+
+	// Create a subdirectory to use as a symlink target.
+	// The Lstat pre-check in loadConfigFromPath detects the symlink and
+	// rejects it before opening the file.
+	targetDir := filepath.Join(dir, "target-dir")
+	if err := os.Mkdir(targetDir, 0755); err != nil {
+		t.Fatalf("Failed to create target directory: %v", err)
+	}
+
+	// Create a symlink pointing to the directory
+	symlinkPath := filepath.Join(dir, "symlink-config.yaml")
+	if err := os.Symlink(targetDir, symlinkPath); err != nil {
+		t.Fatalf("Failed to create symlink: %v", err)
+	}
+
+	// loadConfigFromPath should reject this because the resolved target is not a regular file
+	_, err := loadConfigFromPath(symlinkPath)
+	if err == nil {
+		t.Fatal("expected error when loading config from symlink to non-regular file, got nil")
+	}
+	if !strings.Contains(err.Error(), "non-regular file") {
+		t.Errorf("expected error to contain 'non-regular file', got: %v", err)
+	}
+}
+
+func TestLoadConfigFromSymlinkToRegularFile(t *testing.T) {
+	dir := t.TempDir()
+
+	// Create a regular file as the symlink target
+	targetFile := filepath.Join(dir, "real-config.yaml")
+	if err := os.WriteFile(targetFile, []byte("repos: []\n"), 0644); err != nil {
+		t.Fatalf("Failed to create target file: %v", err)
+	}
+
+	// Create a symlink pointing to the regular file
+	symlinkPath := filepath.Join(dir, "symlink-config.yaml")
+	if err := os.Symlink(targetFile, symlinkPath); err != nil {
+		t.Fatalf("Failed to create symlink: %v", err)
+	}
+
+	// loadConfigFromPath should reject this because the Lstat detects a symlink
+	_, err := loadConfigFromPath(symlinkPath)
+	if err == nil {
+		t.Fatal("expected error when loading config from symlink to regular file, got nil")
+	}
+	if !strings.Contains(err.Error(), "non-regular file") {
+		t.Errorf("expected error to contain 'non-regular file', got: %v", err)
 	}
 }
 

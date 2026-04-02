@@ -590,6 +590,58 @@ func TestLoadIndex_ErrorCases(t *testing.T) {
 	})
 }
 
+func TestLoadIndex_Symlink(t *testing.T) {
+	dir := t.TempDir()
+
+	// Create a subdirectory to use as a symlink target.
+	// The Lstat pre-check in LoadIndex detects the symlink and
+	// rejects it before opening the file.
+	targetDir := filepath.Join(dir, "target-dir")
+	if err := os.Mkdir(targetDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create a symlink at the expected index.json path pointing to the directory
+	symlinkPath := filepath.Join(dir, "index.json")
+	if err := os.Symlink(targetDir, symlinkPath); err != nil {
+		t.Fatalf("Failed to create symlink: %v", err)
+	}
+
+	c := &ReposCache{baseDir: dir}
+	_, err := c.LoadIndex()
+	if err == nil {
+		t.Fatal("expected error when loading index from symlink to non-regular file, got nil")
+	}
+	if !strings.Contains(err.Error(), "non-regular file") {
+		t.Errorf("expected error to contain 'non-regular file', got: %v", err)
+	}
+}
+
+func TestLoadIndex_SymlinkToRegularFile(t *testing.T) {
+	dir := t.TempDir()
+
+	// Create a regular file as the symlink target
+	targetFile := filepath.Join(dir, "secret.json")
+	if err := os.WriteFile(targetFile, []byte("[]"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create a symlink at the expected index.json path pointing to the regular file
+	symlinkPath := filepath.Join(dir, "index.json")
+	if err := os.Symlink(targetFile, symlinkPath); err != nil {
+		t.Fatalf("Failed to create symlink: %v", err)
+	}
+
+	c := &ReposCache{baseDir: dir}
+	_, err := c.LoadIndex()
+	if err == nil {
+		t.Fatal("expected error when loading index from symlink to regular file, got nil")
+	}
+	if !strings.Contains(err.Error(), "non-regular file") {
+		t.Errorf("expected error to contain 'non-regular file', got: %v", err)
+	}
+}
+
 func TestCloneOrPull_RejectsNonHTTP(t *testing.T) {
 	rc := &ReposCache{baseDir: t.TempDir()}
 	tests := []string{

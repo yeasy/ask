@@ -2,6 +2,57 @@
 
 All notable changes to this project will be documented in this file.
 
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.9.1] - 2026-03-30
+
+### Fixed
+- **Code Quality**: Cleaned up debug print statements and improved doc comments.
+- **HTTP**: Fixed response body double `LimitReader` wrapping that could cause read failures.
+- **Security**: Fixed TOCTOU race conditions in symlink checks using open-then-fstat pattern.
+- **Security**: Added file size limits and `LimitReader` wrapping to `CopyFile`.
+- **Security**: Added cleanup of partial destination files on copy errors.
+- **Security**: HTTP handlers no longer leak internal error messages to clients.
+- **Security**: Added path traversal rejection in dependency resolver.
+- **Security**: Added git operation timeouts to prevent indefinite hangs.
+- **Security**: JSON responses marshal to buffer first to avoid partial writes.
+- **Docs**: Updated README and README_zh command tables with missing entries.
+
+## [1.9.0] - 2026-03-29
+
+### Changed
+- **CI**: Updated GitHub Actions to latest versions and hardened workflow permissions.
+- **Dependencies**: Upgraded to Go 1.25 and updated all dependencies.
+- **Dependencies**: Updated `golang.org/x/crypto` and `golang.org/x/net` for security patches.
+- **Dependencies**: Bumped `github.com/wailsapp/wails/v2` from 2.11.0 to 2.12.0.
+
+### Fixed
+- **Security**: Fixed path traversal vulnerabilities in `sync` command.
+- **Security**: Fixed YAML template escape issues in skill template generation.
+- **Install**: Fixed `lock-install` global flag not propagating correctly.
+- **Install**: Fixed `uninstall` command not resolving skill paths properly.
+
+## [1.8.1] - 2026-03-29
+
+### Added
+- **Testing**: Expanded test coverage across all major packages with comprehensive test suites.
+
+### Fixed
+- **Security**: Fixed XSS vulnerabilities and hardened HTTP server security.
+- **Security**: Hardened skill scanning, validation, and trust scoring.
+- **Security**: Hardened security in core packages (git, installer, config, filesystem, cache).
+- **CLI**: Improved input validation and error messages across all commands.
+- **Lint**: Fixed errcheck lint warnings.
+
+## [1.8.0] - 2026-03-27
+
+### Added
+- **Scoring**: Enhanced skill trust scoring system with improved category weights and detection patterns.
+
+### Fixed
+- **Security**: Hardened security and fixed bugs across multiple packages.
+- **Dependencies**: Updated dependencies and gitignore.
 
 ## [1.7.9] - 2026-03-14
 
@@ -157,17 +208,17 @@ All notable changes to this project will be documented in this file.
 
 ## [1.3.2] - 2026-01-30
 
- ### Fixed
- - **Build**: Updated GoReleaser config to use `brews` instead of `homebrew_casks` for correct Formula generation.
- - **CI**: Updated `release.yml` to use `libwebkit2gtk-4.1-dev` for compatibility with Ubuntu 24.04 (Noble).
+### Fixed
+- **Build**: Updated GoReleaser config to use `brews` instead of `homebrew_casks` for correct Formula generation.
+- **CI**: Updated `release.yml` to use `libwebkit2gtk-4.1-dev` for compatibility with Ubuntu 24.04 (Noble).
 
 ## [1.3.1] - 2026-01-30
- 
- ### Fixed
- - **Web UI**: Fixed missing icons in Repositories view by correctly prioritizing GitHub URLs for avatar generation.
- - **Server**: Fixed unused variable lint error in server code.
- 
- ## [1.1.3] - 2026-01-26
+
+### Fixed
+- **Web UI**: Fixed missing icons in Repositories view by correctly prioritizing GitHub URLs for avatar generation.
+- **Server**: Fixed unused variable lint error in server code.
+
+## [1.1.3] - 2026-01-26
 
 ### Added
 - **Security Report Improvements**:
@@ -199,9 +250,6 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Refined HTML report CSS for better readability and interactivity.
 - Defaulted findings groups to collapsed state for cleaner initial view.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [1.0.0] - 2026-01-25
 
@@ -314,7 +362,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced command help text with practical examples
 - Improved error messages with actionable suggestions
 
-## [0.5.0] - 2026-01-17
+## [0.5.0] - 2026-01-16
 
 ### Added
 - **Multi-Tool Support** (`--agent` / `-a` flag)
@@ -375,7 +423,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configuration file support (`ask.yaml`)
 - Default repositories: Community, Anthropic, MCP-Servers, Scientific, Superpowers
 
-[Unreleased]: https://github.com/yeasy/ask/compare/v1.5.1...HEAD
+[Unreleased]: https://github.com/yeasy/ask/compare/v1.9.1...HEAD
+[1.9.1]: https://github.com/yeasy/ask/compare/v1.9.0...v1.9.1
+[1.9.0]: https://github.com/yeasy/ask/compare/v1.8.1...v1.9.0
+[1.8.1]: https://github.com/yeasy/ask/compare/v1.8.0...v1.8.1
+[1.8.0]: https://github.com/yeasy/ask/compare/v1.7.9...v1.8.0
+[1.7.9]: https://github.com/yeasy/ask/compare/v1.7.4...v1.7.9
+[1.7.4]: https://github.com/yeasy/ask/compare/v1.7.2...v1.7.4
+[1.7.3]: https://github.com/yeasy/ask/compare/v1.7.2...v1.7.3
+[1.7.2]: https://github.com/yeasy/ask/compare/v1.7.0...v1.7.2
+[1.7.0]: https://github.com/yeasy/ask/compare/v1.6.5...v1.7.0
+[1.6.5]: https://github.com/yeasy/ask/compare/v1.6.4...v1.6.5
+[1.6.4]: https://github.com/yeasy/ask/compare/v1.6.2...v1.6.4
+[1.6.2]: https://github.com/yeasy/ask/compare/v1.6.1...v1.6.2
+[1.6.1]: https://github.com/yeasy/ask/compare/v1.6.0...v1.6.1
+[1.6.0]: https://github.com/yeasy/ask/compare/v1.5.1...v1.6.0
 [1.5.1]: https://github.com/yeasy/ask/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/yeasy/ask/compare/v1.4.3...v1.5.0
 [1.4.3]: https://github.com/yeasy/ask/compare/v1.4.2...v1.4.3

@@ -5,19 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.9.1] - 2026-03-30
+## [1.9.3] - 2026-04-01
 
 ### Fixed
-- **Code Quality**: Cleaned up debug print statements and improved doc comments.
-- **HTTP**: Fixed response body double `LimitReader` wrapping that could cause read failures.
-- **Security**: Fixed TOCTOU race conditions in symlink checks using open-then-fstat pattern.
+- **Security**: Global config paths now return errors instead of falling back to CWD when HOME is unavailable.
+- **Security**: Skill-bundled `.askcheck.yaml` can no longer disable CRITICAL security rules.
+- **Security**: Fixed `IsPathIgnored` substring matching bypass (e.g., `vendor/**` no longer matches `vendor-tools`).
+- **Security**: Added `json:"-"` tag to `Repo.Token` to prevent accidental JSON serialization.
+- **Security**: `sanitizeAndRestrictPath` now resolves symlinks to prevent path bypass.
+- **Security**: `InstallSubdir` validates subdirectory path before both sparse and fallback clone paths.
+- **Security**: Tightened URL scheme checks from `HasPrefix("http")` to `HasPrefix("http://")` / `HasPrefix("https://")`.
+- **Security**: `OpenBrowser` rejects URLs with shell metacharacters on Windows.
+- **Security**: HTTP path validation errors logged server-side instead of forwarded to clients.
+- **Security**: Reduced `NET-IP-ADDR` false positives on version strings and loopback addresses.
+- **Security**: Custom rule regex compilation errors now warn to stderr instead of being silently discarded.
+- **Security**: `cloneForScore` now has a 5-minute timeout.
+- **Docs**: Added documentation for 12 missing CLI commands in `docs/commands.md`.
+- **Docs**: Synced README_zh.md with English README (Go install method, desktop app section).
+- **Docs**: Corrected CHANGELOG version splitting for v1.9.1/v1.9.2.
+
+## [1.9.2] - 2026-04-01
+
+### Fixed
 - **Security**: Added file size limits and `LimitReader` wrapping to `CopyFile`.
 - **Security**: Added cleanup of partial destination files on copy errors.
 - **Security**: HTTP handlers no longer leak internal error messages to clients.
 - **Security**: Added path traversal rejection in dependency resolver.
 - **Security**: Added git operation timeouts to prevent indefinite hangs.
 - **Security**: JSON responses marshal to buffer first to avoid partial writes.
+- **Testing**: Added symlink and non-regular file tests.
 - **Docs**: Updated README and README_zh command tables with missing entries.
+
+## [1.9.1] - 2026-03-30
+
+### Fixed
+- **Code Quality**: Cleaned up debug print statements and improved doc comments.
+- **HTTP**: Fixed response body double `LimitReader` wrapping that could cause read failures.
+- **Security**: Fixed TOCTOU race conditions in symlink checks using open-then-fstat pattern.
 
 ## [1.9.0] - 2026-03-29
 

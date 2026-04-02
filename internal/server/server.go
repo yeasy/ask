@@ -123,14 +123,22 @@ func OpenBrowser(rawURL string) error {
 		return fmt.Errorf("only http and https URLs are supported")
 	}
 
+	// Reject URLs with characters that could be interpreted as shell metacharacters
+	// on Windows (cmd.exe). url.Parse is lenient and allows characters like |, >, <
+	// which cmd.exe would interpret as command operators.
+	safeURL := u.String()
+	if strings.ContainsAny(safeURL, "|><\"'`") {
+		return fmt.Errorf("URL contains unsafe characters")
+	}
+
 	var cmd *exec.Cmd
 	switch runtime.GOOS {
 	case "darwin":
-		cmd = exec.Command("open", u.String())
+		cmd = exec.Command("open", safeURL)
 	case "linux":
-		cmd = exec.Command("xdg-open", u.String())
+		cmd = exec.Command("xdg-open", safeURL)
 	case "windows":
-		cmd = exec.Command("cmd", "/c", "start", "", strings.ReplaceAll(u.String(), "&", "^&"))
+		cmd = exec.Command("cmd", "/c", "start", "", strings.ReplaceAll(safeURL, "&", "^&"))
 	default:
 		return fmt.Errorf("unsupported platform")
 	}
@@ -163,14 +171,29 @@ func validateSkillName(name string) error {
 
 // sanitizeAndRestrictPath resolves a raw path to an absolute path and restricts it
 // to be within the user's home directory or current working directory.
+// Symlinks are resolved when possible to prevent bypasses via symlinked path components.
 func sanitizeAndRestrictPath(rawPath string) (string, error) {
 	cleanPath, err := filepath.Abs(filepath.Clean(rawPath))
 	if err != nil {
 		return "", fmt.Errorf("invalid path")
 	}
+	// Resolve symlinks to compare real paths (best-effort; path may not exist yet)
+	if resolved, err := filepath.EvalSymlinks(cleanPath); err == nil {
+		cleanPath = resolved
+	}
 
 	homeDir, homeErr := os.UserHomeDir()
+	if homeErr == nil {
+		if resolved, err := filepath.EvalSymlinks(homeDir); err == nil {
+			homeDir = resolved
+		}
+	}
 	cwd, cwdErr := os.Getwd()
+	if cwdErr == nil {
+		if resolved, err := filepath.EvalSymlinks(cwd); err == nil {
+			cwd = resolved
+		}
+	}
 	if homeErr != nil && cwdErr != nil {
 		return "", fmt.Errorf("cannot determine safe base directory")
 	}

@@ -72,7 +72,7 @@ func Install(input string, opts InstallOptions) error {
 		skillName = parsedName
 	} else {
 		// Check if it's a direct URL or shorthand
-		isURL := strings.HasPrefix(input, "http") || strings.HasPrefix(input, "git@")
+		isURL := strings.HasPrefix(input, "http://") || strings.HasPrefix(input, "https://") || strings.HasPrefix(input, "git@")
 
 		if !isURL {
 			parts := strings.Split(input, "/")
@@ -145,7 +145,7 @@ func Install(input string, opts InstallOptions) error {
 												for _, r := range opts.Config.Repos {
 													// Calculate derived name as used in sync
 													derivedName := r.Name
-													if !strings.HasPrefix(r.URL, "http") {
+													if !strings.HasPrefix(r.URL, "http://") && !strings.HasPrefix(r.URL, "https://") {
 														parts := strings.Split(r.URL, "/")
 														if len(parts) >= 2 {
 															derivedName = parts[0] + "-" + parts[1]
@@ -155,7 +155,7 @@ func Install(input string, opts InstallOptions) error {
 													}
 
 													if r.Name == s.RepoName || derivedName == s.RepoName {
-														if !strings.HasPrefix(r.URL, "http") {
+														if !strings.HasPrefix(r.URL, "http://") && !strings.HasPrefix(r.URL, "https://") {
 															parts := strings.Split(r.URL, "/")
 															if len(parts) >= 2 {
 																repoURL = fmt.Sprintf("https://github.com/%s/%s.git", parts[0], parts[1])
@@ -194,7 +194,7 @@ func Install(input string, opts InstallOptions) error {
 						for _, r := range opts.Config.Repos {
 							if r.Name == parts[0] {
 								// Found matching repo config
-								if !strings.HasPrefix(r.URL, "http") {
+								if !strings.HasPrefix(r.URL, "http://") && !strings.HasPrefix(r.URL, "https://") {
 									repoParts := strings.Split(r.URL, "/")
 									if len(repoParts) >= 2 {
 										repoURL = fmt.Sprintf("https://github.com/%s/%s.git", repoParts[0], repoParts[1])
@@ -204,7 +204,7 @@ func Install(input string, opts InstallOptions) error {
 								}
 
 								baseSubDir := ""
-								if !strings.HasPrefix(r.URL, "http") {
+								if !strings.HasPrefix(r.URL, "http://") && !strings.HasPrefix(r.URL, "https://") {
 									repoParts := strings.Split(r.URL, "/")
 									if len(repoParts) > 2 {
 										baseSubDir = strings.Join(repoParts[2:], "/")
@@ -244,7 +244,7 @@ func Install(input string, opts InstallOptions) error {
 	}
 
 	// SkillHub Slug Resolution
-	if !strings.Contains(input, "/") && !strings.HasPrefix(input, "http") && !strings.HasPrefix(input, "git") {
+	if !strings.Contains(input, "/") && !strings.HasPrefix(input, "http://") && !strings.HasPrefix(input, "https://") && !strings.HasPrefix(input, "git") {
 		// 1. Try resolving from local cache first
 		reposCache, err := cache.NewReposCache()
 		if err == nil {
@@ -328,7 +328,11 @@ func Install(input string, opts InstallOptions) error {
 		}
 	} else {
 		if opts.Global {
-			targetDirs = []string{config.GetSkillsDirByScope(true)}
+			dir, err := config.GetSkillsDirByScope(true)
+			if err != nil {
+				return fmt.Errorf("failed to get global skills dir: %w", err)
+			}
+			targetDirs = []string{dir}
 			scopeLabel = "global"
 		} else {
 			if opts.Config != nil {
@@ -339,7 +343,11 @@ func Install(input string, opts InstallOptions) error {
 				targetDirs = opts.Config.GetActiveSkillsDirs(wd)
 				scopeLabel = "detected targets"
 			} else {
-				targetDirs = []string{config.GetSkillsDirByScope(false)}
+				dir, err := config.GetSkillsDirByScope(false)
+				if err != nil {
+					return fmt.Errorf("failed to get skills dir: %w", err)
+				}
+				targetDirs = []string{dir}
 				scopeLabel = "project"
 			}
 		}
@@ -498,7 +506,9 @@ func Install(input string, opts InstallOptions) error {
 	// Central storage
 	centralDir := config.DefaultSkillsDir
 	if opts.Global {
-		centralDir = config.GetSkillsDirByScope(true)
+		if dir, err := config.GetSkillsDirByScope(true); err == nil {
+			centralDir = dir
+		}
 	}
 	centralPath := filepath.Join(centralDir, skillName)
 

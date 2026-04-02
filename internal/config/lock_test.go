@@ -443,7 +443,10 @@ func TestSaveByScope_Global(t *testing.T) {
 	}
 
 	// Verify the global lock file exists
-	globalPath := GetGlobalLockPath()
+	globalPath, err := GetGlobalLockPath()
+	if err != nil {
+		t.Fatalf("GetGlobalLockPath failed: %v", err)
+	}
 	if _, err := os.Stat(globalPath); err != nil {
 		t.Fatalf("global lock file not found at %s: %v", globalPath, err)
 	}

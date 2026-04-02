@@ -211,6 +211,52 @@ func TestIsPathIgnored(t *testing.T) {
 		{"src/app.test.js", true},
 		{"dist/bundle.min.js", true},
 		{"src/index.js", false},
+		// Ensure ** patterns use path-segment matching, not substring matching
+		{"src/vendor-tools/file.go", false}, // vendor/** must not match substring "vendor" in "vendor-tools"
+		{"not-vendor/lib.go", false},        // vendor/** must not match "not-vendor"
+		{"a/b/c/bundle.min.js", true},       // **/*.min.js should match deeply nested paths
+	}
+
+	for _, tt := range tests {
+		got := cfg.IsPathIgnored(tt.path)
+		if got != tt.ignored {
+			t.Errorf("IsPathIgnored(%q) = %v, want %v", tt.path, got, tt.ignored)
+		}
+	}
+}
+
+func TestIsPathIgnored_NoSubstringFalsePositives(t *testing.T) {
+	cfg := &CheckConfig{
+		IgnorePaths: []string{
+			"vendor/**",
+			"**/secret",
+			"**/config",
+		},
+	}
+
+	tests := []struct {
+		path    string
+		ignored bool
+	}{
+		// vendor/** should match paths under vendor/ directory only
+		{"vendor/foo.go", true},
+		{"vendor/sub/bar.go", true},
+		{"src/vendor-tools/file.go", false}, // "vendor" as substring must NOT match
+		{"src/my-vendor/file.go", false},    // "vendor" as substring must NOT match
+		{"other-vendor/file.go", false},     // "vendor" as prefix of different dir must NOT match
+
+		// **/secret should match "secret" as an exact path segment
+		{"src/secret", true},
+		{"a/b/secret", true},
+		{"not-a-secret-file.go", false},   // substring must NOT match
+		{"src/secretfile.txt", false},     // prefix substring must NOT match
+		{"src/my-secret/data.txt", false}, // substring within segment must NOT match
+
+		// **/config should match "config" as an exact path segment
+		{"app/config", true},
+		{"src/app/config", true},
+		{"src/config-files/app.yaml", false}, // substring must NOT match
+		{"src/myconfig/app.yaml", false},     // substring must NOT match
 	}
 
 	for _, tt := range tests {

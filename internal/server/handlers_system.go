@@ -44,13 +44,14 @@ func (s *Server) handleConfig(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	globalSkillsDir, _ := config.GetGlobalSkillsDir()
 	info := ConfigInfo{
 		Version:     s.version,
 		SkillsDir:   cfg.GetSkillsDir(),
 		Agents:      config.GetSupportedAgentNames(),
 		ToolTargets: cfg.GetToolTargets(),
 
-		GlobalDir:   config.GetGlobalSkillsDir(),
+		GlobalDir:   globalSkillsDir,
 		Initialized: initialized,
 	}
 
@@ -147,7 +148,8 @@ func (s *Server) handleConfigUpdate(w http.ResponseWriter, r *http.Request) {
 		// Sanitize and restrict path
 		cleanRoot, pathErr := sanitizeAndRestrictPath(req.ProjectRoot)
 		if pathErr != nil {
-			jsonError(w, pathErr.Error(), http.StatusBadRequest)
+			log.Printf("path validation failed: %v", pathErr)
+			jsonError(w, "Invalid project root path", http.StatusBadRequest)
 			return
 		}
 		req.ProjectRoot = cleanRoot
@@ -193,7 +195,8 @@ func (s *Server) handleConfigUpdate(w http.ResponseWriter, r *http.Request) {
 	if req.SkillsDir != "" {
 		cleanSkillsDir, pathErr := sanitizeAndRestrictPath(req.SkillsDir)
 		if pathErr != nil {
-			jsonError(w, pathErr.Error(), http.StatusBadRequest)
+			log.Printf("path validation failed: %v", pathErr)
+			jsonError(w, "Invalid skills directory path", http.StatusBadRequest)
 			return
 		}
 		cfg.SkillsDir = cleanSkillsDir

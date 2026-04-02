@@ -311,6 +311,9 @@ func (s *Server) handleSkillSearch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	s.cwdMu.RLock()
+	defer s.cwdMu.RUnlock()
+
 	query := r.URL.Query().Get("q")
 	if len(query) > 255 {
 		jsonError(w, "Query too long (max 255 characters)", http.StatusBadRequest)
@@ -429,7 +432,7 @@ func (s *Server) handleSkillInstall(w http.ResponseWriter, r *http.Request) {
 	args := []string{"skill", "install"}
 	if req.Agent != "" {
 		if _, ok := config.ResolveAgentType(req.Agent); !ok {
-			jsonError(w, "Invalid agent name: "+req.Agent, http.StatusBadRequest)
+			jsonError(w, "Invalid agent name", http.StatusBadRequest)
 			return
 		}
 		args = append(args, "--agent", req.Agent)
@@ -446,10 +449,10 @@ func (s *Server) handleSkillInstall(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Printf("skill install output: %s", string(output))
 	jsonResponse(w, map[string]string{
 		"status":  "success",
 		"message": fmt.Sprintf("Installed %s", req.Name),
-		"output":  string(output),
 	})
 }
 
@@ -494,10 +497,10 @@ func (s *Server) handleSkillUninstall(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Printf("skill uninstall output: %s", string(output))
 	jsonResponse(w, map[string]string{
 		"status":  "success",
 		"message": fmt.Sprintf("Uninstalled %s", req.Name),
-		"output":  string(output),
 	})
 }
 
@@ -530,7 +533,8 @@ func (s *Server) handleSkillScan(w http.ResponseWriter, r *http.Request) {
 	// Sanitize and restrict path
 	cleanPath, pathErr := sanitizeAndRestrictPath(req.Path)
 	if pathErr != nil {
-		jsonError(w, pathErr.Error(), http.StatusBadRequest)
+		log.Printf("path validation failed: %v", pathErr)
+		jsonError(w, "Invalid path", http.StatusBadRequest)
 		return
 	}
 
@@ -603,7 +607,8 @@ func (s *Server) handleSkillImport(w http.ResponseWriter, r *http.Request) {
 	// Sanitize and restrict path
 	cleanSrcPath, pathErr := sanitizeAndRestrictPath(req.SrcPath)
 	if pathErr != nil {
-		jsonError(w, pathErr.Error(), http.StatusBadRequest)
+		log.Printf("path validation failed: %v", pathErr)
+		jsonError(w, "Invalid source path", http.StatusBadRequest)
 		return
 	}
 
@@ -628,10 +633,10 @@ func (s *Server) handleSkillImport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Printf("skill import output: %s", string(output))
 	jsonResponse(w, map[string]string{
 		"status":  "success",
 		"message": "Skill imported successfully",
-		"output":  string(output),
 	})
 }
 
@@ -704,13 +709,14 @@ func (s *Server) handleSkillFiles(w http.ResponseWriter, r *http.Request) {
 
 	// Also check Global if not found?
 	if skillPath == "" {
-		globalDir := config.GetGlobalSkillsDir()
-		p := filepath.Join(globalDir, skillName)
-		absBase, err1 := filepath.Abs(globalDir)
-		absP, err2 := filepath.Abs(p)
-		if err1 == nil && err2 == nil && strings.HasPrefix(absP, absBase+string(filepath.Separator)) {
-			if skill.FindSkillMD(p) {
-				skillPath = p
+		if globalDir, err := config.GetGlobalSkillsDir(); err == nil {
+			p := filepath.Join(globalDir, skillName)
+			absBase, err1 := filepath.Abs(globalDir)
+			absP, err2 := filepath.Abs(p)
+			if err1 == nil && err2 == nil && strings.HasPrefix(absP, absBase+string(filepath.Separator)) {
+				if skill.FindSkillMD(p) {
+					skillPath = p
+				}
 			}
 		}
 	}
@@ -884,13 +890,14 @@ func (s *Server) handleSkillReadme(w http.ResponseWriter, r *http.Request) {
 
 	// Also check global directory if not found
 	if skillPath == "" {
-		globalDir := config.GetGlobalSkillsDir()
-		p := filepath.Join(globalDir, name)
-		absBase, err1 := filepath.Abs(globalDir)
-		absP, err2 := filepath.Abs(p)
-		if err1 == nil && err2 == nil && strings.HasPrefix(absP, absBase+string(filepath.Separator)) {
-			if skill.FindSkillMD(p) {
-				skillPath = p
+		if globalDir, err := config.GetGlobalSkillsDir(); err == nil {
+			p := filepath.Join(globalDir, name)
+			absBase, err1 := filepath.Abs(globalDir)
+			absP, err2 := filepath.Abs(p)
+			if err1 == nil && err2 == nil && strings.HasPrefix(absP, absBase+string(filepath.Separator)) {
+				if skill.FindSkillMD(p) {
+					skillPath = p
+				}
 			}
 		}
 	}

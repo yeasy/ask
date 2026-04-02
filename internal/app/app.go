@@ -25,8 +25,10 @@ func (a *App) Startup(ctx context.Context) {
 	a.ctx = ctx
 
 	// 0. Ensure global config exists
-	globalPath := config.GetGlobalConfigPath()
-	if _, err := os.Stat(globalPath); os.IsNotExist(err) {
+	globalPath, err := config.GetGlobalConfigPath()
+	if err != nil {
+		log.Printf("Could not determine global config path: %v", err)
+	} else if _, err := os.Stat(globalPath); os.IsNotExist(err) {
 		log.Println("Global config not found, initializing default...")
 		defaultCfg := config.DefaultConfig()
 		if err := defaultCfg.SaveGlobal(); err != nil {

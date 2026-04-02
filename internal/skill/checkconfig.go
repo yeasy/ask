@@ -19,6 +19,11 @@ type CheckConfig struct {
 	IgnorePaths []string `yaml:"ignore_paths"`
 	// Rules defines additional custom rules
 	Rules []CustomRuleDef `yaml:"rules"`
+
+	// SkillBundled indicates the config was loaded from within a skill directory.
+	// When true, CRITICAL severity built-in rules cannot be ignored.
+	// This prevents a malicious skill from bundling a config that disables its own security audit.
+	SkillBundled bool `yaml:"-"`
 }
 
 // CustomRuleDef represents a user-defined rule in .askcheck.yaml
@@ -92,12 +97,31 @@ func LoadCheckConfig(dir string) (*CheckConfig, error) {
 	return &cfg, nil
 }
 
+// protectedRuleIDs returns the set of built-in rule IDs with CRITICAL severity.
+// These rules cannot be ignored by skill-bundled .askcheck.yaml configs.
+func protectedRuleIDs() map[string]bool {
+	protected := make(map[string]bool)
+	for _, r := range defaultRules {
+		if r.Severity == SeverityCritical {
+			protected[strings.ToUpper(r.ID)] = true
+		}
+	}
+	return protected
+}
+
 // BuildRules returns the effective rule set: default rules (minus ignored) plus custom rules.
+// When SkillBundled is true, built-in CRITICAL rules cannot be ignored.
 func (cc *CheckConfig) BuildRules() []Rule {
 	ignoreSet := make(map[string]bool)
 	if cc != nil {
+		protected := protectedRuleIDs()
 		for _, id := range cc.Ignore {
-			ignoreSet[strings.ToUpper(id)] = true
+			upper := strings.ToUpper(id)
+			// Skill-bundled configs cannot ignore built-in CRITICAL rules
+			if cc.SkillBundled && protected[upper] {
+				continue
+			}
+			ignoreSet[upper] = true
 		}
 	}
 
@@ -114,7 +138,8 @@ func (cc *CheckConfig) BuildRules() []Rule {
 		for _, cr := range cc.Rules {
 			compiled, err := regexp.Compile(cr.Pattern)
 			if err != nil {
-				continue // Skip invalid patterns
+				fmt.Fprintf(os.Stderr, "Warning: skipping custom rule %q: invalid pattern: %v\n", cr.ID, err)
+				continue
 			}
 			sev := SeverityWarning
 			switch strings.ToLower(cr.Severity) {
@@ -148,13 +173,26 @@ func (cc *CheckConfig) IsPathIgnored(relPath string) bool {
 		if matched, _ := filepath.Match(pattern, filepath.Base(relPath)); matched {
 			return true
 		}
-		// Support ** prefix by checking suffix
+		// Support ** prefix by matching the suffix pattern against each sub-path.
+		// For example, pattern "**/vendor" should match "src/vendor" but not
+		// "src/vendor-tools/file.go", and "**/*.min.js" should match
+		// "dist/bundle.min.js".
 		if strings.HasPrefix(pattern, "**") {
 			suffix := strings.TrimPrefix(pattern, "**")
 			suffix = strings.TrimPrefix(suffix, "/")
 			suffix = strings.TrimPrefix(suffix, string(filepath.Separator))
-			if strings.HasSuffix(relPath, suffix) || strings.Contains(relPath, suffix) {
-				return true
+			// Try matching suffix against the full path and every sub-path
+			// obtained by stripping leading directories one at a time.
+			candidate := relPath
+			for {
+				if matched, _ := filepath.Match(suffix, candidate); matched {
+					return true
+				}
+				i := strings.IndexAny(candidate, "/"+string(filepath.Separator))
+				if i < 0 {
+					break
+				}
+				candidate = candidate[i+1:]
 			}
 		}
 		// Support directory prefix patterns like "vendor/**"

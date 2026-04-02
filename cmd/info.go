@@ -31,7 +31,11 @@ Use --global to check global skills.`,
 			}
 		}
 
-		skillsDir := config.GetSkillsDirByScope(global)
+		skillsDir, err := config.GetSkillsDirByScope(global)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
 		skillPath := filepath.Join(skillsDir, skillName)
 
 		// Check if skill exists

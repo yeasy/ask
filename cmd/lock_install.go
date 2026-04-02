@@ -103,7 +103,11 @@ team members and CI/CD pipelines.`,
 
 				// Run security check if --check flag is set or enterprise requires it
 				if check || (cfg.Enterprise != nil && cfg.Enterprise.RequireCheck) {
-					skillsDir := config.GetSkillsDirByScope(global)
+					skillsDir, sdErr := config.GetSkillsDirByScope(global)
+					if sdErr != nil {
+						fmt.Fprintf(os.Stderr, "Error: %v\n", sdErr)
+						os.Exit(1)
+					}
 					skillPath := filepath.Join(skillsDir, entry.Name)
 					if skill.FindSkillMD(skillPath) {
 						result, checkErr := skill.CheckSafety(skillPath)

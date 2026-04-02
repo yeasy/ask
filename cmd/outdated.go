@@ -65,7 +65,11 @@ Use --global to check global skills.`,
 		_, _ = fmt.Fprintln(w, "SKILL\tCURRENT\tLATEST\tSTATUS")
 
 		outdatedCount := 0
-		skillsDir := config.GetSkillsDirByScope(global)
+		skillsDir, err := config.GetSkillsDirByScope(global)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
 
 		for _, skillName := range allSkills {
 			skillPath := filepath.Join(skillsDir, skillName)

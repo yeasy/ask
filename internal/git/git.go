@@ -109,6 +109,12 @@ func SparseClone(ctx context.Context, repoURL, branch, subDir, dest string) erro
 // InstallSubdir installs a subdirectory from a repository
 // Uses sparse checkout for efficiency, falls back to full clone if sparse fails
 func InstallSubdir(ctx context.Context, repoURL, branch, subDir, dest string) error {
+	// Validate subDir early so both sparse and fallback paths are protected.
+	cleaned := filepath.Clean(subDir)
+	if filepath.ToSlash(cleaned) != filepath.ToSlash(subDir) || strings.HasPrefix(cleaned, "..") || filepath.IsAbs(cleaned) {
+		return fmt.Errorf("invalid subdirectory: path traversal not allowed")
+	}
+
 	// Create temp dir for sparse clone
 	tempDir, err := os.MkdirTemp("", "ask-install-*")
 	if err != nil {

@@ -127,7 +127,11 @@ func (l *LockFile) GetEntry(name string) *LockEntry {
 
 // LoadGlobalLockFile loads the global lock file (~/.ask/ask.lock)
 func LoadGlobalLockFile() (*LockFile, error) {
-	return loadLockFromPath(GetGlobalLockPath())
+	path, err := GetGlobalLockPath()
+	if err != nil {
+		return nil, err
+	}
+	return loadLockFromPath(path)
 }
 
 // SaveGlobal saves the lock file to the global location (~/.ask/ask.lock) atomically
@@ -136,11 +140,16 @@ func (l *LockFile) SaveGlobal() error {
 		return fmt.Errorf("ensure global dir: %w", err)
 	}
 
+	path, err := GetGlobalLockPath()
+	if err != nil {
+		return fmt.Errorf("resolve global lock path: %w", err)
+	}
+
 	data, err := yaml.Marshal(l)
 	if err != nil {
 		return fmt.Errorf("marshal global lock file: %w", err)
 	}
-	if err := atomicWriteFile(GetGlobalLockPath(), data, 0600); err != nil {
+	if err := atomicWriteFile(path, data, 0600); err != nil {
 		return fmt.Errorf("write global lock file: %w", err)
 	}
 	return nil

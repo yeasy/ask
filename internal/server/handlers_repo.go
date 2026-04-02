@@ -58,7 +58,7 @@ func (s *Server) handleRepos(w http.ResponseWriter, r *http.Request) {
 	for _, repo := range cfg.Repos {
 		// Convert owner/repo or owner/repo/path format to full GitHub URL
 		displayURL := repo.URL
-		if !strings.HasPrefix(repo.URL, "http") && strings.Contains(repo.URL, "/") {
+		if !strings.HasPrefix(repo.URL, "http://") && !strings.HasPrefix(repo.URL, "https://") && strings.Contains(repo.URL, "/") {
 			parts := strings.SplitN(repo.URL, "/", 3)
 			if len(parts) >= 2 {
 				// Use just owner/repo for the display URL
@@ -147,10 +147,10 @@ func (s *Server) handleRepoAdd(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Printf("repo add output: %s", string(output))
 	jsonResponse(w, map[string]string{
 		"status":  "success",
 		"message": fmt.Sprintf("Added repository %s", req.URL),
-		"output":  string(output),
 	})
 }
 
@@ -195,10 +195,10 @@ func (s *Server) handleRepoRemove(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Printf("repo remove output: %s", string(output))
 	jsonResponse(w, map[string]string{
 		"status":  "success",
 		"message": fmt.Sprintf("Removed repository %s", req.Name),
-		"output":  string(output),
 	})
 }
 
@@ -257,9 +257,9 @@ func (s *Server) handleRepoSync(w http.ResponseWriter, r *http.Request) {
 		msg = fmt.Sprintf("Repository '%s' synced", req.Name)
 	}
 
+	log.Printf("repo sync output: %s", string(output))
 	jsonResponse(w, map[string]string{
 		"status":  "success",
 		"message": msg,
-		"output":  string(output),
 	})
 }

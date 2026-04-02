@@ -28,11 +28,11 @@ func SetOffline(offline bool) {
 // Repo represents a skill repository
 type Repo struct {
 	Name    string `yaml:"name"`
-	Type    string `yaml:"type"`               // "topic", "dir", "registry", or "skillhub"
-	URL     string `yaml:"url"`                // GitHub topic or "owner/repo/path"
-	Token   string `yaml:"token,omitempty"`    // Per-repo auth token (private repos)
-	BaseURL string `yaml:"base_url,omitempty"` // GitHub Enterprise base URL
-	Private bool   `yaml:"private,omitempty"`  // Whether the repo is private
+	Type    string `yaml:"type"`                     // "topic", "dir", "registry", or "skillhub"
+	URL     string `yaml:"url"`                      // GitHub topic or "owner/repo/path"
+	Token   string `yaml:"token,omitempty" json:"-"` // Per-repo auth token (private repos)
+	BaseURL string `yaml:"base_url,omitempty"`       // GitHub Enterprise base URL
+	Private bool   `yaml:"private,omitempty"`        // Whether the repo is private
 }
 
 // ToolTarget represents a supported AI coding tool
@@ -181,45 +181,61 @@ const GlobalSkillsDirName = "skills"
 // GlobalLockFileName is the name of the global lock file
 const GlobalLockFileName = "ask.lock"
 
-// GetGlobalConfigDir returns the global config directory path (~/.ask)
-func GetGlobalConfigDir() string {
+// GetGlobalConfigDir returns the global config directory path (~/.ask).
+// Returns an error if the user's home directory cannot be determined.
+func GetGlobalConfigDir() (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
-		return ""
+		return "", fmt.Errorf("could not determine home directory: %w", err)
 	}
-	return filepath.Join(home, GlobalConfigDirName)
+	return filepath.Join(home, GlobalConfigDirName), nil
 }
 
-// GetGlobalConfigPath returns the global config file path (~/.ask/config.yaml)
-func GetGlobalConfigPath() string {
-	return filepath.Join(GetGlobalConfigDir(), GlobalConfigFileName)
+// GetGlobalConfigPath returns the global config file path (~/.ask/config.yaml).
+// Returns an error if the user's home directory cannot be determined.
+func GetGlobalConfigPath() (string, error) {
+	dir, err := GetGlobalConfigDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(dir, GlobalConfigFileName), nil
 }
 
-// GetGlobalSkillsDir returns the global skills directory path (~/.ask/skills)
-func GetGlobalSkillsDir() string {
-	return filepath.Join(GetGlobalConfigDir(), GlobalSkillsDirName)
+// GetGlobalSkillsDir returns the global skills directory path (~/.ask/skills).
+// Returns an error if the user's home directory cannot be determined.
+func GetGlobalSkillsDir() (string, error) {
+	dir, err := GetGlobalConfigDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(dir, GlobalSkillsDirName), nil
 }
 
-// GetGlobalLockPath returns the global lock file path (~/.ask/ask.lock)
-func GetGlobalLockPath() string {
-	return filepath.Join(GetGlobalConfigDir(), GlobalLockFileName)
+// GetGlobalLockPath returns the global lock file path (~/.ask/ask.lock).
+// Returns an error if the user's home directory cannot be determined.
+func GetGlobalLockPath() (string, error) {
+	dir, err := GetGlobalConfigDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(dir, GlobalLockFileName), nil
 }
 
 // EnsureGlobalDirExists creates the global config directory if it doesn't exist
 func EnsureGlobalDirExists() error {
-	globalDir := GetGlobalConfigDir()
-	if globalDir == "" {
-		return fmt.Errorf("could not determine home directory")
+	globalDir, err := GetGlobalConfigDir()
+	if err != nil {
+		return err
 	}
 	return os.MkdirAll(globalDir, 0755)
 }
 
 // GetSkillsDirByScope returns the skills directory based on global flag
-func GetSkillsDirByScope(global bool) string {
+func GetSkillsDirByScope(global bool) (string, error) {
 	if global {
 		return GetGlobalSkillsDir()
 	}
-	return DefaultSkillsDir
+	return DefaultSkillsDir, nil
 }
 
 // GetSkillsDir returns the skills directory, using default if not set
@@ -480,7 +496,11 @@ func CreateConfigWithAgents(agents []string) error {
 
 // LoadGlobalConfig loads the global config file (~/.ask/config.yaml)
 func LoadGlobalConfig() (*Config, error) {
-	cfg, err := loadConfigFromPath(GetGlobalConfigPath())
+	path, err := GetGlobalConfigPath()
+	if err != nil {
+		return nil, err
+	}
+	cfg, err := loadConfigFromPath(path)
 	if err != nil {
 		if os.IsNotExist(err) {
 			// Return default config if doesn't exist
@@ -498,11 +518,16 @@ func (c *Config) SaveGlobal() error {
 		return err
 	}
 
+	path, err := GetGlobalConfigPath()
+	if err != nil {
+		return err
+	}
+
 	data, err := yaml.Marshal(c)
 	if err != nil {
 		return err
 	}
-	return atomicWriteFile(GetGlobalConfigPath(), data, 0600)
+	return atomicWriteFile(path, data, 0600)
 }
 
 // LoadConfigByScope loads config based on global flag

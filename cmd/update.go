@@ -86,7 +86,11 @@ Use --global to update global skills.`,
 			skillsToUpdate = allSkills
 		}
 
-		skillsDir := config.GetSkillsDirByScope(global)
+		skillsDir, err := config.GetSkillsDirByScope(global)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
 		for _, skillName := range skillsToUpdate {
 			skillPath := filepath.Join(skillsDir, skillName)
 

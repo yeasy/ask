@@ -188,7 +188,7 @@ If no repo name is specified, syncs all configured repositories.`,
 // Validates that owner/repo parts do not contain path traversal patterns.
 func buildRepoURL(repoURL string) string {
 	// Handle owner/repo format
-	if !strings.HasPrefix(repoURL, "http") && !strings.HasPrefix(repoURL, "git@") {
+	if !strings.HasPrefix(repoURL, "http://") && !strings.HasPrefix(repoURL, "https://") && !strings.HasPrefix(repoURL, "git@") {
 		// Extract owner/repo from path like "anthropics/skills/skills"
 		parts := strings.Split(repoURL, "/")
 		if len(parts) >= 2 {

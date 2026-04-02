@@ -166,14 +166,25 @@ func CheckSafety(skillPath string) (*CheckResult, error) {
 		return nil, fmt.Errorf("failed to load .askcheck.yaml: %w", err)
 	}
 
+	// Mark as skill-bundled so CRITICAL rules cannot be ignored
+	if checkCfg != nil {
+		checkCfg.SkillBundled = true
+	}
+
 	// Build effective rules (defaults minus ignored, plus custom)
 	rules := checkCfg.BuildRules()
 
-	// Build ignored rule set for filtering validation findings too
+	// Build ignored rule set for filtering validation findings too.
+	// Respect the same SkillBundled restriction: CRITICAL built-in rules stay enforced.
 	ignoreSet := make(map[string]bool)
 	if checkCfg != nil {
+		protected := protectedRuleIDs()
 		for _, id := range checkCfg.Ignore {
-			ignoreSet[strings.ToUpper(id)] = true
+			upper := strings.ToUpper(id)
+			if checkCfg.SkillBundled && protected[upper] {
+				continue
+			}
+			ignoreSet[upper] = true
 		}
 	}
 
@@ -370,6 +381,24 @@ func scanFile(path, rootPath string, rules []Rule) ([]Finding, error) {
 						}
 					}
 					if excluded || strings.Contains(lowerMatch, "license") {
+						continue
+					}
+				}
+
+				// Special handling for NET-IP-ADDR to reduce false positives on
+				// version numbers (e.g. "1.2.3.4"), loopback, and link-local addresses.
+				if rule.ID == "NET-IP-ADDR" {
+					lowerLine := strings.ToLower(line)
+					// Skip lines that are clearly version declarations
+					if strings.Contains(lowerLine, "version") ||
+						strings.Contains(lowerLine, "\"version\"") ||
+						strings.Contains(lowerLine, "'version'") {
+						continue
+					}
+					// Skip well-known non-routable addresses
+					if fullMatch == "127.0.0.1" || fullMatch == "0.0.0.0" ||
+						strings.HasPrefix(fullMatch, "169.254.") ||
+						fullMatch == "255.255.255.255" {
 						continue
 					}
 				}

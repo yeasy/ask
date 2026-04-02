@@ -103,6 +103,11 @@ brew install --cask yeasy/tap/ask-desktop  # 桌面应用 (仅 macOS)
 > [!NOTE]
 > **macOS 用户请注意**：首次打开 `ask-desktop` 时若提示"无法验证开发者"，请前往 **系统设置 > 隐私与安全性**，在"安全性"区域点击 **"仍要打开" (Open Anyway)** 即可正常运行。
 
+**Go Install:**
+```bash
+go install github.com/yeasy/ask@latest
+```
+
 **源码安装:**
 ```bash
 git clone https://github.com/yeasy/ask.git
@@ -111,8 +116,8 @@ make build && mv ask /usr/local/bin/
 make build-desktop # 构建桌面应用
 ```
 
-**二进制 / 手动安装 (Windows / Linux):**
-请前往 [Releases](https://github.com/yeasy/ask/releases) 页面下载对应系统的预编译二进制文件。
+**二进制 / 手动安装 (Windows / Linux / Desktop):**
+请前往 [Releases](https://github.com/yeasy/ask/releases) 页面下载对应系统的预编译二进制文件或桌面应用。
 
 
 

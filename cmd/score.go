@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -334,11 +335,14 @@ func cloneForScore(target string) (string, error) {
 	}
 
 	url := target
-	if !strings.HasPrefix(target, "http") {
+	if !strings.HasPrefix(target, "http://") && !strings.HasPrefix(target, "https://") {
 		url = "https://github.com/" + target
 	}
 
-	cloneErr := git.Clone(context.Background(), url, tmpDir)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
+
+	cloneErr := git.Clone(ctx, url, tmpDir)
 	if cloneErr != nil {
 		_ = os.RemoveAll(tmpDir)
 		return "", cloneErr

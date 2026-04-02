@@ -84,7 +84,12 @@ Use --all to remove both symlinks AND the source files in .agent/skills/.`,
 			}
 		} else {
 			if global {
-				targetDirs = []string{config.GetSkillsDirByScope(true)}
+				gsd, gsdErr := config.GetSkillsDirByScope(true)
+				if gsdErr != nil {
+					fmt.Fprintf(os.Stderr, "Error: %v\n", gsdErr)
+					os.Exit(1)
+				}
+				targetDirs = []string{gsd}
 				scopeLabel = "global"
 			} else {
 				// Use active/detected directories
@@ -107,7 +112,12 @@ Use --all to remove both symlinks AND the source files in .agent/skills/.`,
 		// Central storage location
 		centralDir := config.DefaultSkillsDir
 		if global {
-			centralDir = config.GetSkillsDirByScope(true)
+			gsd, gsdErr := config.GetSkillsDirByScope(true)
+			if gsdErr != nil {
+				fmt.Fprintf(os.Stderr, "Error: %v\n", gsdErr)
+				os.Exit(1)
+			}
+			centralDir = gsd
 		}
 		centralPath := filepath.Join(centralDir, targetName)
 

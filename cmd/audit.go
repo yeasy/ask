@@ -74,7 +74,11 @@ func runAudit(cmd *cobra.Command, _ []string) {
 	lockFile, _ := config.LoadLockFileByScope(global)
 
 	// Find skills directory
-	skillsDir := config.GetSkillsDirByScope(global)
+	skillsDir, err := config.GetSkillsDirByScope(global)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
+	}
 
 	entries, err := os.ReadDir(skillsDir)
 	if err != nil {

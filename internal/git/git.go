@@ -8,10 +8,14 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/yeasy/ask/internal/filesystem"
 	"github.com/yeasy/ask/internal/ui"
 )
+
+// CloneTimeout is the maximum time allowed for a git clone operation.
+const CloneTimeout = 5 * time.Minute
 
 // Clone clones a git repository to the specified destination.
 // Only HTTPS URLs are accepted for security.
@@ -148,8 +152,11 @@ func InstallSubdir(ctx context.Context, repoURL, branch, subDir, dest string) er
 	srcPath := filepath.Join(tempDir, subDir)
 
 	// Check if srcPath exists
-	if _, err := os.Stat(srcPath); os.IsNotExist(err) {
-		return fmt.Errorf("subdirectory %s not found in repo", subDir)
+	if _, err := os.Stat(srcPath); err != nil {
+		if os.IsNotExist(err) {
+			return fmt.Errorf("subdirectory %s not found in repo", subDir)
+		}
+		return fmt.Errorf("failed to access subdirectory %s: %w", subDir, err)
 	}
 
 	return filesystem.CopyDir(srcPath, dest)

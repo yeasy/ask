@@ -1,12 +1,14 @@
 package skill
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"text/template"
+	"time"
 )
 
 // TemplateData holds data for the skill template
@@ -46,7 +48,9 @@ Explain how to use this skill here.
 // GetGitAuthor returns the git author name from git config.
 // Falls back to "User" if git config is unavailable.
 func GetGitAuthor() string {
-	cmd := exec.Command("git", "config", "user.name")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, "git", "config", "user.name")
 	output, err := cmd.Output()
 	if err != nil {
 		return "User"
@@ -107,6 +111,12 @@ func createSkillDir(data TemplateData, destDir string) error {
 			s = strings.ReplaceAll(s, `"`, `\"`)
 			s = strings.ReplaceAll(s, "\n", `\n`)
 			s = strings.ReplaceAll(s, "\r", `\r`)
+			s = strings.ReplaceAll(s, "\t", `\t`)
+			s = strings.ReplaceAll(s, "\x00", "")
+			// Escape Unicode line breaks that YAML treats as newlines
+			s = strings.ReplaceAll(s, "\u0085", `\x85`)
+			s = strings.ReplaceAll(s, "\u2028", `\u2028`)
+			s = strings.ReplaceAll(s, "\u2029", `\u2029`)
 			return s
 		},
 	}

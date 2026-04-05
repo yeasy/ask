@@ -128,6 +128,30 @@ func (s *Server) handleConfigUpdate(w http.ResponseWriter, r *http.Request) {
 		defer s.cwdMu.RUnlock()
 	}
 
+	// Validate all inputs before making any state changes
+	if req.ProjectRoot != "" {
+		cleanRoot, pathErr := sanitizeAndRestrictPath(req.ProjectRoot)
+		if pathErr != nil {
+			log.Printf("path validation failed: %v", pathErr)
+			jsonError(w, "Invalid project root path", http.StatusBadRequest)
+			return
+		}
+		req.ProjectRoot = cleanRoot
+		if info, err := os.Stat(req.ProjectRoot); err != nil || !info.IsDir() {
+			jsonError(w, "Invalid project root: not a valid directory", http.StatusBadRequest)
+			return
+		}
+	}
+	if req.SkillsDir != "" {
+		cleanSkillsDir, pathErr := sanitizeAndRestrictPath(req.SkillsDir)
+		if pathErr != nil {
+			log.Printf("path validation failed: %v", pathErr)
+			jsonError(w, "Invalid skills directory path", http.StatusBadRequest)
+			return
+		}
+		req.SkillsDir = cleanSkillsDir
+	}
+
 	cfg, err := config.LoadConfig()
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -145,18 +169,10 @@ func (s *Server) handleConfigUpdate(w http.ResponseWriter, r *http.Request) {
 
 	// Handle project_root update first, as it changes the context for everything else
 	if req.ProjectRoot != "" {
-		// Sanitize and restrict path
-		cleanRoot, pathErr := sanitizeAndRestrictPath(req.ProjectRoot)
-		if pathErr != nil {
-			log.Printf("path validation failed: %v", pathErr)
-			jsonError(w, "Invalid project root path", http.StatusBadRequest)
-			return
-		}
-		req.ProjectRoot = cleanRoot
-
-		// Validate the path exists before changing
-		if info, err := os.Stat(req.ProjectRoot); err != nil || !info.IsDir() {
-			jsonError(w, "Invalid project root: not a valid directory", http.StatusBadRequest)
+		oldCwd, err := os.Getwd()
+		if err != nil {
+			log.Printf("Failed to get current directory: %v", err)
+			jsonError(w, "Failed to get current directory", http.StatusInternalServerError)
 			return
 		}
 		if err := os.Chdir(req.ProjectRoot); err != nil {
@@ -173,6 +189,10 @@ func (s *Server) handleConfigUpdate(w http.ResponseWriter, r *http.Request) {
 				def := config.DefaultConfig()
 				cfg = &def
 			} else {
+				// Rollback working directory on failure
+				if rollbackErr := os.Chdir(oldCwd); rollbackErr != nil {
+					log.Printf("CRITICAL: failed to rollback working directory to %s: %v", oldCwd, rollbackErr)
+				}
 				jsonError(w, "failed to load config in new root", http.StatusInternalServerError)
 				return
 			}
@@ -191,15 +211,9 @@ func (s *Server) handleConfigUpdate(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Handle skills_dir update
+	// Handle skills_dir update (already validated above)
 	if req.SkillsDir != "" {
-		cleanSkillsDir, pathErr := sanitizeAndRestrictPath(req.SkillsDir)
-		if pathErr != nil {
-			log.Printf("path validation failed: %v", pathErr)
-			jsonError(w, "Invalid skills directory path", http.StatusBadRequest)
-			return
-		}
-		cfg.SkillsDir = cleanSkillsDir
+		cfg.SkillsDir = req.SkillsDir
 		updated = true
 	}
 

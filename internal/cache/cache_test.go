@@ -28,8 +28,8 @@ func TestCacheSetGet(t *testing.T) {
 }
 
 func TestCacheExpiry(t *testing.T) {
-	// Use a very short TTL for testing
-	cache, err := New(t.TempDir(), 100*time.Millisecond)
+	// Use a short TTL for testing (500ms avoids flakiness under race detector)
+	cache, err := New(t.TempDir(), 500*time.Millisecond)
 	if err != nil {
 		t.Fatalf("failed to create cache: %v", err)
 	}
@@ -46,7 +46,7 @@ func TestCacheExpiry(t *testing.T) {
 	}
 
 	// Wait for expiry
-	time.Sleep(150 * time.Millisecond)
+	time.Sleep(600 * time.Millisecond)
 
 	// Should not get expired value
 	if cache.Get("expiry-key", &result) {

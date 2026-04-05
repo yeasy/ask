@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -8,6 +9,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -154,7 +156,9 @@ func runPublish(cmd *cobra.Command, args []string) {
 	// Step 7: Check git status
 	fmt.Print("  Checking git status... ")
 	gitRemote := getGitRemote(targetPath)
-	gitCmd := exec.Command("git", "-C", targetPath, "status", "--porcelain")
+	gitCtx, gitCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer gitCancel()
+	gitCmd := exec.CommandContext(gitCtx, "git", "-C", targetPath, "status", "--porcelain")
 	gitOutput, err := gitCmd.Output()
 	if err != nil {
 		color.Yellow("SKIP (not a git repo)")
@@ -167,7 +171,9 @@ func runPublish(cmd *cobra.Command, args []string) {
 	// Step 8: Check git tag
 	fmt.Print("  Checking git tag... ")
 	if meta.Version != "" {
-		tagCmd := exec.Command("git", "-C", targetPath, "tag", "-l", "v"+meta.Version)
+		tagCtx, tagCancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer tagCancel()
+		tagCmd := exec.CommandContext(tagCtx, "git", "-C", targetPath, "tag", "-l", "v"+meta.Version)
 		tagOutput, tagErr := tagCmd.Output()
 		if tagErr != nil {
 			color.Yellow("SKIP (not a git repo)")
@@ -284,7 +290,9 @@ func generateRegistryEntry(meta *skill.Meta, skillPath, gitRemote string) regist
 }
 
 func getGitRemote(path string) string {
-	cmd := exec.Command("git", "-C", path, "remote", "get-url", "origin")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, "git", "-C", path, "remote", "get-url", "origin")
 	out, err := cmd.Output()
 	if err != nil {
 		return ""

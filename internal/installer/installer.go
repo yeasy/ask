@@ -23,9 +23,6 @@ import (
 // maxInstallDepth is the maximum recursion depth for Install to prevent circular resolution.
 const maxInstallDepth = 3
 
-// gitCloneTimeout is the maximum time allowed for a git clone operation.
-const gitCloneTimeout = 5 * time.Minute
-
 // gitOpTimeout is the maximum time allowed for lightweight git operations (checkout, rev-parse).
 const gitOpTimeout = 30 * time.Second
 
@@ -110,14 +107,10 @@ func Install(input string, opts InstallOptions) error {
 						}
 						// If URL found, trigger fetch (which pulls/syncs)
 						if refreshURL != "" {
-							// Use repository package to fetch/sync
-							// Note: We need to import "github.com/yeasy/ask/internal/repository" if not already imported
-							// It is imported as "github.com/yeasy/ask/internal/repository"
-							// But we need to construct a Repo struct
-							refreshRepo := config.Repo{Name: repoName, URL: refreshURL, Type: "dir"} // Type guess, but FetchSkills handles both kinda?
-							// Actually repository.FetchSkills takes a Repo.
-							// Let's use it.
-							_, _ = repository.FetchSkills(refreshRepo)
+							refreshRepo := config.Repo{Name: repoName, URL: refreshURL, Type: "dir"}
+							if _, fetchErr := repository.FetchSkills(refreshRepo); fetchErr != nil {
+								ui.Debug(fmt.Sprintf("Failed to refresh repo '%s': %v (using stale cache)", repoName, fetchErr))
+							}
 							// Re-load cache after sync
 							newCache, cacheErr := cache.NewReposCache()
 							if cacheErr == nil {
@@ -383,7 +376,7 @@ func Install(input string, opts InstallOptions) error {
 	} else if repoURL == "" {
 		return fmt.Errorf("could not resolve repository URL for %q", originalInput)
 	} else {
-		cloneCtx, cloneCancel := context.WithTimeout(context.Background(), gitCloneTimeout)
+		cloneCtx, cloneCancel := context.WithTimeout(context.Background(), git.CloneTimeout)
 		defer cloneCancel()
 		if subDir != "" {
 			err = git.InstallSubdir(cloneCtx, repoURL, branch, subDir, tempSkillPath)
@@ -402,7 +395,7 @@ func Install(input string, opts InstallOptions) error {
 		if scoreErr == nil {
 			minGrade := skill.GradeD
 			if opts.MinScore != "" {
-				minGrade = skill.ScoreGrade(opts.MinScore)
+				minGrade = skill.ScoreGrade(strings.ToUpper(opts.MinScore))
 			}
 			if skill.GradeBelowThreshold(scoreResult.Grade, minGrade) {
 				fmt.Fprintf(os.Stderr, "\n⚠ Trust score warning for %s: %.0f/100 (Grade %s)\n",
@@ -442,7 +435,11 @@ func Install(input string, opts InstallOptions) error {
 	if subDir == "" {
 		commitCtx, commitCancel := context.WithTimeout(context.Background(), gitOpTimeout)
 		defer commitCancel()
-		commitHash, _ = git.GetCurrentCommit(commitCtx, tempSkillPath)
+		var commitErr error
+		commitHash, commitErr = git.GetCurrentCommit(commitCtx, tempSkillPath)
+		if commitErr != nil {
+			ui.Debug(fmt.Sprintf("Warning: could not get commit hash for %s: %v", skillName, commitErr))
+		}
 	}
 
 	// Get metadata

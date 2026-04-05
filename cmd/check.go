@@ -191,15 +191,22 @@ func hasCriticalIssues(result *skill.CheckResult) bool {
 
 func handleReport(result *skill.CheckResult, filename string) {
 	ext := filepath.Ext(filename)
-	format := "md"
-	switch ext {
-	case ".html", ".htm":
-		format = "html"
-	case ".json":
-		format = "json"
-	}
 
-	content, err := skill.GenerateReport(result, format)
+	var content string
+	var err error
+
+	if ext == ".sarif" {
+		content, err = skill.GenerateSARIFReport(result, Version)
+	} else {
+		format := "md"
+		switch ext {
+		case ".html", ".htm":
+			format = "html"
+		case ".json":
+			format = "json"
+		}
+		content, err = skill.GenerateReport(result, format)
+	}
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error generating report: %v\n", err)
 		os.Exit(1)

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -364,6 +365,11 @@ func fetchRepoContents(owner, repo, path string) ([]githubRepoContent, error) {
 	if err != nil {
 		return nil, err
 	}
+	if token := os.Getenv("GITHUB_TOKEN"); token != "" {
+		req.Header.Set("Authorization", "Bearer "+token)
+	} else if token := os.Getenv("GH_TOKEN"); token != "" {
+		req.Header.Set("Authorization", "Bearer "+token)
+	}
 	req.Header.Set("Accept", "application/vnd.github.v3+json")
 	req.Header.Set("User-Agent", "ask-cli")
 
@@ -429,6 +435,11 @@ func validateSkillsRepo(owner, repo, path string) (bool, string, string) {
 	req, err := http.NewRequest(http.MethodGet, githubAPIURL(fmt.Sprintf("/repos/%s/%s", url.PathEscape(owner), url.PathEscape(repo))), nil)
 	if err != nil {
 		return false, "", ""
+	}
+	if token := os.Getenv("GITHUB_TOKEN"); token != "" {
+		req.Header.Set("Authorization", "Bearer "+token)
+	} else if token := os.Getenv("GH_TOKEN"); token != "" {
+		req.Header.Set("Authorization", "Bearer "+token)
 	}
 	req.Header.Set("Accept", "application/vnd.github.v3+json")
 	req.Header.Set("User-Agent", "ask-cli")
@@ -518,7 +529,9 @@ func init() {
 
 // detectGHToken attempts to get a GitHub token from the gh CLI
 func detectGHToken() string {
-	out, err := exec.Command("gh", "auth", "token").Output()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	out, err := exec.CommandContext(ctx, "gh", "auth", "token").Output()
 	if err != nil {
 		return ""
 	}

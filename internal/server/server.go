@@ -125,9 +125,11 @@ func OpenBrowser(rawURL string) error {
 
 	// Reject URLs with characters that could be interpreted as shell metacharacters
 	// on Windows (cmd.exe). url.Parse is lenient and allows characters like |, >, <
-	// which cmd.exe would interpret as command operators.
+	// which cmd.exe would interpret as command operators. Also reject () to prevent
+	// command grouping, ^ (cmd.exe escape char), and ! (delayed expansion).
+	// Note: % is allowed since it is used for URL percent-encoding.
 	safeURL := u.String()
-	if strings.ContainsAny(safeURL, "|><\"'`") {
+	if strings.ContainsAny(safeURL, "|><\"'`()^!") {
 		return fmt.Errorf("URL contains unsafe characters")
 	}
 
@@ -228,6 +230,9 @@ func corsMiddleware(next http.Handler) http.Handler {
 			allowed = true
 		}
 
+		// Always set Vary: Origin since response varies by origin header
+		w.Header().Set("Vary", "Origin")
+
 		if allowed && origin != "" {
 			w.Header().Set("Access-Control-Allow-Origin", origin)
 			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
@@ -290,12 +295,14 @@ func jsonResponse(w http.ResponseWriter, data interface{}) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	buf = append(buf, '\n')
 	_, _ = w.Write(buf)
 }
 
 func jsonError(w http.ResponseWriter, message string, code int) {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(code)
 	buf, err := json.Marshal(map[string]string{"error": message})
 	if err != nil {

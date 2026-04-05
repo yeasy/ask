@@ -146,19 +146,25 @@ func IsSourceAllowed(sourceURL string, allowedPatterns []string) bool {
 	if len(allowedPatterns) == 0 {
 		return true
 	}
-	// Normalize URL: strip https://github.com/ prefix
+	// Normalize URL: strip https://github.com/ prefix and lowercase for case-insensitive matching
 	normalized := strings.TrimPrefix(sourceURL, "https://github.com/")
 	normalized = strings.TrimPrefix(normalized, "http://github.com/")
 	normalized = strings.TrimSuffix(normalized, ".git")
+	normalized = strings.ToLower(normalized)
 
 	for _, pattern := range allowedPatterns {
-		matched, err := filepath.Match(pattern, normalized)
+		matched, err := filepath.Match(strings.ToLower(pattern), normalized)
 		if err == nil && matched {
 			return true
 		}
-		// Simple prefix match for patterns like "company-org/*"
-		prefix := strings.TrimSuffix(pattern, "/*")
-		if prefix != pattern && strings.HasPrefix(normalized, prefix+"/") {
+		// Simple prefix match for patterns like "company-org/*" or "company-org/**"
+		lowerPattern := strings.ToLower(pattern)
+		prefix := strings.TrimSuffix(lowerPattern, "/*")
+		if prefix != lowerPattern && strings.HasPrefix(normalized, prefix+"/") {
+			return true
+		}
+		prefix2 := strings.TrimSuffix(lowerPattern, "/**")
+		if prefix2 != lowerPattern && strings.HasPrefix(normalized, prefix2+"/") {
 			return true
 		}
 	}

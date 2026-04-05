@@ -52,6 +52,18 @@ func FetchSkillsFromRegistry(registryURL string, keyword string) ([]github.Repos
 	owner := parts[0]
 	repo := parts[1]
 	path := parts[2]
+
+	// Reject path traversal and dangerous characters in registry URL segments
+	if strings.Contains(owner, "..") || strings.Contains(repo, "..") || strings.Contains(path, "..") {
+		return nil, fmt.Errorf("invalid registry URL: path traversal detected")
+	}
+	if strings.ContainsAny(owner, "/\\") || strings.ContainsAny(repo, "/\\") {
+		return nil, fmt.Errorf("invalid registry URL: invalid characters in owner or repo")
+	}
+	if owner == "" || repo == "" || path == "" {
+		return nil, fmt.Errorf("invalid registry URL: empty segment in %s", registryURL)
+	}
+
 	rawURL := fmt.Sprintf("%s/%s/%s/main/%s", rawBaseURL, owner, repo, path)
 
 	req, err := http.NewRequest("GET", rawURL, nil)

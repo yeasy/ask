@@ -144,9 +144,14 @@ Use --global to check global skills.`,
 	},
 }
 
+// gitRevParseTimeout is the maximum time for a local git rev-parse operation.
+const gitRevParseTimeout = 10 * time.Second
+
 // getShortCommit returns the short commit hash
 func getShortCommit(repoPath string) string {
-	cmd := exec.Command("git", "rev-parse", "--short", "HEAD")
+	ctx, cancel := context.WithTimeout(context.Background(), gitRevParseTimeout)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, "git", "rev-parse", "--short", "HEAD")
 	cmd.Dir = repoPath
 	output, err := cmd.Output()
 	if err != nil {
@@ -157,24 +162,18 @@ func getShortCommit(repoPath string) string {
 
 // getRemoteHeadCommit returns the short commit hash of remote HEAD
 func getRemoteHeadCommit(repoPath string) string {
-	cmd := exec.Command("git", "rev-parse", "--short", "origin/HEAD")
-	cmd.Dir = repoPath
-	output, err := cmd.Output()
-	if err != nil {
-		// Try origin/main or origin/master
-		cmd = exec.Command("git", "rev-parse", "--short", "origin/main")
+	refs := []string{"origin/HEAD", "origin/main", "origin/master"}
+	for _, ref := range refs {
+		ctx, cancel := context.WithTimeout(context.Background(), gitRevParseTimeout)
+		cmd := exec.CommandContext(ctx, "git", "rev-parse", "--short", ref)
 		cmd.Dir = repoPath
-		output, err = cmd.Output()
-		if err != nil {
-			cmd = exec.Command("git", "rev-parse", "--short", "origin/master")
-			cmd.Dir = repoPath
-			output, err = cmd.Output()
-			if err != nil {
-				return "-"
-			}
+		output, err := cmd.Output()
+		cancel()
+		if err == nil {
+			return strings.TrimSpace(string(output))
 		}
 	}
-	return strings.TrimSpace(string(output))
+	return "-"
 }
 
 func init() {

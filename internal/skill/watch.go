@@ -41,12 +41,12 @@ func WatchAndCheck(ctx context.Context, skillPath string, callback func(event st
 	defer func() {
 		mu.Lock()
 		stopped = true
-		mu.Unlock()
 		if debounceTimer != nil {
 			if debounceTimer.Stop() {
 				wg.Done() // Timer was stopped before firing, balance the Add
 			}
 		}
+		mu.Unlock()
 		wg.Wait()
 	}()
 
@@ -82,7 +82,9 @@ func WatchAndCheck(ctx context.Context, skillPath string, callback func(event st
 			// If a new directory was created, watch it too
 			if event.Has(fsnotify.Create) {
 				if info, statErr := os.Stat(event.Name); statErr == nil && info.IsDir() {
-					_ = addDirRecursive(watcher, event.Name)
+					if watchErr := addDirRecursive(watcher, event.Name); watchErr != nil {
+						callback(event.Name, nil, fmt.Errorf("failed to watch new directory: %w", watchErr))
+					}
 				}
 			}
 

@@ -11,7 +11,7 @@ This guide helps you resolve common issues when using ASK (Agent Skills Kit).
 **Solutions**:
 ```bash
 # 1. Make sure you've added the tap
-brew tap yeasy/ask
+brew tap yeasy/tap
 
 # 2. Update Homebrew
 brew update
@@ -32,7 +32,7 @@ sudo mv ask /usr/local/bin/
 
 **Solutions**:
 ```bash
-# Check Go version (requires 1.24+)
+# Check Go version (requires 1.25+)
 go version
 
 # Update Go if needed (macOS)
@@ -331,15 +331,14 @@ To see detailed logs for debugging purposes, set the log level to `DEBUG`:
 
 ```bash
 # Run commands with verbose output
-export ASK_LOG=debug
-ask skill install browser-use
+ask --log-level debug skill install browser-use
 ```
 
 ### Check System Requirements
 
 ```bash
 # Verify all requirements
-go version      # Should be 1.24+
+go version      # Should be 1.25+
 git --version   # Should be 2.25+
 which ask       # Should show installation path
 
@@ -350,11 +349,8 @@ env | grep GITHUB
 ### Common Environment Variables
 
 ```bash
-# Set GitHub token for API access
+# Set GitHub token for API access (GH_TOKEN also supported)
 export GITHUB_TOKEN=your_token
-
-# Set custom skills directory (not yet supported)
-# export ASK_SKILLS_DIR=./custom/path
 ```
 
 ---

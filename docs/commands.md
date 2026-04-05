@@ -64,6 +64,12 @@ ask skill search mcp         # Find MCP-related skills
 ask skill search scientific  # Find scientific skills
 ```
 
+**Flags:**
+- `--local`: Search only local cache (offline)
+- `--remote`: Force remote API search
+- `--min-stars`: Filter skills by minimum number of GitHub stars
+- `--json`: Output results in JSON format
+
 **Output includes:**
 - Skill name and description
 - Source repository
@@ -80,7 +86,7 @@ ask skill install <skill>                    # Install latest version
 ask skill install <skill>@v1.0.0             # Install specific version
 ask skill install owner/repo                 # Install from GitHub repo
 ask skill install owner/repo/path/to/skill   # Install from subdirectory
-ask skill install <skill> --agent claude cursor  # Install for specific agents
+ask skill install <skill> --agent claude,cursor  # Install for specific agents
 ```
 
 **Examples:**
@@ -92,8 +98,11 @@ ask skill install anthropics/skills/computer-use  # From path
 ```
 
 **Flags:**
-- `--agent, -a`: Install to specific agent(s) (claude, cursor, codex, opencode)
+- `--agent, -a`: Install to specific agent(s) (19 agents supported, e.g., claude, cursor, codex)
 - `--global, -g`: Install to global directory (~/.ask/skills)
+- `--repo, -r`: Install skill(s) from a specific repository
+- `--skip-score`: Skip trust score check before installing
+- `--min-score`: Minimum acceptable trust grade (A/B/C/D/F, default: D)
 
 **What it does:**
 - Downloads the skill to `.agent/skills/<name>/` (or agent-specific directories)
@@ -109,6 +118,11 @@ Remove a skill from your project.
 ```bash
 ask skill uninstall <skill>
 ```
+
+**Flags:**
+- `--agent, -a`: Target agent(s) for uninstallation
+- `--global, -g`: Uninstall globally
+- `--all`: Remove source and all symlinks (complete removal)
 
 **What it does:**
 - Removes `.agent/skills/<name>/` directory
@@ -132,6 +146,7 @@ ask skill list --agent claude    # List skills for specific agent
 - `--agent, -a`: List skills for specific agent(s)
 - `--all`: Show both project and global skills
 - `--global, -g`: Show global skills only
+- `--json`: Output results in JSON format
 
 ---
 
@@ -333,6 +348,12 @@ ask repo add <owner/repo>
 ```bash
 ask repo add my-org/skills
 ```
+
+**Flags:**
+- `--sync`: Sync repository immediately after adding
+- `--token`: Authentication token for private repositories
+- `--base-url`: GitHub Enterprise API base URL
+- `--private`: Mark repository as private (auto-detects gh auth token)
 
 ---
 
@@ -570,11 +591,15 @@ Check a skill for security issues.
 ask skill check <skill-path>      # Check local skill
 ask skill check .                 # Check current directory
 ask skill check -o report.html    # Generate HTML report
-ask skill check -o report.json    # Generate JSON report
+ask skill check -o report.sarif   # Generate SARIF report
 ```
 
 **Flags:**
-- `--output, -o`: Save detailed findings to a file (`.md`, `.html`, `.json`).
+- `--output, -o`: Save detailed findings to a file (`.md`, `.html`, `.json`, `.sarif`)
+- `--format`: Output format for console (console, json, html, markdown, sarif)
+- `--ci`: CI mode — exit non-zero on findings above severity threshold
+- `--severity`: Minimum severity to report (info, warning, critical) (default: warning)
+- `--watch`: Watch mode — re-check on file changes
 
 **What it does:**
 - Scans for hardcoded secrets (API keys, tokens)

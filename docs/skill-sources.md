@@ -10,15 +10,12 @@ ASK comes with six pre-configured sources:
 
 | Name | Type | URL | Description |
 |------|------|-----|-------------|
-| `community` | topic | `agent-skill` | GitHub repos with the `agent-skill` topic |
-| `anthropics` | dir | `https://github.com/anthropics/skills/tree/main/skills` | Official Anthropic skills |
-| `scientific` | dir | `https://github.com/K-Dense-AI/claude-scientific-skills/tree/main/scientific-skills` | Scientific research skills |
-| `superpowers` | dir | `https://github.com/obra/superpowers/tree/main/skills` | Core skills library |
-| **OpenAI** | Official | `openai` | OpenAI Official Skills |
-| **MATLAB** | Official | `matlab` | MATLAB Official Skills |
-| **Composio** | Community | `composio` | Awesome Claude Skills |
-| **SkillHub** | Service | `skills` | SkillHub.club Search Service |
-| **Vercel** | AI SDK | `vercel-labs/agent-skills` | Vercel AI SDK Skills |
+| `featured` | registry | `yeasy/awesome-agent-skills/registry/index.json` | Featured skills registry |
+| `anthropics` | dir | `anthropics/skills/skills` | Official Anthropic skills |
+| `openai` | dir | `openai/skills/skills` | OpenAI official skills |
+| `composio` | dir | `ComposioHQ/awesome-claude-skills` | Awesome Claude Skills |
+| `vercel` | dir | `vercel-labs/agent-skills` | Vercel AI SDK skills |
+| `openclaw` | dir | `openclaw/openclaw/skills` | OpenClaw skills |
 
 ---
 
@@ -42,6 +39,26 @@ repos:
 **Cons:**
 - Search results depend on GitHub API limits
 - Quality varies across community projects
+
+### Registry Sources (`registry`)
+
+Registry sources point to a JSON index file that lists curated skills with metadata.
+
+```yaml
+repos:
+  - name: featured
+    type: registry
+    url: yeasy/awesome-agent-skills/registry/index.json
+```
+
+**Pros:**
+- Centrally curated with rich metadata (descriptions, tags, scores)
+- Fast lookups from a single index file
+- Ideal for featured or recommended skill lists
+
+**Cons:**
+- Requires maintaining the registry index file
+- Skills must be explicitly added to the registry
 
 ### Directory Sources (`dir`)
 
@@ -69,7 +86,7 @@ repos:
 Edit your `ask.yaml` to add custom sources:
 
 ```yaml
-version: "1.0"
+version: "1.2"
 skills:
   - browser-use
 repos:

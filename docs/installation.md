@@ -5,7 +5,7 @@ This guide covers all methods of installing ASK on your system.
 ## Requirements
 
 - **Operating System**: macOS, Linux, or Windows
-- **Go** (optional): 1.24+ if building from source
+- **Go** (optional): 1.25+ if building from source
 
 ---
 
@@ -14,7 +14,7 @@ This guide covers all methods of installing ASK on your system.
 The easiest way to install ASK on macOS:
 
 ```bash
-brew tap yeasy/ask
+brew tap yeasy/tap
 brew install ask
 ```
 
@@ -77,7 +77,7 @@ Expand-Archive -Path "ask.zip" -DestinationPath "C:\tools\ask"
 
 ### Prerequisites
 
-- **Go**: Version 1.24 or higher.
+- **Go**: Version 1.25 or higher.
 - **Wails**: Required for building the desktop application.
 - **Node.js**: Required for building the frontend components.
 
@@ -163,5 +163,5 @@ ask --help
 ## Next Steps
 
 1. [Initialize your first project](commands.md#ask-init)
-2. [Search for skills](commands.md#ask-search)
-3. [Install a skill](commands.md#ask-install)
+2. [Search for skills](commands.md#ask-skill-search)
+3. [Install a skill](commands.md#ask-skill-install)

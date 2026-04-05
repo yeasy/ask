@@ -11,7 +11,7 @@ ASK 使用两个配置文件：`ask.yaml` 用于项目设置，`ask.lock` 用于
 ### 完整示例
 
 ```yaml
-version: "1.0"
+version: "1.2"
 
 # 已安装的技能 (旧格式)
 skills:
@@ -29,27 +29,24 @@ skills_info:
 
 # 技能源
 repos:
-  - name: community
-    type: topic
-    url: agent-skill
+  - name: featured
+    type: registry
+    url: yeasy/awesome-agent-skills/registry/index.json
   - name: anthropics
     type: dir
-    url: https://github.com/anthropics/skills/tree/main/skills
-  - name: scientific
-    type: dir
-    url: https://github.com/K-Dense-AI/claude-scientific-skills/tree/main/scientific-skills
-  - name: superpowers
-    type: dir
-    url: https://github.com/obra/superpowers/tree/main/skills
+    url: anthropics/skills/skills
   - name: openai
     type: dir
-    url: https://github.com/openai/skills/tree/main/skills
-  - name: matlab
+    url: openai/skills/skills
+  - name: composio
     type: dir
-    url: https://github.com/matlab/skills/tree/main/skills
+    url: ComposioHQ/awesome-claude-skills
   - name: vercel
     type: dir
-    url: https://github.com/vercel-labs/agent-skills
+    url: vercel-labs/agent-skills
+  - name: openclaw
+    type: dir
+    url: openclaw/openclaw/skills
 ```
 
 ### 字段说明
@@ -106,8 +103,7 @@ skills:
 
 | 变量 | 描述 |
 |----------|-------------|
-| `GITHUB_TOKEN` | 用于提高速率限制的 GitHub API 令牌 |
-| `ASK_SKILLS_DIR` | 自定义技能目录 (默认: `./skills`) |
+| `GITHUB_TOKEN` / `GH_TOKEN` | 用于提高速率限制的 GitHub API 令牌 |
 
 ### 示例
 
@@ -124,13 +120,12 @@ ASK 自动包含这些源，即使它们不在您的 `ask.yaml` 中：
 
 | 名称 | 类型 | URL |
 |------|------|-----|
-| `community` | topic | `agent-skill` |
-| `anthropics` | dir | `https://github.com/anthropics/skills/tree/main/skills` |
-| `scientific` | dir | `https://github.com/K-Dense-AI/claude-scientific-skills/tree/main/scientific-skills` |
-| `superpowers` | dir | `https://github.com/obra/superpowers/tree/main/skills` |
-| `openai` | dir | `https://github.com/openai/skills/tree/main/skills` |
-| `matlab` | dir | `https://github.com/matlab/skills/tree/main/skills` |
-| `vercel` | dir | `https://github.com/vercel-labs/agent-skills` |
+| `featured` | registry | `yeasy/awesome-agent-skills/registry/index.json` |
+| `anthropics` | dir | `anthropics/skills/skills` |
+| `openai` | dir | `openai/skills/skills` |
+| `composio` | dir | `ComposioHQ/awesome-claude-skills` |
+| `vercel` | dir | `vercel-labs/agent-skills` |
+| `openclaw` | dir | `openclaw/openclaw/skills` |
 
 要添加自定义源，请参阅 [技能源](skill-sources_zh.md)。
 

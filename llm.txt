@@ -8,7 +8,7 @@ ASK helps you discover, install, and manage skills for AI coding agents (Claude,
 
 ### Installation
 ```bash
-brew tap yeasy/ask && brew install ask
+brew tap yeasy/tap && brew install ask
 # or: go install github.com/yeasy/ask@latest
 ```
 
@@ -31,7 +31,7 @@ ask install browser-use/browser-use@v1.0.0
 
 # Install for specific agent(s)
 ask install pdf --agent claude
-ask install pdf --agent claude --agent cursor
+ask install pdf --agent claude,cursor
 
 # List installed skills
 ask skill list
@@ -105,7 +105,7 @@ ask install mcp-builder pdf docx
 
 ### Install skills for multiple agents
 ```bash
-ask install pdf --agent claude --agent cursor --agent codex
+ask install pdf --agent claude,cursor,codex
 ```
 
 ### Update all skills
@@ -137,18 +137,17 @@ Skills are automatically installed to detected agent directories:
 - Cursor: `.cursor/skills/`
 - Codex: `.codex/skills/`
 - Windsurf: `.windsurf/skills/`
-- And 14+ more agents supported
+- And 15 more agents supported (19 total)
 
 ## Environment Variables
 
-- `ASK_LOG=debug` - Enable debug logging
-- `GITHUB_TOKEN=xxx` - Increase GitHub API rate limits
+- `GITHUB_TOKEN=xxx` or `GH_TOKEN=xxx` - Increase GitHub API rate limits
 
 ## Error Handling
 
 If you encounter issues:
 1. Run `ask doctor` to diagnose problems
-2. Check `ASK_LOG=debug ask <command>` for detailed logs
+2. Use `ask --log-level debug <command>` for detailed logs
 3. Ensure `git` is installed and accessible
 4. Run `ask repo sync` to refresh local cache
 

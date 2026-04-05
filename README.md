@@ -108,6 +108,14 @@ brew install --cask yeasy/tap/ask-desktop  # Desktop App (macOS only)
 go install github.com/yeasy/ask@latest
 ```
 
+**Source Install:**
+```bash
+git clone https://github.com/yeasy/ask.git
+cd ask
+make build && mv ask /usr/local/bin/
+make build-desktop  # Build Desktop App (requires Wails)
+```
+
 **Binary / Manual Install (Windows / Linux / Desktop):**
 Download the latest pre-compiled binary or Desktop App for your system from [Releases](https://github.com/yeasy/ask/releases).
 
@@ -137,7 +145,7 @@ ask install mcp-builder@v1.0.0
 
 # Install for specific agent
 ask install mcp-builder --agent claude
-ask install mcp-builder --agent claude cursor
+ask install mcp-builder --agent claude,cursor
 
 # Security Check
 ask check .
@@ -200,8 +208,8 @@ ASK comes pre-configured with trusted sources:
 
 | Source | Description |
 | :--- | :--- |
+| **Featured** | Curated registry [yeasy/awesome-agent-skills](https://github.com/yeasy/awesome-agent-skills) |
 | **Anthropic** | Official [anthropics/skills](https://github.com/anthropics/skills) |
-| **Community** | Top-rated community skills (GitHub `agent-skill` and `agent-skills` topics) |
 | **Composio** | [ComposioHQ/awesome-claude-skills](https://github.com/ComposioHQ/awesome-claude-skills) collection |
 | **OpenAI** | Official [openai/skills](https://github.com/openai/skills) |
 | **Vercel** | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) AI SDK skills |
@@ -213,6 +221,7 @@ For specific needs, you can add these additional sources:
 
 | Repository | Command to Add | Description |
 | :--- | :--- | :--- |
+| **Community** | `ask repo add yeasy/awesome-agent-skills` | Top-rated community skills (GitHub `agent-skill` topics) |
 | **Scientific** | `ask repo add K-Dense-AI/claude-scientific-skills` | Data science & research skills |
 | **MATLAB** | `ask repo add matlab/skills` | Official MATLAB integration |
 | **Superpowers** | `ask repo add obra/superpowers` | Full dev workflow with sub-agents |
@@ -230,11 +239,10 @@ For detailed architecture diagrams and installation layout, see [Architecture Gu
 
 ## 🐞 Debugging
 
-To see detailed operational logs (scanning, updating, searching), set `ASK_LOG=debug`:
+To see detailed operational logs (scanning, updating, searching), use `--log-level debug`:
 
 ```bash
-export ASK_LOG=debug
-ask skill install browser-use
+ask --log-level debug skill install browser-use
 ```
 
 ## ⌨️ Shell Completion

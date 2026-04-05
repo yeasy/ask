@@ -29,7 +29,7 @@
   <a href="#-快速开始">🚀 快速开始</a> •
   <a href="#-核心特性">✨ 核心特性</a> •
   <a href="#-命令参考">📋 命令参考</a> •
-  <a href="docs/README.md">📚 文档</a>
+  <a href="docs/README_zh.md">📚 文档</a>
 </p>
 
 ---
@@ -87,7 +87,7 @@ ask serve
 wails build && ./build/bin/ask-desktop
 ```
 
-📖 [Web UI 文档 →](docs/web-ui.md)
+📖 [Web UI 文档 →](docs/web-ui_zh.md)
 
 ## 🚀 快速开始
 
@@ -133,9 +133,9 @@ ask init
 # 搜索 Skill
 ask search mcp
 
-# 安装 Skill (通过名称或仓库，支持使用 ask add 别名)
+# 安装 Skill (通过名称或仓库，`ask add` 是 `ask install` 的别名)
 ask install anthropics/mcp-builder
-ask add superpowers
+ask install superpowers
 
 # 安装根目录类型的 Skill (如 Youtube Clipper)
 ask install op7418/Youtube-clipper-skill
@@ -145,16 +145,17 @@ ask install mcp-builder@v1.0.0
 
 # 为指定 Agent 安装
 ask install mcp-builder --agent claude
+ask install mcp-builder --agent claude,cursor
 
 # 安全检查
 ask check .
 ask check anthropics/mcp-builder -o report.html
 
-# 启动 Web 管理界面
-ask serve
-
 # 从 ask.lock 或 ask.yaml 还原安装技能（不带参数运行）
 ask install
+
+# 启动 Web 管理界面
+ask serve
 
 # 从指定仓库安装技能
 ask skill install --repo anthropics pdf
@@ -207,8 +208,8 @@ ASK 默认内置了以下受信源：
 
 | 来源 | 说明 |
 | :--- | :--- |
+| **Featured** | 精选注册表 [yeasy/awesome-agent-skills](https://github.com/yeasy/awesome-agent-skills) |
 | **Anthropic** | 官方库 [anthropics/skills](https://github.com/anthropics/skills) |
-| **Community** | GitHub 社区高分技能 (`agent-skill` 和 `agent-skills` topics) |
 | **Composio** | 精选集 [ComposioHQ/awesome-claude-skills](https://github.com/ComposioHQ/awesome-claude-skills) |
 | **OpenAI** | 官方库 [openai/skills](https://github.com/openai/skills) |
 | **Vercel** | AI SDK [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) |
@@ -220,6 +221,7 @@ ASK 默认内置了以下受信源：
 
 | 仓库 | 添加命令 | 说明 |
 | :--- | :--- | :--- |
+| **Community** | `ask repo add yeasy/awesome-agent-skills` | GitHub 社区高分技能 (`agent-skill` topics) |
 | **Scientific** | `ask repo add K-Dense-AI/claude-scientific-skills` | 数据科学与研究技能 |
 | **MATLAB** | `ask repo add matlab/skills` | 官方 MATLAB 集成 |
 | **Superpowers** | `ask repo add obra/superpowers` | 全链路开发工作流 |
@@ -237,11 +239,10 @@ ASK 默认内置了以下受信源：
 
 ## 🐞 调试
 
-要查看详细的操作日志（如扫描、更新、搜索），请设置 `ASK_LOG=debug`：
+要查看详细的操作日志（如扫描、更新、搜索），请使用 `--log-level debug`：
 
 ```bash
-export ASK_LOG=debug
-ask skill install browser-use
+ask --log-level debug skill install browser-use
 ```
 
 ## ⌨️ Shell 自动补全

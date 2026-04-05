@@ -10,15 +10,12 @@ ASK 附带了六个预配置的源：
 
 | 名称 | 类型 | URL | 描述 |
 |------|------|-----|-------------|
-| `community` | topic | `agent-skill` | 带有 `agent-skill` 主题的 GitHub 仓库 |
-| `anthropics` | dir | `https://github.com/anthropics/skills/tree/main/skills` | Anthropic 官方技能 |
-| `scientific` | dir | `https://github.com/K-Dense-AI/claude-scientific-skills/tree/main/scientific-skills` | 科研技能 |
-| `superpowers` | dir | `https://github.com/obra/superpowers/tree/main/skills` | 核心技能库 |
-| **OpenAI** | Official | `openai` | OpenAI 官方技能 |
-| **MATLAB** | Official | `matlab` | MATLAB 官方技能 |
-| **Composio** | Community | `composio` | Awesome Claude Skills |
-| **SkillHub** | Service | `skills` | SkillHub.club 搜索服务 |
-| **Vercel** | AI SDK | `vercel-labs/agent-skills` | Vercel AI SDK 技能 |
+| `featured` | registry | `yeasy/awesome-agent-skills/registry/index.json` | 精选技能注册表 |
+| `anthropics` | dir | `anthropics/skills/skills` | Anthropic 官方技能 |
+| `openai` | dir | `openai/skills/skills` | OpenAI 官方技能 |
+| `composio` | dir | `ComposioHQ/awesome-claude-skills` | Awesome Claude Skills |
+| `vercel` | dir | `vercel-labs/agent-skills` | Vercel AI SDK 技能 |
+| `openclaw` | dir | `openclaw/openclaw/skills` | OpenClaw 技能 |
 
 ---
 
@@ -42,6 +39,26 @@ repos:
 **缺点：**
 - 搜索结果取决于 GitHub API 限制
 - 社区项目的质量参差不齐
+
+### 注册表源 (`registry`)
+
+注册表源指向一个 JSON 索引文件，其中列出了带有元数据的精选技能。
+
+```yaml
+repos:
+  - name: featured
+    type: registry
+    url: yeasy/awesome-agent-skills/registry/index.json
+```
+
+**优点：**
+- 集中管理，带有丰富的元数据（描述、标签、评分）
+- 从单个索引文件快速查找
+- 适合精选或推荐技能列表
+
+**缺点：**
+- 需要维护注册表索引文件
+- 技能必须明确添加到注册表中
 
 ### 目录源 (`dir`)
 
@@ -69,7 +86,7 @@ repos:
 编辑您的 `ask.yaml` 以添加自定义源：
 
 ```yaml
-version: "1.0"
+version: "1.2"
 skills:
   - browser-use
 repos:

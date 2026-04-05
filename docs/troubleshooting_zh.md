@@ -11,7 +11,7 @@
 **解决方案**：
 ```bash
 # 1. 确保已添加 tap
-brew tap yeasy/ask
+brew tap yeasy/tap
 
 # 2. 更新 Homebrew
 brew update
@@ -32,13 +32,13 @@ sudo mv ask /usr/local/bin/
 
 **解决方案**：
 ```bash
-# 检查 Go 版本 (需要 1.24+)
+# 检查 Go 版本 (需要 1.25+)
 go version
 
 # 如果需要，更新 Go (macOS)
 brew upgrade go
 
-#这也是清理并重新构建
+# 清理并重新构建
 make clean
 go mod download
 make build
@@ -331,15 +331,14 @@ git config --global credential.helper cache
 
 ```bash
 # 使用详细输出运行命令
-export ASK_LOG=debug
-ask skill install browser-use
+ask --log-level debug skill install browser-use
 ```
 
 ### 检查系统要求
 
 ```bash
 # 验证所有要求
-go version      # 应该是 1.24+
+go version      # 应该是 1.25+
 git --version   # 应该是 2.25+
 which ask       # 应该显示安装路径
 
@@ -350,11 +349,8 @@ env | grep GITHUB
 ### 常见环境变量
 
 ```bash
-# 设置用于 API 访问的 GitHub 令牌
+# 设置用于 API 访问的 GitHub 令牌（也支持 GH_TOKEN）
 export GITHUB_TOKEN=your_token
-
-# 设置自定义技能目录（尚未支持）
-# export ASK_SKILLS_DIR=./custom/path
 ```
 
 ---

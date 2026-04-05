@@ -5,7 +5,7 @@
 ## 系统要求
 
 - **操作系统**: macOS, Linux, 或 Windows
-- **Go** (可选): 1.24+ 如果从源代码构建
+- **Go** (可选): 1.25+ 如果从源代码构建
 
 ---
 
@@ -14,7 +14,7 @@
 在 macOS 上安装 ASK 最简单的方法：
 
 ```bash
-brew tap yeasy/ask
+brew tap yeasy/tap
 brew install ask
 ```
 
@@ -77,7 +77,7 @@ Expand-Archive -Path "ask.zip" -DestinationPath "C:\tools\ask"
 
 ### 前置条件
 
-- **Go**: 版本 1.24 或更高。
+- **Go**: 版本 1.25 或更高。
 - **Wails**: 构建桌面应用程序所需。
 - **Node.js**: 构建前端组件所需。
 
@@ -162,5 +162,5 @@ ask --help
 ## 下一步
 
 1. [初始化您的第一个项目](commands_zh.md#ask-init)
-2. [搜索技能](commands_zh.md#ask-search)
-3. [安装技能](commands_zh.md#ask-install)
+2. [搜索技能](commands_zh.md#ask-skill-search)
+3. [安装技能](commands_zh.md#ask-skill-install)

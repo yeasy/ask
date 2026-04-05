@@ -11,7 +11,7 @@ The main configuration file, created by `ask init`.
 ### Full Example
 
 ```yaml
-version: "1.0"
+version: "1.2"
 
 # Installed skills (legacy format)
 skills:
@@ -29,27 +29,24 @@ skills_info:
 
 # Skill sources
 repos:
-  - name: community
-    type: topic
-    url: agent-skill
+  - name: featured
+    type: registry
+    url: yeasy/awesome-agent-skills/registry/index.json
   - name: anthropics
     type: dir
-    url: https://github.com/anthropics/skills/tree/main/skills
-  - name: scientific
-    type: dir
-    url: https://github.com/K-Dense-AI/claude-scientific-skills/tree/main/scientific-skills
-  - name: superpowers
-    type: dir
-    url: https://github.com/obra/superpowers/tree/main/skills
+    url: anthropics/skills/skills
   - name: openai
     type: dir
-    url: https://github.com/openai/skills/tree/main/skills
-  - name: matlab
+    url: openai/skills/skills
+  - name: composio
     type: dir
-    url: https://github.com/matlab/skills/tree/main/skills
+    url: ComposioHQ/awesome-claude-skills
   - name: vercel
     type: dir
-    url: https://github.com/vercel-labs/agent-skills
+    url: vercel-labs/agent-skills
+  - name: openclaw
+    type: dir
+    url: openclaw/openclaw/skills
 ```
 
 ### Fields
@@ -106,8 +103,7 @@ skills:
 
 | Variable | Description |
 |----------|-------------|
-| `GITHUB_TOKEN` | GitHub API token for higher rate limits |
-| `ASK_SKILLS_DIR` | Custom skills directory (default: `./skills`) |
+| `GITHUB_TOKEN` / `GH_TOKEN` | GitHub API token for higher rate limits |
 
 ### Example
 
@@ -124,13 +120,12 @@ ASK automatically includes these sources, even if not in your `ask.yaml`:
 
 | Name | Type | URL |
 |------|------|-----|
-| `community` | topic | `agent-skill` |
-| `anthropics` | dir | `https://github.com/anthropics/skills/tree/main/skills` |
-| `scientific` | dir | `https://github.com/K-Dense-AI/claude-scientific-skills/tree/main/scientific-skills` |
-| `superpowers` | dir | `https://github.com/obra/superpowers/tree/main/skills` |
-| `openai` | dir | `https://github.com/openai/skills/tree/main/skills` |
-| `matlab` | dir | `https://github.com/matlab/skills/tree/main/skills` |
-| `vercel` | dir | `https://github.com/vercel-labs/agent-skills` |
+| `featured` | registry | `yeasy/awesome-agent-skills/registry/index.json` |
+| `anthropics` | dir | `anthropics/skills/skills` |
+| `openai` | dir | `openai/skills/skills` |
+| `composio` | dir | `ComposioHQ/awesome-claude-skills` |
+| `vercel` | dir | `vercel-labs/agent-skills` |
+| `openclaw` | dir | `openclaw/openclaw/skills` |
 
 To add custom sources, see [Skill Sources](skill-sources.md).
 

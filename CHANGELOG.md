@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.4] - 2026-04-04
+
+### Fixed
+- **Security**: Case-insensitive matching in `IsSourceAllowed` to prevent bypass via mixed-case URLs.
+- **Security**: Path traversal rejection in registry URL parsing.
+- **Security**: Extended shell metacharacter blocklist, added `Vary: Origin` and `X-Content-Type-Options: nosniff` headers.
+- **Security**: Validate paths before state changes in config update handler with rollback on failure.
+- **Bug**: Send auth token in GitHub API requests for repo content fetching.
+- **Bug**: Fix shared context timeout across fallback git commands in outdated check.
+- **Bug**: Add timeouts to git exec commands in publish and template operations.
+- **Bug**: Fix lock ordering in file watcher debounce timer cleanup.
+- **Bug**: Fix flaky cache test timing under race detector.
+- **Docs**: Fix incorrect brew tap name, debug command, and missing command flags documentation.
+
 ## [1.9.3] - 2026-04-01
 
 ### Fixed
@@ -90,6 +104,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **UX**: Added OS signal handling (`Ctrl+C`) for graceful cancellation of `repo sync` operations.
 - **Code Quality**: Removed redundant `splitLines`/`trimSpace` helper functions in favor of `strings` stdlib.
 
+## [1.7.8] - 2026-03-09
+
+### Added
+- **Scoring**: Implemented `ask skill score` command for skill trust evaluation.
+- **Agents**: Added OpenClaw agent support.
+
+## [1.7.7] - 2026-03-09
+
+### Changed
+- **UX**: Refined wording and improved list output formatting.
+
+### Added
+- **Registry**: Implemented skill registry support.
+
+## [1.7.6] - 2026-03-09
+
+### Added
+- **Install**: Implemented `ask lock-install` command for reproducible installations.
+- **Watch**: Implemented file watch mode for skill development.
+- **Config**: Added support for customized security rules.
+- **CI**: Added GitHub Actions workflows.
+- **Init**: Added interactive init workflow.
+
+## [1.7.5] - 2026-03-08
+
+### Fixed
+- **Config**: Updated config tests for featured registry repo.
+- **Template**: Fixed backtick escaping in skill template README.
+
+### Added
+- **Search**: Show popular skills overview when searching without keyword.
+- **Install**: Show install sync summary with agent names.
+
 ## [1.7.4] - 2026-03-04
 
 ### Fixed
@@ -146,13 +193,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - **CI**: Fixed race condition in GitHub Actions release workflow that caused Goreleaser to fail when desktop builds finished first.
 - **Linting**: Fixed string formatting in `internal/skill/report.go` to use `fmt.Fprintf` instead of `WriteString(fmt.Sprintf(...))`.
-- **Stability**: Resolved potential nil pointer deference (`SA5011`) issues in `cmd/install.go` and `cmd/repo.go`.
+- **Stability**: Resolved potential nil pointer dereference (`SA5011`) issues in `cmd/install.go` and `cmd/repo.go`.
 
+## [1.7.1] - 2026-02-19
+
+### Changed
+- **Release**: Patch release with internal improvements.
 
 ## [1.7.0] - 2026-02-12
 
-### Added
-- **Repository Filter**: Added `--repo` flag to `ask skill install` to filter skills by repository or install all skills from a specific repository.
+### Changed
+- **Release**: Consolidate v1.6.x feature additions into minor release.
 
 ## [1.6.5] - 2026-02-12
 
@@ -163,6 +214,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Skill Restoration**: `ask skill install` (without arguments) now restores skills from `ask.lock` or `ask.yaml` in the current directory.
+
+## [1.6.3] - 2026-02-12
+
+### Changed
+- **Release**: Patch release with version bump and release preparation.
 
 ## [1.6.2] - 2026-02-09
 
@@ -216,7 +272,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **CI**: Fixed Codecov upload condition in test.yml (go-version 1.22 → 1.24).
 - **Documentation**: Fixed malformed YAML frontmatter example in SPEC.md.
 
-## [1.4.0] - 2026-02-01
+## [1.4.1] - 2026-02-01
+
+### Fixed
+- **Config**: Corrected repository URLs and CI configuration.
+
+## [1.4.0] - 2026-01-31
 
 ### Fixed
 - **Monorepo Support**: Fixed `ask repo sync` failing to retrieve star counts for repositories configured with subpaths (e.g., `owner/repo/path/to/skills`).
@@ -242,6 +303,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Web UI**: Fixed missing icons in Repositories view by correctly prioritizing GitHub URLs for avatar generation.
 - **Server**: Fixed unused variable lint error in server code.
 
+## [1.3.0] - 2026-01-30
+
+### Added
+- **Desktop**: Added desktop app support with Wails framework.
+
+### Fixed
+- **Build**: Fixed GoReleaser v2 deprecation and independent desktop builds.
+- **Windows**: Fixed cross-platform build for Windows (Setpgid/SIGTERM).
+
+## [1.2.0] - 2026-01-29
+
+### Added
+- **Web UI**: Added web-based UI for skill management via `ask serve`.
+- **Install**: Added installation support for Windows and Linux.
+- **Agents**: Added CodeBuddy agent support.
+
 ## [1.1.3] - 2026-01-26
 
 ### Added
@@ -259,6 +336,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **Case Sensitivity**: Fixed an issue where `cmd_test.go` failed due to case sensitivity of agent names.
 - **Documentation**: Updated `README.md` and `README_zh.md` to clarify repository sync behavior.
+
+## [1.1.1] - 2026-01-26
+
+### Fixed
+- **Repo**: Improved repo list fuzzy matching.
+- **Docs**: Updated documentation with correct Go version and synced with v1.1.0 changes.
 
 ## [1.1.0] - 2026-01-26
 
@@ -282,7 +365,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Values Reports**: Generate detailed security reports in Markdown, HTML, or JSON with `ask check -o <file>`.
 - **Entropy Analysis**: Smart secret detection using Shannon entropy to reduce false positives.
 
-## [1.0.0-rc2] - 2026-01-24
+## [1.0.0-rc2] - 2026-01-25
 
 ### Added
 - **Docker-Style Aliases**: New top-level commands `ask install`, `ask search`, `ask list` for faster access.
@@ -298,6 +381,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Documentation**: Removed invalid `skillhub/skills` repository example and clarified `mcp-builder` installation.
 - **Input Validation**: Added input length limits and stricter validation to prevent empty skill name installations from malformed inputs.
 - **Robustness**: Improved re-installation check safety.
+- **Robust Installation**: Fixed issue where `ask skill install Source/Skill` would fail if the local cache was empty/missing.
+- **Index Reliability**: Fixed a bug where repository URLs were not being persisted to `index.json`.
 
 ### Changed
 - **Repository Naming**: Local cache directories now use the user-configured repository name (e.g. `anthropics`).
@@ -305,9 +390,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Search UI**: Removed `local:` prefix from search results.
 - **Documentation**: Updated English and Chinese READMEs with new alias usage.
 
-### Fixed
-- **Robust Installation**: Fixed issue where `ask skill install Source/Skill` would fail if the local cache was empty/missing.
-- **Index Reliability**: Fixed a bug where repository URLs were not being persisted to `index.json`.
+## [1.0.0-rc1] - 2026-01-24
+
+### Added
+- **Initial Release Candidate**: First RC for v1.0.0 with core functionality stabilized.
+- **Skill Management**: `ask skill install`, `ask skill search`, `ask skill list` commands.
+- **Repository System**: Multi-source repository configuration and caching.
 
 ## [0.9.0] - 2026-01-21
 
@@ -447,34 +535,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configuration file support (`ask.yaml`)
 - Default repositories: Community, Anthropic, MCP-Servers, Scientific, Superpowers
 
-[Unreleased]: https://github.com/yeasy/ask/compare/v1.9.1...HEAD
+[Unreleased]: https://github.com/yeasy/ask/compare/v1.9.4...HEAD
+[1.9.4]: https://github.com/yeasy/ask/compare/v1.9.3...v1.9.4
+[1.9.3]: https://github.com/yeasy/ask/compare/v1.9.2...v1.9.3
+[1.9.2]: https://github.com/yeasy/ask/compare/v1.9.1...v1.9.2
 [1.9.1]: https://github.com/yeasy/ask/compare/v1.9.0...v1.9.1
 [1.9.0]: https://github.com/yeasy/ask/compare/v1.8.1...v1.9.0
 [1.8.1]: https://github.com/yeasy/ask/compare/v1.8.0...v1.8.1
 [1.8.0]: https://github.com/yeasy/ask/compare/v1.7.9...v1.8.0
-[1.7.9]: https://github.com/yeasy/ask/compare/v1.7.4...v1.7.9
-[1.7.4]: https://github.com/yeasy/ask/compare/v1.7.2...v1.7.4
+[1.7.9]: https://github.com/yeasy/ask/compare/v1.7.8...v1.7.9
+[1.7.8]: https://github.com/yeasy/ask/compare/v1.7.7...v1.7.8
+[1.7.7]: https://github.com/yeasy/ask/compare/v1.7.6...v1.7.7
+[1.7.6]: https://github.com/yeasy/ask/compare/v1.7.5...v1.7.6
+[1.7.5]: https://github.com/yeasy/ask/compare/v1.7.4...v1.7.5
+[1.7.4]: https://github.com/yeasy/ask/compare/v1.7.3...v1.7.4
 [1.7.3]: https://github.com/yeasy/ask/compare/v1.7.2...v1.7.3
-[1.7.2]: https://github.com/yeasy/ask/compare/v1.7.0...v1.7.2
+[1.7.2]: https://github.com/yeasy/ask/compare/v1.7.1...v1.7.2
+[1.7.1]: https://github.com/yeasy/ask/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/yeasy/ask/compare/v1.6.5...v1.7.0
 [1.6.5]: https://github.com/yeasy/ask/compare/v1.6.4...v1.6.5
-[1.6.4]: https://github.com/yeasy/ask/compare/v1.6.2...v1.6.4
+[1.6.4]: https://github.com/yeasy/ask/compare/v1.6.3...v1.6.4
+[1.6.3]: https://github.com/yeasy/ask/compare/v1.6.2...v1.6.3
 [1.6.2]: https://github.com/yeasy/ask/compare/v1.6.1...v1.6.2
 [1.6.1]: https://github.com/yeasy/ask/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/yeasy/ask/compare/v1.5.1...v1.6.0
 [1.5.1]: https://github.com/yeasy/ask/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/yeasy/ask/compare/v1.4.3...v1.5.0
 [1.4.3]: https://github.com/yeasy/ask/compare/v1.4.2...v1.4.3
-[1.4.2]: https://github.com/yeasy/ask/compare/v1.4.0...v1.4.2
+[1.4.2]: https://github.com/yeasy/ask/compare/v1.4.1...v1.4.2
+[1.4.1]: https://github.com/yeasy/ask/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/yeasy/ask/compare/v1.3.3...v1.4.0
 [1.3.3]: https://github.com/yeasy/ask/compare/v1.3.2...v1.3.3
 [1.3.2]: https://github.com/yeasy/ask/compare/v1.3.1...v1.3.2
-[1.3.1]: https://github.com/yeasy/ask/compare/v1.1.3...v1.3.1
+[1.3.1]: https://github.com/yeasy/ask/compare/v1.3.0...v1.3.1
+[1.3.0]: https://github.com/yeasy/ask/compare/v1.2.0...v1.3.0
+[1.2.0]: https://github.com/yeasy/ask/compare/v1.1.3...v1.2.0
 [1.1.3]: https://github.com/yeasy/ask/compare/v1.1.2...v1.1.3
-[1.1.2]: https://github.com/yeasy/ask/compare/v1.1.0...v1.1.2
+[1.1.2]: https://github.com/yeasy/ask/compare/v1.1.1...v1.1.2
+[1.1.1]: https://github.com/yeasy/ask/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/yeasy/ask/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/yeasy/ask/compare/v1.0.0-rc2...v1.0.0
-[1.0.0-rc2]: https://github.com/yeasy/ask/compare/v0.9.0...v1.0.0-rc2
+[1.0.0-rc2]: https://github.com/yeasy/ask/compare/v1.0.0-rc1...v1.0.0-rc2
+[1.0.0-rc1]: https://github.com/yeasy/ask/compare/v0.9.0...v1.0.0-rc1
 [0.9.0]: https://github.com/yeasy/ask/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/yeasy/ask/compare/v0.7.6...v0.8.0
 [0.7.6]: https://github.com/yeasy/ask/compare/v0.7.5...v0.7.6

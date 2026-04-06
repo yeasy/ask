@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/yeasy/ask/internal/filesystem"
 )
 
 // ReposCache manages local git repository cache for skill discovery
@@ -341,34 +343,7 @@ func (c *ReposCache) SaveIndexWithStars(starCounts map[string]int, urls map[stri
 	if err != nil {
 		return err
 	}
-	return atomicWriteFile(indexPath, data, 0600)
-}
-
-// atomicWriteFile writes data to a temp file then renames it to the target path.
-// This prevents partial writes from corrupting the file on crash.
-func atomicWriteFile(path string, data []byte, perm os.FileMode) error {
-	dir := filepath.Dir(path)
-	tmp, err := os.CreateTemp(dir, filepath.Base(path)+".tmp.*")
-	if err != nil {
-		return err
-	}
-	tmpName := tmp.Name()
-
-	if _, err := tmp.Write(data); err != nil {
-		_ = tmp.Close()
-		_ = os.Remove(tmpName)
-		return err
-	}
-	if err := tmp.Chmod(perm); err != nil {
-		_ = tmp.Close()
-		_ = os.Remove(tmpName)
-		return err
-	}
-	if err := tmp.Close(); err != nil {
-		_ = os.Remove(tmpName)
-		return err
-	}
-	return os.Rename(tmpName, path)
+	return filesystem.AtomicWriteFile(indexPath, data, 0600)
 }
 
 // maxIndexFileSize limits the index file size to prevent OOM on malformed files

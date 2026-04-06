@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/yeasy/ask/internal/filesystem"
 	"gopkg.in/yaml.v3"
 )
 
@@ -86,7 +87,7 @@ func (l *LockFile) Save() error {
 	if err != nil {
 		return fmt.Errorf("marshal lock file: %w", err)
 	}
-	if err := atomicWriteFile(LockFileName, data, 0600); err != nil {
+	if err := filesystem.AtomicWriteFile(LockFileName, data, 0600); err != nil {
 		return fmt.Errorf("write lock file: %w", err)
 	}
 	return nil
@@ -149,7 +150,7 @@ func (l *LockFile) SaveGlobal() error {
 	if err != nil {
 		return fmt.Errorf("marshal global lock file: %w", err)
 	}
-	if err := atomicWriteFile(path, data, 0600); err != nil {
+	if err := filesystem.AtomicWriteFile(path, data, 0600); err != nil {
 		return fmt.Errorf("write global lock file: %w", err)
 	}
 	return nil

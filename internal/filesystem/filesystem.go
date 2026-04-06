@@ -176,6 +176,38 @@ func CreateSymlinkOrCopy(source, target string) error {
 	return CopyFile(source, target)
 }
 
+// AtomicWriteFile writes data to a temp file then renames it to the target path.
+// This prevents partial writes from corrupting the file on crash.
+func AtomicWriteFile(path string, data []byte, perm os.FileMode) error {
+	dir := filepath.Dir(path)
+	tmp, err := os.CreateTemp(dir, filepath.Base(path)+".tmp.*")
+	if err != nil {
+		return err
+	}
+	tmpName := tmp.Name()
+
+	if _, err := tmp.Write(data); err != nil {
+		_ = tmp.Close()
+		_ = os.Remove(tmpName)
+		return err
+	}
+	if err := tmp.Chmod(perm); err != nil {
+		_ = tmp.Close()
+		_ = os.Remove(tmpName)
+		return err
+	}
+	if err := tmp.Sync(); err != nil {
+		_ = tmp.Close()
+		_ = os.Remove(tmpName)
+		return err
+	}
+	if err := tmp.Close(); err != nil {
+		_ = os.Remove(tmpName)
+		return err
+	}
+	return os.Rename(tmpName, path)
+}
+
 // IsSymlink checks if the given path is a symbolic link
 func IsSymlink(path string) bool {
 	fi, err := os.Lstat(path)

@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync/atomic"
 
+	"github.com/yeasy/ask/internal/filesystem"
 	"gopkg.in/yaml.v3"
 )
 
@@ -384,34 +385,7 @@ func (c *Config) Save() error {
 	if err != nil {
 		return err
 	}
-	return atomicWriteFile("ask.yaml", data, 0600)
-}
-
-// atomicWriteFile writes data to a temp file then renames it to the target path.
-// This prevents partial writes from corrupting the file.
-func atomicWriteFile(path string, data []byte, perm os.FileMode) error {
-	dir := filepath.Dir(path)
-	tmp, err := os.CreateTemp(dir, filepath.Base(path)+".tmp.*")
-	if err != nil {
-		return err
-	}
-	tmpName := tmp.Name()
-
-	if _, err := tmp.Write(data); err != nil {
-		_ = tmp.Close()
-		_ = os.Remove(tmpName)
-		return err
-	}
-	if err := tmp.Chmod(perm); err != nil {
-		_ = tmp.Close()
-		_ = os.Remove(tmpName)
-		return err
-	}
-	if err := tmp.Close(); err != nil {
-		_ = os.Remove(tmpName)
-		return err
-	}
-	return os.Rename(tmpName, path)
+	return filesystem.AtomicWriteFile("ask.yaml", data, 0600)
 }
 
 // RemoveSkill removes a skill from the configuration
@@ -533,7 +507,7 @@ func (c *Config) SaveGlobal() error {
 	if err != nil {
 		return err
 	}
-	return atomicWriteFile(path, data, 0600)
+	return filesystem.AtomicWriteFile(path, data, 0600)
 }
 
 // LoadConfigByScope loads config based on global flag

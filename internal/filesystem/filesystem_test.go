@@ -282,6 +282,77 @@ func TestCopyFile_PreservesPermissions(t *testing.T) {
 	}
 }
 
+func TestAtomicWriteFile_Basic(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "testfile.txt")
+	data := []byte("hello atomic write")
+
+	err := AtomicWriteFile(path, data, 0644)
+	if err != nil {
+		t.Fatalf("AtomicWriteFile failed: %v", err)
+	}
+
+	got, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("Failed to read written file: %v", err)
+	}
+	if string(got) != string(data) {
+		t.Errorf("Expected content %q, got %q", string(data), string(got))
+	}
+}
+
+func TestAtomicWriteFile_Permissions(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "permfile.txt")
+
+	err := AtomicWriteFile(path, []byte("perm test"), 0600)
+	if err != nil {
+		t.Fatalf("AtomicWriteFile failed: %v", err)
+	}
+
+	info, err := os.Stat(path)
+	if err != nil {
+		t.Fatalf("Failed to stat file: %v", err)
+	}
+	if info.Mode().Perm() != 0600 {
+		t.Errorf("Expected permissions 0600, got %o", info.Mode().Perm())
+	}
+}
+
+func TestAtomicWriteFile_Overwrite(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "overwrite.txt")
+
+	// Write initial content
+	err := AtomicWriteFile(path, []byte("original"), 0644)
+	if err != nil {
+		t.Fatalf("First write failed: %v", err)
+	}
+
+	// Overwrite with new content
+	err = AtomicWriteFile(path, []byte("replaced"), 0644)
+	if err != nil {
+		t.Fatalf("Overwrite failed: %v", err)
+	}
+
+	got, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("Failed to read file: %v", err)
+	}
+	if string(got) != "replaced" {
+		t.Errorf("Expected content %q, got %q", "replaced", string(got))
+	}
+}
+
+func TestAtomicWriteFile_InvalidDir(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "nonexistent", "file.txt")
+
+	err := AtomicWriteFile(path, []byte("data"), 0644)
+	if err == nil {
+		t.Fatal("Expected error for non-existent directory, got nil")
+	}
+}
+
 func TestCopyFile_NonexistentSource(t *testing.T) {
 	tmpDir := t.TempDir()
 	err := CopyFile(filepath.Join(tmpDir, "nonexistent.txt"), filepath.Join(tmpDir, "dst.txt"))

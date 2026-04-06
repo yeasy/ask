@@ -103,7 +103,7 @@ func runSearch(cmd *cobra.Command, args []string) {
 	}
 
 	var allRepos []github.Repository
-	var errors []string
+	var searchErrors []string
 	var searchSource string
 
 	// Check local cache first (unless --remote is specified)
@@ -248,16 +248,16 @@ func runSearch(cmd *cobra.Command, args []string) {
 		result := <-results
 		_ = bar.Add(1)
 		if result.err != nil {
-			errors = append(errors, fmt.Sprintf("%s: %v", result.source, result.err))
+			searchErrors = append(searchErrors, fmt.Sprintf("%s: %v", result.source, result.err))
 			continue
 		}
 		allRepos = append(allRepos, result.repos...)
 	}
 
 	fmt.Println()
-	if len(errors) > 0 {
+	if len(searchErrors) > 0 {
 		ui.Warn("Some sources failed to load:")
-		for _, errMsg := range errors {
+		for _, errMsg := range searchErrors {
 			ui.Warn(fmt.Sprintf("  - %s", errMsg))
 		}
 	}

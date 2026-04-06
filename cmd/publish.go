@@ -324,17 +324,17 @@ func isValidSemver(v string) bool {
 }
 
 func validateSkillMeta(meta *skill.Meta) []string {
-	var errors []string
+	var validationErrors []string
 	if meta == nil {
 		return []string{"failed to parse SKILL.md metadata"}
 	}
 	if meta.Name == "" {
-		errors = append(errors, "name is required in SKILL.md frontmatter")
+		validationErrors = append(validationErrors, "name is required in SKILL.md frontmatter")
 	}
 	if meta.Description == "" {
-		errors = append(errors, "description is required in SKILL.md frontmatter")
+		validationErrors = append(validationErrors, "description is required in SKILL.md frontmatter")
 	}
-	return errors
+	return validationErrors
 }
 
 func init() {

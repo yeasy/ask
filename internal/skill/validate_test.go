@@ -13,9 +13,9 @@ func TestValidateMeta_Valid(t *testing.T) {
 		Description: "A valid skill description",
 	}
 
-	errors := ValidateMeta(meta, "my-skill")
-	if len(errors) != 0 {
-		t.Errorf("Expected no errors for valid meta, got %d: %+v", len(errors), errors)
+	validationErrors := ValidateMeta(meta, "my-skill")
+	if len(validationErrors) != 0 {
+		t.Errorf("Expected no errors for valid meta, got %d: %+v", len(validationErrors), validationErrors)
 	}
 }
 
@@ -24,9 +24,9 @@ func TestValidateMeta_MissingName(t *testing.T) {
 		Description: "A skill without a name",
 	}
 
-	errors := ValidateMeta(meta, "test")
+	validationErrors := ValidateMeta(meta, "test")
 	found := false
-	for _, e := range errors {
+	for _, e := range validationErrors {
 		if e.Field == "name" && strings.Contains(e.Message, "required") {
 			found = true
 		}
@@ -42,9 +42,9 @@ func TestValidateMeta_UppercaseName(t *testing.T) {
 		Description: "A skill with uppercase name",
 	}
 
-	errors := ValidateMeta(meta, "My-Skill")
+	validationErrors := ValidateMeta(meta, "My-Skill")
 	found := false
-	for _, e := range errors {
+	for _, e := range validationErrors {
 		if e.Field == "name" && strings.Contains(e.Message, "lowercase") {
 			found = true
 		}
@@ -60,9 +60,9 @@ func TestValidateMeta_ConsecutiveHyphens(t *testing.T) {
 		Description: "A skill with consecutive hyphens",
 	}
 
-	errors := ValidateMeta(meta, "my--skill")
+	validationErrors := ValidateMeta(meta, "my--skill")
 	found := false
-	for _, e := range errors {
+	for _, e := range validationErrors {
 		if e.Field == "name" && strings.Contains(e.Message, "consecutive") {
 			found = true
 		}
@@ -78,9 +78,9 @@ func TestValidateMeta_LeadingHyphen(t *testing.T) {
 		Description: "A skill with leading hyphen",
 	}
 
-	errors := ValidateMeta(meta, "-myskill")
+	validationErrors := ValidateMeta(meta, "-myskill")
 	found := false
-	for _, e := range errors {
+	for _, e := range validationErrors {
 		if e.Field == "name" && strings.Contains(e.Message, "start or end") {
 			found = true
 		}
@@ -95,9 +95,9 @@ func TestValidateMeta_MissingDescription(t *testing.T) {
 		Name: "my-skill",
 	}
 
-	errors := ValidateMeta(meta, "my-skill")
+	validationErrors := ValidateMeta(meta, "my-skill")
 	found := false
-	for _, e := range errors {
+	for _, e := range validationErrors {
 		if e.Field == "description" && strings.Contains(e.Message, "required") {
 			found = true
 		}
@@ -113,9 +113,9 @@ func TestValidateMeta_DescriptionTooLong(t *testing.T) {
 		Description: strings.Repeat("a", 1025),
 	}
 
-	errors := ValidateMeta(meta, "my-skill")
+	validationErrors := ValidateMeta(meta, "my-skill")
 	found := false
-	for _, e := range errors {
+	for _, e := range validationErrors {
 		if e.Field == "description" && strings.Contains(e.Message, "1-1024") {
 			found = true
 		}
@@ -131,9 +131,9 @@ func TestValidateMeta_DirectoryMismatch(t *testing.T) {
 		Description: "Valid description",
 	}
 
-	errors := ValidateMeta(meta, "different-name")
+	validationErrors := ValidateMeta(meta, "different-name")
 	found := false
-	for _, e := range errors {
+	for _, e := range validationErrors {
 		if e.Field == "name" && strings.Contains(e.Message, "should match") {
 			found = true
 		}
@@ -150,9 +150,9 @@ func TestValidateMeta_CompatibilityTooLong(t *testing.T) {
 		Compatibility: strings.Repeat("x", 501),
 	}
 
-	errors := ValidateMeta(meta, "my-skill")
+	validationErrors := ValidateMeta(meta, "my-skill")
 	found := false
-	for _, e := range errors {
+	for _, e := range validationErrors {
 		if e.Field == "compatibility" && strings.Contains(e.Message, "1-500") {
 			found = true
 		}

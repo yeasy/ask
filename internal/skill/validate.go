@@ -23,11 +23,11 @@ var nameRegex = regexp.MustCompile(`^[a-z][a-z0-9]*(-[a-z0-9]+)*$`)
 // ValidateMeta validates the Meta struct against the Agent Skills specification
 // https://agentskills.io/specification
 func ValidateMeta(meta *Meta, dirName string) []ValidationError {
-	var errors []ValidationError
+	var validationErrors []ValidationError
 
 	// Validate name (required)
 	if meta.Name == "" {
-		errors = append(errors, ValidationError{
+		validationErrors = append(validationErrors, ValidationError{
 			Field:    "name",
 			Message:  "name is required",
 			Severity: SeverityCritical,
@@ -35,7 +35,7 @@ func ValidateMeta(meta *Meta, dirName string) []ValidationError {
 	} else {
 		// Check length (1-64 chars)
 		if len(meta.Name) > 64 {
-			errors = append(errors, ValidationError{
+			validationErrors = append(validationErrors, ValidationError{
 				Field:    "name",
 				Message:  fmt.Sprintf("name must be 1-64 characters, got %d", len(meta.Name)),
 				Severity: SeverityCritical,
@@ -45,7 +45,7 @@ func ValidateMeta(meta *Meta, dirName string) []ValidationError {
 		// Check for uppercase letters
 		for _, r := range meta.Name {
 			if unicode.IsUpper(r) {
-				errors = append(errors, ValidationError{
+				validationErrors = append(validationErrors, ValidationError{
 					Field:    "name",
 					Message:  "name must be lowercase (a-z and hyphens only)",
 					Severity: SeverityCritical,
@@ -56,7 +56,7 @@ func ValidateMeta(meta *Meta, dirName string) []ValidationError {
 
 		// Check for consecutive hyphens
 		if strings.Contains(meta.Name, "--") {
-			errors = append(errors, ValidationError{
+			validationErrors = append(validationErrors, ValidationError{
 				Field:    "name",
 				Message:  "name must not contain consecutive hyphens (--)",
 				Severity: SeverityCritical,
@@ -65,7 +65,7 @@ func ValidateMeta(meta *Meta, dirName string) []ValidationError {
 
 		// Check for leading/trailing hyphens
 		if strings.HasPrefix(meta.Name, "-") || strings.HasSuffix(meta.Name, "-") {
-			errors = append(errors, ValidationError{
+			validationErrors = append(validationErrors, ValidationError{
 				Field:    "name",
 				Message:  "name must not start or end with a hyphen",
 				Severity: SeverityCritical,
@@ -83,7 +83,7 @@ func ValidateMeta(meta *Meta, dirName string) []ValidationError {
 				}
 			}
 			if hasOther {
-				errors = append(errors, ValidationError{
+				validationErrors = append(validationErrors, ValidationError{
 					Field:    "name",
 					Message:  "name may only contain lowercase letters (a-z), digits, and hyphens",
 					Severity: SeverityCritical,
@@ -93,7 +93,7 @@ func ValidateMeta(meta *Meta, dirName string) []ValidationError {
 
 		// Check name matches directory name (warning)
 		if dirName != "" && meta.Name != dirName {
-			errors = append(errors, ValidationError{
+			validationErrors = append(validationErrors, ValidationError{
 				Field:    "name",
 				Message:  fmt.Sprintf("name '%s' should match directory name '%s'", meta.Name, dirName),
 				Severity: SeverityWarning,
@@ -103,13 +103,13 @@ func ValidateMeta(meta *Meta, dirName string) []ValidationError {
 
 	// Validate description (required)
 	if meta.Description == "" {
-		errors = append(errors, ValidationError{
+		validationErrors = append(validationErrors, ValidationError{
 			Field:    "description",
 			Message:  "description is required",
 			Severity: SeverityCritical,
 		})
 	} else if len(meta.Description) > 1024 {
-		errors = append(errors, ValidationError{
+		validationErrors = append(validationErrors, ValidationError{
 			Field:    "description",
 			Message:  fmt.Sprintf("description must be 1-1024 characters, got %d", len(meta.Description)),
 			Severity: SeverityCritical,
@@ -118,12 +118,12 @@ func ValidateMeta(meta *Meta, dirName string) []ValidationError {
 
 	// Validate compatibility (optional, 1-500 chars if provided)
 	if meta.Compatibility != "" && len(meta.Compatibility) > 500 {
-		errors = append(errors, ValidationError{
+		validationErrors = append(validationErrors, ValidationError{
 			Field:    "compatibility",
 			Message:  fmt.Sprintf("compatibility must be 1-500 characters, got %d", len(meta.Compatibility)),
 			Severity: SeverityWarning,
 		})
 	}
 
-	return errors
+	return validationErrors
 }

@@ -92,7 +92,7 @@ If no repo name is specified, syncs all configured repositories.`,
 			successCount int
 			starCounts   = make(map[string]int)
 			repoURLs     = make(map[string]string)
-			errors       []string
+			syncErrors   []string
 		)
 
 		for _, repo := range targetRepos {
@@ -144,9 +144,9 @@ If no repo name is specified, syncs all configured repositories.`,
 
 				if err != nil {
 					if repoCtx.Err() == context.DeadlineExceeded {
-						errors = append(errors, fmt.Sprintf("✗ Failed to sync %s: operation timed out", repo.Name))
+						syncErrors = append(syncErrors, fmt.Sprintf("✗ Failed to sync %s: operation timed out", repo.Name))
 					} else {
-						errors = append(errors, fmt.Sprintf("✗ Failed to sync %s: %v", repo.Name, err))
+						syncErrors = append(syncErrors, fmt.Sprintf("✗ Failed to sync %s: %v", repo.Name, err))
 					}
 					return nil // Don't return error to errgroup to continue other syncs
 				}
@@ -168,7 +168,7 @@ If no repo name is specified, syncs all configured repositories.`,
 		fmt.Println() // Newline after progress bar
 
 		// Print any errors that occurred
-		for _, errMsg := range errors {
+		for _, errMsg := range syncErrors {
 			ui.Warn(errMsg)
 		}
 

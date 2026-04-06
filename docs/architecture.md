@@ -541,7 +541,7 @@ Command-level tests in `cmd/cmd_test.go`:
 
 GitHub Actions workflows:
 - **Lint**: golangci-lint, go fmt, go vet
-- **Test**: Multi-platform (Ubuntu, macOS), multi-version (Go 1.21, 1.22)
+- **Test**: Multi-platform (Ubuntu, macOS), Go 1.25+
 - **Release**: Automated releases with goreleaser
 
 ## Monitoring & Observability

@@ -156,7 +156,16 @@ ask skill list --agent claude    # 列出特定 Agent 的技能
 
 ```bash
 ask skill info <skill>
+ask skill info <skill> --global   # 显示全局安装的技能信息
+ask skill info <skill> --json     # 以 JSON 格式输出
 ```
+
+**参数：**
+
+| 参数 | 说明 |
+| :--- | :--- |
+| `--global` | 显示全局安装的技能信息 |
+| `--json` | 以 JSON 格式输出技能信息 |
 
 **输出包含：**
 - 来自 SKILL.md 的完整描述

@@ -19,7 +19,7 @@ var uninstallCmd = &cobra.Command{
 	Long: `Remove a skill from the skills directory and update configuration.
 Use --global to uninstall from global installation (~/.ask/skills).
 
-Use --agent (-a) to specify target agents (claude, cursor, codex, opencode).
+Use --agent (-a) to specify target agents (e.g., claude, cursor, codex).
 If no agent is specified, uninstalls from agent directories only (keeps source).
 
 Use --all to remove both symlinks AND the source files in .agent/skills/.`,

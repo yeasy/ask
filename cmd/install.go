@@ -24,7 +24,7 @@ You can also specify versions: owner/repo@v1.0.0
 
 If no arguments are provided, it will attempt to restore skills from ask.lock or ask.yaml in the current directory.
 
-Use --agent (-a) to specify target agents (claude, cursor, codex, opencode).
+Use --agent (-a) to specify target agents (e.g., claude, cursor, codex).
 Multiple agents can be specified by repeating the flag.
 If no agent is specified, skills are installed to .agent/skills/ by default.`,
 	Example: `  # Install from GitHub shorthand

@@ -156,7 +156,16 @@ Show detailed information about a skill.
 
 ```bash
 ask skill info <skill>
+ask skill info <skill> --global   # Show info for globally installed skill
+ask skill info <skill> --json     # Output as JSON
 ```
+
+**Flags:**
+
+| Flag | Description |
+| :--- | :--- |
+| `--global` | Show info for globally installed skill |
+| `--json` | Output skill information as JSON |
 
 **Output includes:**
 - Full description from SKILL.md

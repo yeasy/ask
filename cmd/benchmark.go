@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/yeasy/ask/internal/cache"
 	"github.com/yeasy/ask/internal/config"
 	"github.com/yeasy/ask/internal/github"
 )
@@ -32,7 +31,6 @@ var benchmarkCmd = &cobra.Command{
 			return
 		}
 		defer func() { _ = os.RemoveAll(tmpCacheDir) }()
-		_, _ = cache.New(tmpCacheDir, cache.DefaultTTL)
 
 		start := time.Now()
 		// We simulate search by calling the internal function directly to avoid printing to stdout

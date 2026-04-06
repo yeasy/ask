@@ -6,10 +6,16 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/yeasy/ask/internal/filesystem"
 )
+
+// maxCacheFileSize limits cache file reads to prevent OOM from malformed files
+const maxCacheFileSize = 5 * 1024 * 1024 // 5MB
 
 // Cache provides file-based caching with TTL
 type Cache struct {
@@ -60,8 +66,14 @@ func hashKey(key string) string {
 func (c *Cache) Get(key string, v interface{}) bool {
 	filename := filepath.Join(c.dir, hashKey(key)+".json")
 
-	data, err := os.ReadFile(filename)
+	f, err := os.Open(filename)
 	if err != nil {
+		return false
+	}
+	defer func() { _ = f.Close() }()
+
+	data, err := io.ReadAll(io.LimitReader(f, maxCacheFileSize+1))
+	if err != nil || int64(len(data)) > maxCacheFileSize {
 		return false
 	}
 
@@ -101,7 +113,7 @@ func (c *Cache) Set(key string, v interface{}) error {
 	}
 
 	filename := filepath.Join(c.dir, hashKey(key)+".json")
-	return os.WriteFile(filename, entryData, 0600)
+	return filesystem.AtomicWriteFile(filename, entryData, 0600)
 }
 
 // Clear removes all cached entries

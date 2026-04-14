@@ -130,7 +130,6 @@ team members and CI/CD pipelines.`,
 
 func init() {
 	rootCmd.AddCommand(lockInstallCmd)
-	lockInstallCmd.Flags().BoolP("global", "g", false, "Install from global lock file")
 	lockInstallCmd.Flags().StringSliceP("agent", "a", []string{}, "Target agent(s)")
 	lockInstallCmd.Flags().Bool("check", false, "Run security check after installing each skill")
 }

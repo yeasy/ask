@@ -53,8 +53,7 @@ Use --all to remove both symlinks AND the source files in .agent/skills/.`,
 		targetName := filepath.Base(skillName)
 
 		// Validate skill name to prevent path traversal
-		if targetName == "." || targetName == ".." || targetName == "" ||
-			strings.ContainsAny(targetName, `/\`) {
+		if targetName == "." || targetName == ".." || targetName == "" {
 			fmt.Fprintf(os.Stderr, "Error: Invalid skill name '%s'\n", skillName)
 			os.Exit(1)
 		}
@@ -206,7 +205,6 @@ Use --all to remove both symlinks AND the source files in .agent/skills/.`,
 func init() {
 	skillCmd.AddCommand(uninstallCmd)
 	uninstallCmd.Flags().StringSliceP("agent", "a", []string{}, "target agent(s) for uninstallation")
-	uninstallCmd.Flags().BoolP("global", "g", false, "uninstall globally")
 	uninstallCmd.Flags().Bool("all", false, "remove source and all symlinks (complete removal)")
 
 	// Register installed skill name completion

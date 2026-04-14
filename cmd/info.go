@@ -152,7 +152,6 @@ Use --global to check global skills.`,
 
 func init() {
 	skillCmd.AddCommand(infoCmd)
-	infoCmd.Flags().Bool("global", false, "check global skills")
 	infoCmd.Flags().Bool("json", false, "output results in JSON format")
 
 	// Register installed skill name completion

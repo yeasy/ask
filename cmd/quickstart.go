@@ -122,5 +122,4 @@ If no pack is specified, lists all available packs.`,
 func init() {
 	rootCmd.AddCommand(quickstartCmd)
 	quickstartCmd.Flags().StringSliceP("agent", "a", []string{}, "Target agent(s)")
-	quickstartCmd.Flags().BoolP("global", "g", false, "Install globally for all projects")
 }

@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -18,7 +19,7 @@ func NewSpinner(description string) *progressbar.ProgressBar {
 		progressbar.OptionShowCount(),
 		progressbar.OptionSpinnerType(14),
 		progressbar.OptionOnCompletion(func() {
-			println()
+			fmt.Fprintln(os.Stderr)
 		}),
 	)
 }
@@ -36,7 +37,7 @@ func NewProgressBar(total int, description string) *progressbar.ProgressBar {
 		progressbar.OptionFullWidth(),
 		progressbar.OptionSetRenderBlankState(true),
 		progressbar.OptionOnCompletion(func() {
-			println()
+			fmt.Fprintln(os.Stderr)
 		}),
 	)
 }

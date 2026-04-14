@@ -102,6 +102,7 @@ func runServiceStart(_ *cobra.Command, _ []string) {
 		return
 	}
 
+	bgCmd.Stdin, _ = os.Open(os.DevNull)
 	bgCmd.Stdout = logFile
 	bgCmd.Stderr = logFile
 

@@ -125,9 +125,8 @@ ask skill uninstall <skill>
 - `--all`: 移除源文件和所有符号链接（完全移除）
 
 **功能说明：**
-- 删除 `.agent/skills/<name>/` 目录
-- 从 `ask.yaml` 中移除条目
-- 从 `ask.lock` 中移除条目
+- 从 Agent 目录中删除技能（符号链接或副本）
+- 使用 `--all` 时：同时删除源文件及 `ask.yaml` 和 `ask.lock` 中的条目
 
 ---
 
@@ -633,3 +632,20 @@ ask skill outdated --offline
 - 强制使用本地缓存进行搜索
 - 跳过远程更新检查
 - 适用于气隙环境或低连接性的环境
+
+### --log-level
+
+设置日志详细级别。
+
+```bash
+ask --log-level debug skill install browser-use
+ask --log-level warn skill search mcp
+```
+
+**可选值：** `debug`、`info`（默认）、`warn`、`error`
+
+**功能说明：**
+- `debug`：显示详细的操作日志（扫描、更新、搜索等）
+- `info`：默认级别，显示正常操作信息
+- `warn`：仅显示警告和错误
+- `error`：仅显示错误信息

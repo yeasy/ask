@@ -64,19 +64,37 @@ The command layer uses [Cobra](https://github.com/spf13/cobra) for CLI framework
 **Structure**:
 ```
 cmd/
-├── root.go          # Root command & config
-├── init.go          # Project initialization
-├── skill.go         # Skill parent command
-├── search.go        # Skill search
-├── install.go       # Skill installation
-├── uninstall.go     # Skill removal
-├── update.go        # Skill updates
-├── outdated.go      # Check outdated skills
-├── list.go          # List installed skills
-├── info.go          # Skill information
-├── create.go        # Create skill template
-├── repo.go          # Repository management
-└── completion.go    # Shell completion
+├── root.go              # Root command & config
+├── init.go              # Project initialization
+├── skill.go             # Skill parent command
+├── search.go            # Skill search
+├── install.go           # Skill installation
+├── uninstall.go         # Skill removal
+├── update.go            # Skill updates
+├── outdated.go          # Check outdated skills
+├── list.go              # List installed skills
+├── info.go              # Skill information
+├── create.go            # Create skill template
+├── repo.go              # Repository management
+├── completion.go        # Shell completion
+├── audit.go             # Security audit reports
+├── benchmark.go         # Performance benchmarks
+├── check.go             # Security scanning
+├── doctor.go            # System diagnostics
+├── gui.go               # Desktop app launcher
+├── lock_install.go      # Lock file installation
+├── prompt.go            # System prompt generation
+├── publish.go           # Skill publishing
+├── quickstart.go        # Quick start packs
+├── score.go             # Trust scoring
+├── serve.go             # Web UI server
+├── service.go           # Service management
+├── service_unix.go      # Unix service support
+├── service_windows.go   # Windows service support
+├── sync.go              # Repository sync
+├── test.go              # Skill validation tests
+├── utils.go             # Shared utilities
+└── version.go           # Version display
 ```
 
 **Command Flow**:

@@ -64,19 +64,37 @@ graph LR
 **目录结构**:
 ```
 cmd/
-├── root.go          # 根命令与配置
-├── init.go          # 项目初始化
-├── skill.go         # 技能父命令
-├── search.go        # 技能搜索
-├── install.go       # 技能安装
-├── uninstall.go     # 技能卸载
-├── update.go        # 技能更新
-├── outdated.go      # 检查过期技能
-├── list.go          # 列出已安装技能
-├── info.go          # 技能详情
-├── create.go        # 创建技能模板
-├── repo.go          # 仓库管理
-└── completion.go    # Shell 补全
+├── root.go              # 根命令与配置
+├── init.go              # 项目初始化
+├── skill.go             # 技能父命令
+├── search.go            # 技能搜索
+├── install.go           # 技能安装
+├── uninstall.go         # 技能卸载
+├── update.go            # 技能更新
+├── outdated.go          # 检查过期技能
+├── list.go              # 列出已安装技能
+├── info.go              # 技能详情
+├── create.go            # 创建技能模板
+├── repo.go              # 仓库管理
+├── completion.go        # Shell 补全
+├── audit.go             # 安全审计报告
+├── benchmark.go         # 性能基准测试
+├── check.go             # 安全扫描
+├── doctor.go            # 系统诊断
+├── gui.go               # 桌面应用启动
+├── lock_install.go      # 锁定文件安装
+├── prompt.go            # 系统提示生成
+├── publish.go           # 技能发布
+├── quickstart.go        # 快速入门套件
+├── score.go             # 信任评分
+├── serve.go             # Web UI 服务
+├── service.go           # 服务管理
+├── service_unix.go      # Unix 服务支持
+├── service_windows.go   # Windows 服务支持
+├── sync.go              # 仓库同步
+├── test.go              # 技能验证测试
+├── utils.go             # 共享工具函数
+└── version.go           # 版本显示
 ```
 
 **命令流程**:
@@ -137,6 +155,8 @@ graph LR
 - `SparseClone()`: 高效的子目录克隆
 - `InstallSubdir()`: 从仓库子目录安装
 - `GetLatestTag()`: 获取最新版本标签
+- `Checkout()`: 切换到指定版本
+- `GetCurrentCommit()`: 获取 commit SHA 用于锁定
 
 **稀疏检出优化的理由**:
 - **速度**: 仅下载所需文件
@@ -420,3 +440,4 @@ repos:
 更多详细信息，请参阅：
 - [配置指南](configuration.md)
 - [SKILL.md 格式规范](skill-format.md)
+- [开发指南](../CONTRIBUTING.md)

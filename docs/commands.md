@@ -125,9 +125,8 @@ ask skill uninstall <skill>
 - `--all`: Remove source and all symlinks (complete removal)
 
 **What it does:**
-- Removes `.agent/skills/<name>/` directory
-- Removes entry from `ask.yaml`
-- Removes entry from `ask.lock`
+- Removes skill from agent directories (symlinks or copies)
+- With `--all`: also removes source and entries from `ask.yaml` and `ask.lock`
 
 ---
 
@@ -634,3 +633,20 @@ ask skill outdated --offline
 - Forces usage of local cache for search
 - Skips remote checks for updates
 - Useful for air-gapped environments or low connectivity
+
+### --log-level
+
+Set the logging verbosity level.
+
+```bash
+ask --log-level debug skill install browser-use
+ask --log-level warn skill search mcp
+```
+
+**Values:** `debug`, `info` (default), `warn`, `error`
+
+**What it does:**
+- `debug`: Show detailed operational logs (scanning, updating, searching)
+- `info`: Default level, show normal operational messages
+- `warn`: Show only warnings and errors
+- `error`: Show only errors

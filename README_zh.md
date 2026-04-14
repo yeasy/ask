@@ -56,7 +56,7 @@ $ ask install browser-use
 | :--- | :--- |
 | **🤖 19 个智能体，一个 CLI** | 一次安装，自动同步到 Claude、Cursor、Codex、Copilot、Windsurf、Gemini CLI、OpenClaw 等 19 个智能体。不绑定厂商。 |
 | **📦 版本锁定** | `ask.lock` 精确锁定 commit，确保可复现构建。`ask lock-install` 类似 `npm ci`，专为 CI/CD 设计。 |
-| **🛡️ 安全扫描** | 26+ 条内置规则检测密钥泄漏、危险命令和恶意代码。支持 SARIF 格式输出，集成 GitHub Code Scanning。 |
+| **🛡️ 安全扫描** | 15+ 条内置规则检测密钥泄漏、危险命令和恶意代码。支持 SARIF 格式输出，集成 GitHub Code Scanning。 |
 | **🔍 精选注册表** | 搜索 [官方注册表](https://github.com/yeasy/awesome-agent-skills)、GitHub 仓库和社区源。 |
 | **⚡ 极速体验** | 纯 Go 编写，并发下载、稀疏检出，零运行时依赖。 |
 | **🔌 离线与企业** | 完整离线模式、私有仓库支持、来源白名单、HTML 审计报告。 |
@@ -289,7 +289,7 @@ ask completion fish > ~/.config/fish/completions/ask.fish
 | :--- | :---: | :---: | :---: |
 | **多智能体支持** | ✅ 19 个 | 仅 Claude | 仅 Cursor |
 | **版本锁定** | ✅ `ask.lock` | ❌ | ❌ |
-| **安全扫描** | ✅ 26+ 规则 | ❌ | ❌ |
+| **安全扫描** | ✅ 15+ 规则 | ❌ | ❌ |
 | **离线模式** | ✅ | ❌ | ❌ |
 | **团队共享** | ✅ lock 文件 | ❌ | ❌ |
 | **私有仓库 / 企业级** | ✅ | ❌ | ❌ |

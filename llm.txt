@@ -61,6 +61,9 @@ ask repo list
 # Add a custom repo
 ask repo add <owner/repo>
 
+# Remove a repo
+ask repo remove <name>
+
 # Sync repos to local cache (faster searches)
 ask repo sync
 ask repo sync anthropics
@@ -72,7 +75,38 @@ ask repo sync anthropics
 # Security audit a skill or directory
 ask check <path>
 ask check .
-ask check anthropics/pdf -o report.html
+ask check ./skills/pdf -o report.html
+```
+
+### Advanced Skill Management
+
+```bash
+# Create a new skill from template
+ask skill create <name>
+
+# Generate XML for agent system prompts
+ask skill prompt [paths...]
+
+# Compute trust score for a skill
+ask skill score <path-or-url>
+
+# Run validation checks on a skill
+ask skill test [skill-path]
+
+# Validate and prepare skill for publishing
+ask skill publish [skill-path]
+
+# Generate security audit report
+ask audit
+
+# Install exact versions from ask.lock (like npm ci)
+ask lock-install
+
+# Install recommended skill packs
+ask quickstart [pack-name]
+
+# Run performance benchmarks
+ask benchmark
 ```
 
 ### System

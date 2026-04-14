@@ -239,9 +239,20 @@ ask/
 │   ├── skill.go        # Skill subcommand
 │   └── *.go            # Other commands
 ├── internal/           # Private packages
+│   ├── app/            # Application orchestration
+│   ├── cache/          # Search result caching
 │   ├── config/         # Configuration handling
+│   ├── deps/           # Dependency resolution
+│   ├── filesystem/     # File operations
 │   ├── git/            # Git operations
-│   └── github/         # GitHub API client
+│   ├── github/         # GitHub API client
+│   ├── installer/      # Skill installation logic
+│   ├── repository/     # Repository management
+│   ├── server/         # HTTP server (web UI)
+│   ├── service/        # Process management
+│   ├── skill/          # SKILL.md parsing & security
+│   ├── skillhub/       # SkillHub registry client
+│   └── ui/             # Terminal UI helpers
 ├── docs/               # Documentation
 └── main.go             # Entry point
 ```

@@ -151,6 +151,11 @@ func TestParseRepoURL(t *testing.T) {
 			wantErr:   false,
 		},
 		{
+			name:    "non-github ssh host",
+			input:   "git@gitlab.com:owner/repo.git",
+			wantErr: true,
+		},
+		{
 			name:      "trailing slash",
 			input:     "https://github.com/owner/repo/",
 			wantOwner: "owner",

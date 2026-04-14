@@ -78,6 +78,10 @@ func ParseRepoURL(url string) (owner, repo string, err error) {
 		if len(parts) != 2 {
 			return "", "", fmt.Errorf("invalid git url: %s", url)
 		}
+		host := strings.TrimPrefix(parts[0], "git@")
+		if host != "github.com" {
+			return "", "", fmt.Errorf("unsupported git host: %s", host)
+		}
 		url = parts[1]
 	}
 

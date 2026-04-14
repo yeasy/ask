@@ -32,6 +32,12 @@ const (
 	maxResponseBodySize = 5 * 1024 * 1024 // 5MB
 )
 
+// Shared HTTP clients to enable connection reuse across requests
+var (
+	httpClientDefault = &http.Client{Timeout: httpTimeoutDefault}
+	httpClientShort   = &http.Client{Timeout: httpTimeoutShort}
+)
+
 // Global cache instance, protected by cacheMu for concurrent access
 var (
 	searchCache *cache.Cache
@@ -159,8 +165,7 @@ func SearchTopic(topic, keyword string) ([]Repository, error) {
 	req.Header.Set("Accept", "application/vnd.github.v3+json")
 	req.Header.Set("User-Agent", "ask-cli")
 
-	client := &http.Client{Timeout: httpTimeoutDefault}
-	resp, err := client.Do(req)
+	resp, err := httpClientDefault.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -220,8 +225,7 @@ func SearchDir(owner, repo, path string) ([]Repository, error) {
 	req.Header.Set("Accept", "application/vnd.github.v3+json")
 	req.Header.Set("User-Agent", "ask-cli")
 
-	client := &http.Client{Timeout: httpTimeoutDefault}
-	resp, err := client.Do(req)
+	resp, err := httpClientDefault.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -303,8 +307,7 @@ func fetchSkillDescription(owner, repo, skillPath string) string {
 	req.Header.Set("Accept", "application/vnd.github.v3.raw") // Get raw file content
 	req.Header.Set("User-Agent", "ask-cli")
 
-	client := &http.Client{Timeout: httpTimeoutShort}
-	resp, err := client.Do(req)
+	resp, err := httpClientShort.Do(req)
 	if err != nil {
 		return ""
 	}
@@ -426,7 +429,7 @@ type Client struct {
 // NewClient creates a new GitHub API client
 func NewClient() *Client {
 	return &Client{
-		httpClient: &http.Client{Timeout: httpTimeoutDefault},
+		httpClient: httpClientDefault,
 		token:      getAuthToken(),
 	}
 }
@@ -541,8 +544,7 @@ func FetchRepoDetails(owner, repo string) (*Repository, error) {
 	req.Header.Set("Accept", "application/vnd.github.v3+json")
 	req.Header.Set("User-Agent", "ask-cli")
 
-	client := &http.Client{Timeout: httpTimeoutDefault}
-	resp, err := client.Do(req)
+	resp, err := httpClientDefault.Do(req)
 	if err != nil {
 		return nil, err
 	}

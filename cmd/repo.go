@@ -252,7 +252,7 @@ Examples:
 			r := cfg.Repos[i]
 			// 1. Exact Name Match (Highest priority)
 			if r.Name == repoName {
-				targetRepo = &r
+				targetRepo = &cfg.Repos[i]
 				matchedRepos = []config.Repo{r}
 				break
 			}
@@ -369,6 +369,8 @@ func fetchRepoContents(owner, repo, path string) ([]githubRepoContent, error) {
 		req.Header.Set("Authorization", "Bearer "+token)
 	} else if token := os.Getenv("GH_TOKEN"); token != "" {
 		req.Header.Set("Authorization", "Bearer "+token)
+	} else if token := os.Getenv("ASK_GITHUB_TOKEN"); token != "" {
+		req.Header.Set("Authorization", "Bearer "+token)
 	}
 	req.Header.Set("Accept", "application/vnd.github.v3+json")
 	req.Header.Set("User-Agent", "ask-cli")
@@ -439,6 +441,8 @@ func validateSkillsRepo(owner, repo, path string) (bool, string, string) {
 	if token := os.Getenv("GITHUB_TOKEN"); token != "" {
 		req.Header.Set("Authorization", "Bearer "+token)
 	} else if token := os.Getenv("GH_TOKEN"); token != "" {
+		req.Header.Set("Authorization", "Bearer "+token)
+	} else if token := os.Getenv("ASK_GITHUB_TOKEN"); token != "" {
 		req.Header.Set("Authorization", "Bearer "+token)
 	}
 	req.Header.Set("Accept", "application/vnd.github.v3+json")

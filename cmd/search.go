@@ -68,7 +68,10 @@ func runSearch(cmd *cobra.Command, args []string) {
 	if keyword == "" && !forceLocal && !forceRemote {
 		reposCache, err := cache.NewReposCache()
 		if err == nil {
-			skills, _ := reposCache.SearchSkills("")
+			skills, searchErr := reposCache.SearchSkills("")
+			if searchErr != nil {
+				ui.Debug(fmt.Sprintf("Cache search failed: %v", searchErr))
+			}
 			if len(skills) > 0 {
 				fmt.Println("Popular Skills:")
 				fmt.Println()
@@ -124,7 +127,11 @@ func runSearch(cmd *cobra.Command, args []string) {
 						ui.Warn(fmt.Sprintf("Initial sync failed: %v", err))
 					} else {
 						// Reload index after sync
-						repoInfos, _ = reposCache.LoadIndex()
+						var loadErr error
+						repoInfos, loadErr = reposCache.LoadIndex()
+						if loadErr != nil {
+							ui.Debug(fmt.Sprintf("Failed to load index after sync: %v", loadErr))
+						}
 					}
 				}
 			} else {
@@ -147,7 +154,11 @@ func runSearch(cmd *cobra.Command, args []string) {
 						// Background sync: start child process and wait to prevent zombie
 						cmd := exec.Command(exe, "repo", "sync")
 						if err := cmd.Start(); err == nil {
-							go func() { _ = cmd.Wait() }()
+							go func() {
+								if waitErr := cmd.Wait(); waitErr != nil {
+									ui.Debug(fmt.Sprintf("Background sync failed: %v", waitErr))
+								}
+							}()
 						}
 					}
 				}
@@ -155,7 +166,10 @@ func runSearch(cmd *cobra.Command, args []string) {
 
 			if len(repoInfos) > 0 || forceLocal {
 				ui.Debug(fmt.Sprintf("Searching local cache for '%s'...", keyword))
-				skills, _ := reposCache.SearchSkills(keyword)
+				skills, searchErr := reposCache.SearchSkills(keyword)
+				if searchErr != nil {
+					ui.Debug(fmt.Sprintf("Cache search failed: %v", searchErr))
+				}
 
 				for _, skill := range skills {
 					allRepos = append(allRepos, github.Repository{

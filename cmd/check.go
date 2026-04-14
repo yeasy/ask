@@ -358,7 +358,7 @@ func scanProject(rootDir string, label string) {
 		// To keep it simple and robust: we will walk each requested dir.
 		// Inside walk, we check unique SKILL.md paths.
 
-		_ = filepath.WalkDir(startDir, func(path string, d os.DirEntry, err error) error {
+		if walkErr := filepath.WalkDir(startDir, func(path string, d os.DirEntry, err error) error {
 			if err != nil {
 				return nil // Skip errors
 			}
@@ -423,7 +423,9 @@ func scanProject(rootDir string, label string) {
 				}
 			}
 			return nil
-		})
+		}); walkErr != nil {
+			fmt.Fprintf(os.Stderr, "Warning: failed to scan %s: %v\n", startDir, walkErr)
+		}
 	}
 
 	if foundSkills == 0 {

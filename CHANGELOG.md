@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.6] - 2026-04-13
+
+### Fixed
+- Reuse HTTP clients for connection pooling across GitHub API calls.
+- Add `ASK_GITHUB_TOKEN` support in repo validation functions.
+- Validate SSH host in `ParseRepoURL` to reject non-GitHub hosts.
+- Fix loop variable pointer bug in repo name matching.
+- Remove duplicate `--global` flag registration across subcommands.
+- Remove dead path-separator check after `filepath.Base` in uninstall.
+- Add error logging for search, sync, and directory walk operations.
+- Redirect background service stdin to `/dev/null`.
+- Write progress bar completion newline to stderr consistently.
+- Fix uninstall documentation to clarify `--all` flag behavior.
+- Expand architecture docs, llm.txt, and command reference.
+
+## [1.9.5] - 2026-04-06
+
+### Fixed
+- Consolidated duplicate `atomicWriteFile` into `filesystem.AtomicWriteFile` with fsync.
+- Fixed variable shadowing of `errors` builtin in search command.
+- Added cache file size limit via `io.LimitReader` to prevent OOM.
+- Removed unused cache import in benchmark.
+- Fixed outdated Go version and hardcoded agent list in help text.
+
 ## [1.9.4] - 2026-04-04
 
 ### Fixed
@@ -535,7 +559,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configuration file support (`ask.yaml`)
 - Default repositories: Community, Anthropic, MCP-Servers, Scientific, Superpowers
 
-[Unreleased]: https://github.com/yeasy/ask/compare/v1.9.4...HEAD
+[Unreleased]: https://github.com/yeasy/ask/compare/v1.9.6...HEAD
+[1.9.6]: https://github.com/yeasy/ask/compare/v1.9.5...v1.9.6
+[1.9.5]: https://github.com/yeasy/ask/compare/v1.9.4...v1.9.5
 [1.9.4]: https://github.com/yeasy/ask/compare/v1.9.3...v1.9.4
 [1.9.3]: https://github.com/yeasy/ask/compare/v1.9.2...v1.9.3
 [1.9.2]: https://github.com/yeasy/ask/compare/v1.9.1...v1.9.2

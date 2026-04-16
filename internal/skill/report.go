@@ -6,8 +6,16 @@ import (
 	"html/template"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 )
+
+// htmlReportOnce ensures the HTML report template is parsed only once.
+var htmlReportOnce struct {
+	once sync.Once
+	tmpl *template.Template
+	err  error
+}
 
 // SARIFReport represents a SARIF v2.1.0 report
 type SARIFReport struct {
@@ -212,14 +220,15 @@ func generateMarkdown(result *CheckResult) string {
 	return sb.String()
 }
 
-func generateHTML(result *CheckResult) string {
-	const htmlTemplate = `<!DOCTYPE html>
+// htmlTemplate is the HTML report template string, defined at package level
+// so it can be parsed once and reused across calls.
+const htmlTemplate = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Security Report: {{.SkillName}}</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
     <style>
         :root {
             --critical: #d73a49;
@@ -480,6 +489,7 @@ func generateHTML(result *CheckResult) string {
 </body>
 </html>`
 
+func generateHTML(result *CheckResult) string {
 	type FindingView struct {
 		Finding
 		SeverityClass string
@@ -616,7 +626,7 @@ func generateHTML(result *CheckResult) string {
 		SeverityGroups: sevGroups,
 	}
 
-	tmpl, err := template.New("report").Parse(htmlTemplate)
+	tmpl, err := htmlReportTemplate()
 	if err != nil {
 		return fmt.Sprintf("Error generating HTML: %v", err)
 	}
@@ -627,6 +637,14 @@ func generateHTML(result *CheckResult) string {
 	}
 
 	return sb.String()
+}
+
+// htmlReportTemplate returns the parsed HTML report template, parsing it only once.
+func htmlReportTemplate() (*template.Template, error) {
+	htmlReportOnce.once.Do(func() {
+		htmlReportOnce.tmpl, htmlReportOnce.err = template.New("report").Parse(htmlTemplate)
+	})
+	return htmlReportOnce.tmpl, htmlReportOnce.err
 }
 
 func countSeverities(findings []Finding) (int, int, int) {

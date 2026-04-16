@@ -242,9 +242,17 @@ func TestGetAllAgentSkillsDirs(t *testing.T) {
 		}
 	}
 
-	// Total count: 1 (default) + len(SupportedAgents) project + len(SupportedAgents) global
-	expectedCount := 1 + len(SupportedAgents) + len(SupportedAgents)
-	if len(dirs) != expectedCount {
-		t.Errorf("Expected %d directories, got %d", expectedCount, len(dirs))
+	// Verify no duplicates
+	seen := make(map[string]bool)
+	for _, dir := range dirs {
+		if seen[dir] {
+			t.Errorf("Duplicate directory in result: %s", dir)
+		}
+		seen[dir] = true
+	}
+
+	// Should have at least 1 (default) + some project + some global dirs
+	if len(dirs) < 3 {
+		t.Errorf("Expected at least 3 directories, got %d", len(dirs))
 	}
 }

@@ -31,7 +31,7 @@ func ScanDirectory(root string, limitDepth int) ([]ScanResult, error) {
 		if err != nil {
 			return nil
 		}
-		depth := len(strings.Split(rel, string(filepath.Separator)))
+		depth := strings.Count(rel, string(filepath.Separator)) + 1
 		if rel == "." {
 			depth = 0
 		}

@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.7] - 2026-04-15
+
+### Fixed
+- Fix file descriptor leak for `/dev/null` in `service start`.
+- Replace fixed 1s sleep with polling loop for graceful service shutdown.
+- Fix debounce timer race condition in file watcher.
+- Skip 15 common non-skill directories in all WalkDir callbacks.
+- Pin chart.js CDN to v4.5.1 with explicit UMD bundle path.
+- Cache parsed HTML report template via `sync.Once`.
+- Unify registry token resolution to include `ASK_GITHUB_TOKEN`.
+- Reuse shared HTTP client for registry requests.
+- Replace `strings.Split` with `strings.Count` for zero-alloc depth calc in scan.
+- Deduplicate directories returned by `GetAllAgentSkillsDirs`.
+
 ## [1.9.6] - 2026-04-13
 
 ### Fixed

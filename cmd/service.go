@@ -102,7 +102,13 @@ func runServiceStart(_ *cobra.Command, _ []string) {
 		return
 	}
 
-	bgCmd.Stdin, _ = os.Open(os.DevNull)
+	devNull, err := os.Open(os.DevNull)
+	if err != nil {
+		_ = logFile.Close()
+		ui.Error("Failed to open /dev/null: " + err.Error())
+		return
+	}
+	bgCmd.Stdin = devNull
 	bgCmd.Stdout = logFile
 	bgCmd.Stderr = logFile
 
@@ -110,11 +116,13 @@ func runServiceStart(_ *cobra.Command, _ []string) {
 	bgCmd.SysProcAttr = sysProcAttr()
 
 	if err := bgCmd.Start(); err != nil {
+		_ = devNull.Close()
 		_ = logFile.Close()
 		ui.Error("Failed to start service: " + err.Error())
 		return
 	}
-	// Close the log file in the parent process now that the child has inherited the fd
+	// Close file handles in the parent process now that the child has inherited them
+	_ = devNull.Close()
 	_ = logFile.Close()
 
 	if err := mgr.WritePID(bgCmd.Process.Pid); err != nil {
@@ -148,8 +156,11 @@ func runServiceStop(_ *cobra.Command, _ []string) {
 		// Try graceful shutdown
 		_ = signalTerm(pid)
 
-		// Wait a bit and check
-		time.Sleep(1 * time.Second)
+		// Poll until process exits or timeout (server uses a 5s shutdown internally)
+		deadline := time.Now().Add(6 * time.Second)
+		for time.Now().Before(deadline) && mgr.IsRunning(pid) {
+			time.Sleep(200 * time.Millisecond)
+		}
 		if mgr.IsRunning(pid) {
 			// Force kill if still running
 			_ = process.Kill()

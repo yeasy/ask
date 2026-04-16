@@ -94,12 +94,13 @@ func WatchAndCheck(ctx context.Context, skillPath string, callback func(event st
 			}
 
 			// Debounce: reset timer on each event
+			eventName := displayRel // capture for closure to avoid race
+			mu.Lock()
 			if debounceTimer != nil {
 				if debounceTimer.Stop() {
 					wg.Done() // Timer was stopped before firing, balance the Add
 				}
 			}
-			eventName := displayRel // capture for closure to avoid race
 			wg.Add(1)
 			debounceTimer = time.AfterFunc(debounceDelay, func() {
 				defer wg.Done()
@@ -112,6 +113,7 @@ func WatchAndCheck(ctx context.Context, skillPath string, callback func(event st
 				result, checkErr := CheckSafety(absPath)
 				callback(eventName, result, checkErr)
 			})
+			mu.Unlock()
 
 		case watchErr, ok := <-watcher.Errors:
 			if !ok {
@@ -133,7 +135,10 @@ func addDirRecursive(watcher *fsnotify.Watcher, root string) error {
 			return nil
 		}
 		if d.IsDir() {
-			if d.Name() == ".git" {
+			switch d.Name() {
+			case ".git", "node_modules", "vendor", ".venv", "venv",
+				"__pycache__", ".next", ".nuxt", "dist", "build",
+				".cache", ".gradle", ".cargo", "target", ".tox":
 				return filepath.SkipDir
 			}
 			return watcher.Add(path)

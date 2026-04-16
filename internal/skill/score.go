@@ -396,7 +396,10 @@ func scoreTransparencyCategory(skillPath string) ScoreCategory {
 		}
 
 		if d.IsDir() {
-			if d.Name() == ".git" {
+			switch d.Name() {
+			case ".git", "node_modules", "vendor", ".venv", "venv",
+				"__pycache__", ".next", ".nuxt", "dist", "build",
+				".cache", ".gradle", ".cargo", "target", ".tox":
 				return filepath.SkipDir
 			}
 			return nil

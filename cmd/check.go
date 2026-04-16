@@ -364,8 +364,11 @@ func scanProject(rootDir string, label string) {
 			}
 
 			if d.IsDir() {
-				// Optimization: Skip .git
-				if d.Name() == ".git" {
+				// Optimization: Skip large non-skill directories
+				switch d.Name() {
+				case ".git", "node_modules", "vendor", ".venv", "venv",
+					"__pycache__", ".next", ".nuxt", "dist", "build",
+					".cache", ".gradle", ".cargo", "target", ".tox":
 					return filepath.SkipDir
 				}
 

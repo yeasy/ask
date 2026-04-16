@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
@@ -14,6 +13,9 @@ import (
 )
 
 const maxResponseBodySize = 5 * 1024 * 1024 // 5MB
+
+// registryHTTPClient is a shared HTTP client for registry requests.
+var registryHTTPClient = &http.Client{Timeout: 15 * time.Second}
 
 // rawBaseURL is the base URL for fetching raw files from GitHub.
 // It can be overridden in tests to point to a local httptest server.
@@ -72,14 +74,11 @@ func FetchSkillsFromRegistry(registryURL string, keyword string) ([]github.Repos
 	}
 
 	req.Header.Set("User-Agent", "ask-cli")
-	if token := os.Getenv("GITHUB_TOKEN"); token != "" {
-		req.Header.Set("Authorization", "Bearer "+token)
-	} else if token := os.Getenv("GH_TOKEN"); token != "" {
+	if token := github.GetTokenForRepo(config.Repo{}); token != "" {
 		req.Header.Set("Authorization", "Bearer "+token)
 	}
 
-	client := &http.Client{Timeout: 15 * time.Second}
-	resp, err := client.Do(req)
+	resp, err := registryHTTPClient.Do(req)
 	if err != nil {
 		return nil, err
 	}

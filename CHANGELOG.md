@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- Fix temp directory leak when scoring skills with subdirectory paths.
+- Validate subdirectory existence after clone in `score` command.
+- Use filepath-based path traversal check in score subdir argument.
+- Add `--no-open` flag to background service to prevent orphan browser tabs.
+- Reap zombie process after force-killing service on stop.
+- Add Wait after Kill on PID-write failure in `service start`.
+- Add context timeout for remote skill search goroutines.
+- Add context timeout for background sync subprocesses.
+- Unify HTTP response body drain pattern in registry, GitHub, and repo clients.
+- Fix vendor name in goreleaser nfpm config.
+
+### Changed
+- Replace magic string sentinel with named constant in outdated detection.
+- Extract HTTP server timeout constants in server package.
+- Replace hardcoded search limit with named constant in skillhub client.
+- Use centralized token resolution in repo commands.
+- Update golangci-lint to v2.11.4 in CI workflow.
+- Add `.env` and `.env.*` to `.gitignore`.
+
 ## [1.9.7] - 2026-04-15
 
 ### Fixed
@@ -573,7 +595,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configuration file support (`ask.yaml`)
 - Default repositories: Community, Anthropic, MCP-Servers, Scientific, Superpowers
 
-[Unreleased]: https://github.com/yeasy/ask/compare/v1.9.6...HEAD
+[Unreleased]: https://github.com/yeasy/ask/compare/v1.9.7...HEAD
+[1.9.7]: https://github.com/yeasy/ask/compare/v1.9.6...v1.9.7
 [1.9.6]: https://github.com/yeasy/ask/compare/v1.9.5...v1.9.6
 [1.9.5]: https://github.com/yeasy/ask/compare/v1.9.4...v1.9.5
 [1.9.4]: https://github.com/yeasy/ask/compare/v1.9.3...v1.9.4

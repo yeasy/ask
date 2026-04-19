@@ -53,7 +53,7 @@ brews:
 
 nfpms:
   - file_name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-    vendor: Antigravity
+    vendor: yeasy
     homepage: "https://github.com/yeasy/ask"
     maintainer: "yeasy <yeasy@github.com>"
     description: "Agent Skills Kit - The Package Manager for Agent Skills"

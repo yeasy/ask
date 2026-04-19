@@ -82,8 +82,9 @@ func FetchSkillsFromRegistry(registryURL string, keyword string) ([]github.Repos
 	if err != nil {
 		return nil, err
 	}
+	limitedBody := io.LimitReader(resp.Body, maxResponseBodySize)
 	defer func() {
-		_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, maxResponseBodySize))
+		_, _ = io.Copy(io.Discard, limitedBody)
 		_ = resp.Body.Close()
 	}()
 
@@ -91,7 +92,7 @@ func FetchSkillsFromRegistry(registryURL string, keyword string) ([]github.Repos
 		return nil, fmt.Errorf("registry returned status %d", resp.StatusCode)
 	}
 
-	body, err := io.ReadAll(io.LimitReader(resp.Body, maxResponseBodySize))
+	body, err := io.ReadAll(limitedBody)
 	if err != nil {
 		return nil, err
 	}

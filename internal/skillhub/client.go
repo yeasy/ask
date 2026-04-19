@@ -17,8 +17,12 @@ import (
 // SearchURL is the endpoint for quick search
 const SearchURL = "https://www.skillhub.club/api/search/quick"
 
-// maxResponseBodySize is the maximum number of bytes read from HTTP responses.
-const maxResponseBodySize = 2 * 1024 * 1024
+const (
+	// maxResponseBodySize is the maximum number of bytes read from HTTP responses.
+	maxResponseBodySize = 2 * 1024 * 1024
+	// defaultSearchLimit is the maximum number of results for quick search.
+	defaultSearchLimit = "50"
+)
 
 // Pre-compiled regexes for Resolve()
 var (
@@ -82,7 +86,7 @@ func (c *Client) Search(query string) ([]Skill, error) {
 	}
 	q := u.Query()
 	q.Set("q", query)
-	q.Set("limit", "50") // Fetch up to 50
+	q.Set("limit", defaultSearchLimit)
 	u.RawQuery = q.Encode()
 
 	resp, err := c.HTTPClient.Get(u.String())

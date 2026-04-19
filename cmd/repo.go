@@ -16,6 +16,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/yeasy/ask/internal/cache"
 	"github.com/yeasy/ask/internal/config"
+	"github.com/yeasy/ask/internal/github"
 	"github.com/yeasy/ask/internal/repository"
 	"github.com/yeasy/ask/internal/ui"
 )
@@ -365,11 +366,7 @@ func fetchRepoContents(owner, repo, path string) ([]githubRepoContent, error) {
 	if err != nil {
 		return nil, err
 	}
-	if token := os.Getenv("GITHUB_TOKEN"); token != "" {
-		req.Header.Set("Authorization", "Bearer "+token)
-	} else if token := os.Getenv("GH_TOKEN"); token != "" {
-		req.Header.Set("Authorization", "Bearer "+token)
-	} else if token := os.Getenv("ASK_GITHUB_TOKEN"); token != "" {
+	if token := github.GetTokenForRepo(config.Repo{}); token != "" {
 		req.Header.Set("Authorization", "Bearer "+token)
 	}
 	req.Header.Set("Accept", "application/vnd.github.v3+json")
@@ -438,11 +435,7 @@ func validateSkillsRepo(owner, repo, path string) (bool, string, string) {
 	if err != nil {
 		return false, "", ""
 	}
-	if token := os.Getenv("GITHUB_TOKEN"); token != "" {
-		req.Header.Set("Authorization", "Bearer "+token)
-	} else if token := os.Getenv("GH_TOKEN"); token != "" {
-		req.Header.Set("Authorization", "Bearer "+token)
-	} else if token := os.Getenv("ASK_GITHUB_TOKEN"); token != "" {
+	if token := github.GetTokenForRepo(config.Repo{}); token != "" {
 		req.Header.Set("Authorization", "Bearer "+token)
 	}
 	req.Header.Set("Accept", "application/vnd.github.v3+json")
@@ -452,8 +445,9 @@ func validateSkillsRepo(owner, repo, path string) (bool, string, string) {
 	if err != nil {
 		return false, "", ""
 	}
+	limitedBody := io.LimitReader(resp.Body, maxResponseBodySize)
 	defer func() {
-		_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, maxResponseBodySize))
+		_, _ = io.Copy(io.Discard, limitedBody)
 		_ = resp.Body.Close()
 	}()
 	if resp.StatusCode != http.StatusOK {

@@ -54,10 +54,10 @@ func (s *Server) Start() error {
 	server := &http.Server{
 		Addr:              fmt.Sprintf("127.0.0.1:%d", s.port),
 		Handler:           corsMiddleware(mux),
-		ReadHeaderTimeout: 10 * time.Second,
-		ReadTimeout:       30 * time.Second,
-		WriteTimeout:      60 * time.Second,
-		IdleTimeout:       120 * time.Second,
+		ReadHeaderTimeout: serverReadHeaderTimeout,
+		ReadTimeout:       serverReadTimeout,
+		WriteTimeout:      serverWriteTimeout,
+		IdleTimeout:       serverIdleTimeout,
 	}
 
 	s.mu.Lock()
@@ -248,8 +248,15 @@ func corsMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// maxRequestBodySize limits the maximum size of request bodies (1MB)
-const maxRequestBodySize = 1 << 20 // 1MB
+const (
+	// maxRequestBodySize limits the maximum size of request bodies (1MB)
+	maxRequestBodySize = 1 << 20 // 1MB
+
+	serverReadHeaderTimeout = 10 * time.Second
+	serverReadTimeout       = 30 * time.Second
+	serverWriteTimeout      = 60 * time.Second
+	serverIdleTimeout       = 120 * time.Second
+)
 
 // limitRequestBody is a helper to limit request body size for POST handlers
 func limitRequestBody(w http.ResponseWriter, r *http.Request) {

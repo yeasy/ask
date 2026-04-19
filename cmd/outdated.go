@@ -115,7 +115,7 @@ Use --global to check global skills.`,
 			// Compare local vs remote commit
 			if !isOffline {
 				status = "✓ Up to date"
-				if currentCommit != remoteCommit && remoteCommit != "" {
+				if currentCommit != remoteCommit && remoteCommit != "" && remoteCommit != unknownCommit {
 					status = "⬆ Update available"
 					outdatedCount++
 				}
@@ -144,8 +144,10 @@ Use --global to check global skills.`,
 	},
 }
 
-// gitRevParseTimeout is the maximum time for a local git rev-parse operation.
-const gitRevParseTimeout = 10 * time.Second
+const (
+	gitRevParseTimeout = 10 * time.Second
+	unknownCommit      = "-"
+)
 
 // getShortCommit returns the short commit hash
 func getShortCommit(repoPath string) string {
@@ -155,7 +157,7 @@ func getShortCommit(repoPath string) string {
 	cmd.Dir = repoPath
 	output, err := cmd.Output()
 	if err != nil {
-		return "-"
+		return unknownCommit
 	}
 	return strings.TrimSpace(string(output))
 }
@@ -173,7 +175,7 @@ func getRemoteHeadCommit(repoPath string) string {
 			return strings.TrimSpace(string(output))
 		}
 	}
-	return "-"
+	return unknownCommit
 }
 
 func init() {

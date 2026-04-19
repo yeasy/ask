@@ -69,13 +69,13 @@ func runScore(cmd *cobra.Command, args []string) {
 	if err != nil || !info.IsDir() {
 		// Try as a GitHub reference — clone to temp
 		fmt.Printf("Resolving %s...\n", target)
-		tmpDir, cloneErr := cloneForScore(target)
+		cloneRoot, clonedPath, cloneErr := cloneForScore(target)
 		if cloneErr != nil {
 			fmt.Fprintf(os.Stderr, "Error: cannot resolve '%s' as local path or GitHub repo: %v\n", target, cloneErr)
 			os.Exit(1)
 		}
-		defer func() { _ = os.RemoveAll(tmpDir) }()
-		skillPath = tmpDir
+		defer func() { _ = os.RemoveAll(cloneRoot) }()
+		skillPath = clonedPath
 
 		// Fetch publisher info from GitHub
 		publisher = fetchPublisherInfo(target)
@@ -121,24 +121,24 @@ func runBatchScore(cmd *cobra.Command, args []string) {
 
 	// Resolve target to a local directory
 	baseDir := target
-	var tmpDir string
+	var cloneRoot string
 	var publisher *skill.PublisherInfo
 
 	info, err := os.Stat(target)
 	if err != nil || !info.IsDir() {
 		// Clone remote repo
 		fmt.Printf("Cloning %s for batch scoring...\n", target)
-		cloned, cloneErr := cloneForScore(target)
+		root, clonedPath, cloneErr := cloneForScore(target)
 		if cloneErr != nil {
 			fmt.Fprintf(os.Stderr, "Error: cannot resolve '%s': %v\n", target, cloneErr)
 			os.Exit(1)
 		}
-		tmpDir = cloned
-		baseDir = cloned
+		cloneRoot = root
+		baseDir = clonedPath
 		publisher = fetchPublisherInfo(target)
 	}
-	if tmpDir != "" {
-		defer func() { _ = os.RemoveAll(tmpDir) }()
+	if cloneRoot != "" {
+		defer func() { _ = os.RemoveAll(cloneRoot) }()
 	}
 
 	// Find all skill subdirectories (those containing SKILL.md)
@@ -328,15 +328,24 @@ func formatGrade(result *skill.ScoreResult) string {
 	}
 }
 
-func cloneForScore(target string) (string, error) {
+func cloneForScore(target string) (cloneRoot, scorePath string, err error) {
 	tmpDir, err := os.MkdirTemp("", "ask-score-*")
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	url := target
+	subDir := ""
 	if !strings.HasPrefix(target, "http://") && !strings.HasPrefix(target, "https://") {
-		url = "https://github.com/" + target
+		parts := strings.SplitN(target, "/", 3)
+		if len(parts) >= 2 {
+			url = "https://github.com/" + parts[0] + "/" + parts[1]
+			if len(parts) > 2 {
+				subDir = parts[2]
+			}
+		} else {
+			url = "https://github.com/" + target
+		}
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
@@ -345,10 +354,22 @@ func cloneForScore(target string) (string, error) {
 	cloneErr := git.Clone(ctx, url, tmpDir)
 	if cloneErr != nil {
 		_ = os.RemoveAll(tmpDir)
-		return "", cloneErr
+		return "", "", cloneErr
 	}
 
-	return tmpDir, nil
+	if subDir != "" {
+		targetPath := filepath.Join(tmpDir, filepath.Clean(subDir))
+		if !strings.HasPrefix(targetPath, tmpDir+string(filepath.Separator)) {
+			_ = os.RemoveAll(tmpDir)
+			return "", "", fmt.Errorf("invalid path: traversal not allowed in %s", subDir)
+		}
+		if _, err := os.Stat(targetPath); err != nil {
+			_ = os.RemoveAll(tmpDir)
+			return "", "", fmt.Errorf("subdirectory %s not found in repository", subDir)
+		}
+		return tmpDir, targetPath, nil
+	}
+	return tmpDir, tmpDir, nil
 }
 
 func fetchPublisherInfo(target string) *skill.PublisherInfo {

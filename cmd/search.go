@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -120,11 +121,14 @@ func runSearch(cmd *cobra.Command, args []string) {
 				exe, err := os.Executable()
 				if err == nil {
 					// Run sync synchronously for the first time
-					cmd := exec.Command(exe, "repo", "sync")
+					syncCtx, syncCancel := context.WithTimeout(context.Background(), 5*time.Minute)
+					cmd := exec.CommandContext(syncCtx, exe, "repo", "sync")
 					cmd.Stdout = os.Stdout
 					cmd.Stderr = os.Stderr
-					if err := cmd.Run(); err != nil {
-						ui.Warn(fmt.Sprintf("Initial sync failed: %v", err))
+					syncErr := cmd.Run()
+					syncCancel()
+					if syncErr != nil {
+						ui.Warn(fmt.Sprintf("Initial sync failed: %v", syncErr))
 					} else {
 						// Reload index after sync
 						var loadErr error
@@ -152,13 +156,17 @@ func runSearch(cmd *cobra.Command, args []string) {
 					exe, err := os.Executable()
 					if err == nil {
 						// Background sync: start child process and wait to prevent zombie
-						cmd := exec.Command(exe, "repo", "sync")
+						bgSyncCtx, bgSyncCancel := context.WithTimeout(context.Background(), 5*time.Minute)
+						cmd := exec.CommandContext(bgSyncCtx, exe, "repo", "sync")
 						if err := cmd.Start(); err == nil {
 							go func() {
+								defer bgSyncCancel()
 								if waitErr := cmd.Wait(); waitErr != nil {
 									ui.Debug(fmt.Sprintf("Background sync failed: %v", waitErr))
 								}
 							}()
+						} else {
+							bgSyncCancel()
 						}
 					}
 				}
@@ -209,11 +217,20 @@ func runSearch(cmd *cobra.Command, args []string) {
 
 	results := make(chan searchResult, len(cfg.Repos))
 
+	// Overall timeout for all remote search goroutines
+	searchCtx, searchCancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer searchCancel()
+
 	// Limit concurrent goroutines to avoid excessive parallel requests
 	sem := make(chan struct{}, 5)
 	for _, repo := range cfg.Repos {
 		go func(r config.Repo) {
-			sem <- struct{}{}
+			select {
+			case sem <- struct{}{}:
+			case <-searchCtx.Done():
+				results <- searchResult{source: r.Name, err: searchCtx.Err()}
+				return
+			}
 			defer func() { <-sem }()
 			var repos []github.Repository
 			var err error

@@ -89,7 +89,7 @@ func runServiceStart(_ *cobra.Command, _ []string) {
 		return
 	}
 
-	launchArgs := []string{"serve"}
+	launchArgs := []string{"serve", "--no-open"}
 	// Pass through flags if needed, for now we presume default config or flags set via files
 
 	bgCmd := exec.Command(exe, launchArgs...)
@@ -129,6 +129,7 @@ func runServiceStart(_ *cobra.Command, _ []string) {
 		ui.Error("Failed to write PID file: " + err.Error())
 		// Try to kill the process since we failed to track it
 		_ = bgCmd.Process.Kill()
+		_ = bgCmd.Wait()
 		return
 	}
 
@@ -162,8 +163,8 @@ func runServiceStop(_ *cobra.Command, _ []string) {
 			time.Sleep(200 * time.Millisecond)
 		}
 		if mgr.IsRunning(pid) {
-			// Force kill if still running
 			_ = process.Kill()
+			_, _ = process.Wait()
 		}
 	}
 

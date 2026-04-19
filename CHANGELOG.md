@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.8] - 2026-04-19
+
 ### Fixed
 - Fix temp directory leak when scoring skills with subdirectory paths.
 - Validate subdirectory existence after clone in `score` command.
@@ -595,7 +597,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configuration file support (`ask.yaml`)
 - Default repositories: Community, Anthropic, MCP-Servers, Scientific, Superpowers
 
-[Unreleased]: https://github.com/yeasy/ask/compare/v1.9.7...HEAD
+[Unreleased]: https://github.com/yeasy/ask/compare/v1.9.8...HEAD
+[1.9.8]: https://github.com/yeasy/ask/compare/v1.9.7...v1.9.8
 [1.9.7]: https://github.com/yeasy/ask/compare/v1.9.6...v1.9.7
 [1.9.6]: https://github.com/yeasy/ask/compare/v1.9.5...v1.9.6
 [1.9.5]: https://github.com/yeasy/ask/compare/v1.9.4...v1.9.5

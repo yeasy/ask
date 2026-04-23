@@ -726,6 +726,16 @@ func (s *Server) handleSkillFiles(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	info, err := os.Lstat(skillPath)
+	if err != nil {
+		jsonError(w, "Skill not found", http.StatusNotFound)
+		return
+	}
+	if info.Mode()&os.ModeSymlink != 0 {
+		jsonError(w, "Symlinks are not allowed", http.StatusForbidden)
+		return
+	}
+
 	if mode == "content" {
 		// Read specific file
 		relPath := r.URL.Query().Get("path")

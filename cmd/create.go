@@ -37,9 +37,9 @@ func runCreate(cmd *cobra.Command, args []string) {
 	name := args[0]
 
 	// Validate name
-	match, _ := regexp.MatchString("^[a-zA-Z0-9-]+$", name)
+	match, _ := regexp.MatchString("^[a-zA-Z0-9][a-zA-Z0-9-]*$", name)
 	if !match {
-		fmt.Fprintln(os.Stderr, "Error: Skill name must contain only alphanumeric characters and dashes.")
+		fmt.Fprintln(os.Stderr, "Error: Skill name must start with an alphanumeric character and contain only alphanumeric characters and dashes.")
 		os.Exit(1)
 	}
 

@@ -32,10 +32,28 @@ const (
 	maxResponseBodySize = 5 * 1024 * 1024 // 5MB
 )
 
+// safeRedirect strips the Authorization header on cross-host redirects to
+// prevent token leakage if the server redirects to a different domain.
+func safeRedirect(req *http.Request, via []*http.Request) error {
+	if len(via) >= 10 {
+		return fmt.Errorf("stopped after 10 redirects")
+	}
+	if len(via) > 0 && req.URL.Host != via[0].URL.Host {
+		req.Header.Del("Authorization")
+	}
+	return nil
+}
+
 // Shared HTTP clients to enable connection reuse across requests
 var (
-	httpClientDefault = &http.Client{Timeout: httpTimeoutDefault}
-	httpClientShort   = &http.Client{Timeout: httpTimeoutShort}
+	httpClientDefault = &http.Client{
+		Timeout:       httpTimeoutDefault,
+		CheckRedirect: safeRedirect,
+	}
+	httpClientShort = &http.Client{
+		Timeout:       httpTimeoutShort,
+		CheckRedirect: safeRedirect,
+	}
 )
 
 // Global cache instance, protected by cacheMu for concurrent access

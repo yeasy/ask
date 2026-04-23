@@ -53,7 +53,7 @@ func (s *Server) Start() error {
 
 	server := &http.Server{
 		Addr:              fmt.Sprintf("127.0.0.1:%d", s.port),
-		Handler:           corsMiddleware(mux),
+		Handler:           securityHeadersMiddleware(corsMiddleware(mux)),
 		ReadHeaderTimeout: serverReadHeaderTimeout,
 		ReadTimeout:       serverReadTimeout,
 		WriteTimeout:      serverWriteTimeout,
@@ -98,7 +98,7 @@ func (s *Server) setupRoutes() *http.ServeMux {
 
 // Handler returns the HTTP handler for the server (exported for Wails integration)
 func (s *Server) Handler() http.Handler {
-	return s.setupRoutes()
+	return securityHeadersMiddleware(corsMiddleware(s.setupRoutes()))
 }
 
 // Stop gracefully stops the server
@@ -207,6 +207,17 @@ func sanitizeAndRestrictPath(rawPath string) (string, error) {
 	}
 
 	return cleanPath, nil
+}
+
+// securityHeadersMiddleware adds security headers to prevent clickjacking and other attacks.
+func securityHeadersMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("X-Frame-Options", "DENY")
+		w.Header().Set("Content-Security-Policy", "frame-ancestors 'none'")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.Header().Set("Cache-Control", "no-store")
+		next.ServeHTTP(w, r)
+	})
 }
 
 // corsMiddleware adds CORS headers for development, restricted to localhost

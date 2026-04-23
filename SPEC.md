@@ -47,7 +47,7 @@ v0.5.0 已实现:
   - 全局锁定文件: `~/.ask/ask.lock`
 - [x] 多 Agent 支持 (`--agent` / `-a`)
   - 支持将技能安装到特定 Agent 目录
-  - 支持的 Agent: Claude, Cursor, Codex, OpenCode
+  - 支持的 Agent: Amp, Antigravity, Claude, ClawdBot, CodeBuddy, Codex, Copilot, Cursor, Droid, Gemini, Goose, Kilo, Kiro, Neovate, OpenClaw, OpenCode, Roo, Trae, Windsurf
   - 示例: `ask skill install <skill> --agent claude --agent cursor`
 
 ### v0.6.0 已实现:
@@ -85,37 +85,40 @@ v0.5.0 已实现:
 |------|------|------|
 | `topic` | GitHub 主题搜索 | `agent-skill` |
 | `dir` | GitHub 仓库目录 | `anthropics/skills/skills` |
+| `registry` | JSON 注册表索引 | `yeasy/awesome-agent-skills/registry/index.json` |
 
 ### 默认来源
 
 ```yaml
 repos:
-  - name: community
-    type: topic
-    url: agent-skill
+  - name: featured
+    type: registry
+    url: yeasy/awesome-agent-skills/registry/index.json
   - name: anthropics
     type: dir
-    url: https://github.com/anthropics/skills/tree/main/skills
-  - name: scientific
-    type: dir
-    url: https://github.com/K-Dense-AI/claude-scientific-skills/tree/main/scientific-skills
-  - name: superpowers
-    type: dir
-    url: https://github.com/obra/superpowers/tree/main/skills
+    url: anthropics/skills/skills
   - name: openai
     type: dir
-    url: https://github.com/openai/skills/tree/main/skills
-  - name: matlab
+    url: openai/skills/skills
+  - name: composio
     type: dir
-    url: https://github.com/matlab/skills/tree/main/skills
+    url: ComposioHQ/awesome-claude-skills
+  - name: vercel
+    type: dir
+    url: vercel-labs/agent-skills
+  - name: openclaw
+    type: dir
+    url: openclaw/openclaw/skills
 ```
 
-### 可添加的来源（待验证）
+### 可选来源
 
-| 来源 | URL | 说明 |
-|------|-----|------|
-| OpenAI Skills | `openai/skills/skills` | OpenAI Codex 官方技能 |
-| GitHub Copilot | `github/awesome-copilot/skills` | GitHub Copilot 技能 |
+```yaml
+repos:
+  - name: community
+    type: topic
+    url: "agent-skill OR topic:agent-skills"
+```
 
 ---
 

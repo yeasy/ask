@@ -438,6 +438,6 @@ repos:
 ---
 
 更多详细信息，请参阅：
-- [配置指南](configuration.md)
-- [SKILL.md 格式规范](skill-format.md)
+- [配置指南](configuration_zh.md)
+- [SKILL.md 格式规范](skill-format_zh.md)
 - [开发指南](../CONTRIBUTING.md)

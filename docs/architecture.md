@@ -353,10 +353,13 @@ graph TB
     C --> D[Parallel Search]
     D --> E1[Search Topic Repos]
     D --> E2[Search Dir Repos]
+    D --> E3[Search Registry Repos]
     E1 --> F[GitHub API: Topics]
     E2 --> G[GitHub API: Contents]
+    E3 --> G2[Registry: JSON Index]
     F --> H[Combine Results]
     G --> H
+    G2 --> H
     H --> I[Filter by Keyword]
     I --> J[Mark Installed]
     J --> K[Display Table]
@@ -369,18 +372,18 @@ graph TB
 ```mermaid
 graph TB
     Sources[Skill Sources]
-    Sources --> Topic[Topic-based]
+    Sources --> Registry[Registry-based]
     Sources --> Dir[Directory-based]
     
-    Topic --> T1[community:<br/>agent-skill topic]
+    Registry --> R1[featured:<br/>awesome-agent-skills/registry]
     
     Dir --> D1[anthropics:<br/>skills/]
-    Dir --> D2[scientific:<br/>claude-scientific-skills]
-    Dir --> D3[superpowers:<br/>superpowers/skills]
-    Dir --> D4[openai:<br/>skills/]
-    Dir --> D5[matlab:<br/>skills/]
+    Dir --> D2[openai:<br/>skills/]
+    Dir --> D3[composio:<br/>awesome-claude-skills]
+    Dir --> D4[vercel:<br/>agent-skills]
+    Dir --> D5[openclaw:<br/>openclaw/skills]
     
-    style Topic fill:#ffd93d
+    style Registry fill:#ffd93d
     style Dir fill:#90ee90
 ```
 
@@ -394,6 +397,11 @@ https://api.github.com/search/repositories?q=topic:agent-skill+<keyword>
 **Directory-based** (GitHub Contents API):
 ```
 https://api.github.com/repos/<owner>/<repo>/contents/<path>
+```
+
+**Registry-based** (JSON Index via GitHub Raw):
+```
+https://raw.githubusercontent.com/<owner>/<repo>/main/<path>
 ```
 
 ## File Structure

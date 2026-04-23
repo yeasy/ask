@@ -208,7 +208,7 @@ func runInstall(cmd *cobra.Command, args []string) {
 
 		if len(repos) == 0 {
 			fmt.Printf("No skills found in repo '%s'\n", repoName)
-			os.Exit(0)
+			return
 		}
 
 		// Filter skills if args provided

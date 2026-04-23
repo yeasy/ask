@@ -122,11 +122,11 @@ func runSearch(cmd *cobra.Command, args []string) {
 				if err == nil {
 					// Run sync synchronously for the first time
 					syncCtx, syncCancel := context.WithTimeout(context.Background(), 5*time.Minute)
+					defer syncCancel()
 					cmd := exec.CommandContext(syncCtx, exe, "repo", "sync")
 					cmd.Stdout = os.Stdout
 					cmd.Stderr = os.Stderr
 					syncErr := cmd.Run()
-					syncCancel()
 					if syncErr != nil {
 						ui.Warn(fmt.Sprintf("Initial sync failed: %v", syncErr))
 					} else {

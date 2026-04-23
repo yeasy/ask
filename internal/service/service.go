@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/yeasy/ask/internal/filesystem"
 )
 
 const (
@@ -39,7 +41,7 @@ func (m *Manager) GetLogFilePath() string {
 // WritePID writes the current process ID to the PID file
 func (m *Manager) WritePID(pid int) error {
 	pidFile := m.GetPIDFilePath()
-	return os.WriteFile(pidFile, []byte(strconv.Itoa(pid)), 0600)
+	return filesystem.AtomicWriteFile(pidFile, []byte(strconv.Itoa(pid)), 0600)
 }
 
 // ReadPID reads the PID from the PID file

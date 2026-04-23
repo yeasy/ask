@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -145,7 +146,7 @@ func runBatchScore(cmd *cobra.Command, args []string) {
 	skillDirs := discoverSkillDirs(baseDir)
 	if len(skillDirs) == 0 {
 		fmt.Printf("No skills found in %s\n", target)
-		os.Exit(0)
+		return
 	}
 
 	fmt.Printf("Found %d skills. Scoring...\n\n", len(skillDirs))
@@ -223,7 +224,9 @@ func printBatchResult(batch *BatchScoreResult) {
 	_, _ = bold.Printf("  %-30s  %6s  %5s  %s\n", "SKILL", "SCORE", "GRADE", "ISSUES")
 	fmt.Printf("  %s\n", strings.Repeat("─", 70))
 
-	// Sort by score (worst first for visibility)
+	sort.Slice(batch.Scores, func(i, j int) bool {
+		return batch.Scores[i].TotalScore < batch.Scores[j].TotalScore
+	})
 	for _, r := range batch.Scores {
 		grade := string(r.Grade)
 		var gradeStr string

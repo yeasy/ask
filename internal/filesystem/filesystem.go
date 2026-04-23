@@ -119,6 +119,10 @@ func CopyFile(src, dst string) (retErr error) {
 		return fmt.Errorf("file size changed during copy: expected %d, wrote %d", expectedSize, written)
 	}
 
+	if err := destFile.Sync(); err != nil {
+		return err
+	}
+
 	// Preserve permissions but strip setuid, setgid, sticky bits and
 	// group/other write bits for security.
 	// Execute bits are preserved so shell scripts remain runnable.

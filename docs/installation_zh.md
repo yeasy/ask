@@ -142,7 +142,7 @@ make build-desktop
 - 您可能需要安装 GTK3 和 WebKit2GTK 开发头文件：
   ```bash
   # Debian/Ubuntu
-  sudo apt install libgtk-3-dev libwebkit2gtk-4.0-dev
+  sudo apt install libgtk-3-dev libwebkit2gtk-4.1-dev
   
   # Fedora
   sudo dnf install gtk3-devel webkit2gtk3-devel

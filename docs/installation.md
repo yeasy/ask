@@ -142,7 +142,7 @@ This will generate the application in the `build/bin/` directory.
 - You may need to install GTK3 and WebKit2GTK development headers:
   ```bash
   # Debian/Ubuntu
-  sudo apt install libgtk-3-dev libwebkit2gtk-4.0-dev
+  sudo apt install libgtk-3-dev libwebkit2gtk-4.1-dev
   
   # Fedora
   sudo dnf install gtk3-devel webkit2gtk3-devel

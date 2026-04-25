@@ -126,10 +126,10 @@ func OpenBrowser(rawURL string) error {
 	// Reject URLs with characters that could be interpreted as shell metacharacters
 	// on Windows (cmd.exe). url.Parse is lenient and allows characters like |, >, <
 	// which cmd.exe would interpret as command operators. Also reject () to prevent
-	// command grouping, ^ (cmd.exe escape char), and ! (delayed expansion).
-	// Note: % is allowed since it is used for URL percent-encoding.
+	// command grouping, ^ (cmd.exe escape char), ! (delayed expansion), and %
+	// (environment variable expansion).
 	safeURL := u.String()
-	if strings.ContainsAny(safeURL, "|><\"'`()^!") {
+	if strings.ContainsAny(safeURL, "|><\"'`()^!%") {
 		return fmt.Errorf("URL contains unsafe characters")
 	}
 
@@ -213,9 +213,11 @@ func sanitizeAndRestrictPath(rawPath string) (string, error) {
 func securityHeadersMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("X-Frame-Options", "DENY")
-		w.Header().Set("Content-Security-Policy", "frame-ancestors 'none'")
+		w.Header().Set("Content-Security-Policy", "frame-ancestors 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'")
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("Cache-Control", "no-store")
+		w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
+		w.Header().Set("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
 		next.ServeHTTP(w, r)
 	})
 }

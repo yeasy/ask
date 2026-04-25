@@ -857,7 +857,7 @@ function displayRecentSkills(container, skills) {
         card.className = 'recent-skill-card';
         card.onclick = () => { navigate('skills'); };
         card.innerHTML = `
-            <img src="${iconUrl}" class="recent-skill-icon" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>'">
+            <img src="${escapeHtml(iconUrl)}" class="recent-skill-icon" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>'">
             <div>
                 <div class="recent-skill-name">${escapeHtml(skill.name)}</div>
                 <div class="recent-skill-agents">${escapeHtml(agentText)}</div>
@@ -924,7 +924,7 @@ function renderSkillsList(skills) {
         card.innerHTML = `
       <div class="skill-header">
         <div class="skill-title-group">
-            <img src="${iconUrl}" class="skill-icon" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>'">
+            <img src="${escapeHtml(iconUrl)}" class="skill-icon" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>'">
             <div>
                 <div class="skill-name">${safeName}</div>
                 <div class="skill-meta" style="flex-wrap:wrap; gap:0.3rem;">
@@ -977,7 +977,7 @@ function renderSearchResults(results) {
         card.innerHTML = `
       <div class="skill-header">
         <div class="skill-title-group">
-            <img src="${iconUrl}" class="skill-icon" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>'">
+            <img src="${escapeHtml(iconUrl)}" class="skill-icon" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>'">
             <div>
                 <div class="skill-name">${safeName}</div>
                 <div class="skill-meta">
@@ -1028,7 +1028,7 @@ function renderReposList() {
         tr.innerHTML = `
       <td>
         <div style="display:flex; align-items:center; gap:0.75rem;">
-            <img src="${iconUrl}" class="repo-icon" 
+            <img src="${escapeHtml(iconUrl)}" class="repo-icon"
                  style="width:24px; height:24px; border-radius:4px;"
                  onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>'">
             <strong>${escapeHtml(repo.name)}</strong>
@@ -1161,16 +1161,17 @@ function getIcon(item) {
     if (item.icon_url && (item.icon_url.startsWith('https://') || item.icon_url.startsWith('data:'))) return item.icon_url;
 
     // Metric 3: Repo Owner Avatar (highest quality for GitHub repos)
+    const validOwner = /^[a-zA-Z0-9_-]+$/;
     // Check item.repo (e.g. "owner/repo")
     if (item.repo && item.repo.includes('/')) {
         const [owner] = item.repo.split('/');
-        return `https://github.com/${owner}.png?size=64`;
+        if (validOwner.test(owner)) return `https://github.com/${owner}.png?size=64`;
     }
 
     // Check item.full_name (from GitHub search results)
     if (item.full_name && item.full_name.includes('/')) {
         const [owner] = item.full_name.split('/');
-        return `https://github.com/${owner}.png?size=64`;
+        if (validOwner.test(owner)) return `https://github.com/${owner}.png?size=64`;
     }
 
     // Check URL if it's a GitHub URL
@@ -1179,7 +1180,7 @@ function getIcon(item) {
         if (parts.length > 1) {
             const path = parts[1];
             const [owner] = path.split('/');
-            if (owner) return `https://github.com/${owner}.png?size=64`;
+            if (owner && validOwner.test(owner)) return `https://github.com/${owner}.png?size=64`;
         }
     }
 

@@ -112,6 +112,10 @@ func (s *Server) handleRepoAdd(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate URL format: must be HTTPS URL or owner/repo shorthand
+	if strings.HasPrefix(req.URL, "http://") {
+		jsonError(w, "Repository URL must use HTTPS, not HTTP", http.StatusBadRequest)
+		return
+	}
 	if !strings.HasPrefix(req.URL, "https://") {
 		// Allow owner/repo shorthand (e.g., "yeasy/awesome-agent-skills")
 		parts := strings.SplitN(req.URL, "/", 3)

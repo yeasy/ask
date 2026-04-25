@@ -599,6 +599,11 @@ func TestHandleRepoAddValidation(t *testing.T) {
 			body:       "not json",
 			wantStatus: http.StatusBadRequest,
 		},
+		{
+			name:       "http url rejected",
+			body:       `{"url":"http://example.com/repo"}`,
+			wantStatus: http.StatusBadRequest,
+		},
 	}
 
 	for _, tt := range tests {

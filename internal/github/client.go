@@ -118,15 +118,16 @@ type Repository struct {
 	} `json:"owner"`
 }
 
-// getAuthToken returns the GitHub token from environment variables
+// getAuthToken returns the GitHub token from environment variables.
+// Priority: ASK_GITHUB_TOKEN → GITHUB_TOKEN → GH_TOKEN.
 func getAuthToken() string {
+	if token := os.Getenv("ASK_GITHUB_TOKEN"); token != "" {
+		return token
+	}
 	if token := os.Getenv("GITHUB_TOKEN"); token != "" {
 		return token
 	}
-	if token := os.Getenv("GH_TOKEN"); token != "" {
-		return token
-	}
-	return os.Getenv("ASK_GITHUB_TOKEN")
+	return os.Getenv("GH_TOKEN")
 }
 
 // GetTokenForRepo returns the best available token for a given repo config.

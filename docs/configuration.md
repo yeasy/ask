@@ -104,6 +104,7 @@ skills:
 | Variable | Description |
 |----------|-------------|
 | `GITHUB_TOKEN` / `GH_TOKEN` | GitHub API token for higher rate limits |
+| `ASK_GITHUB_TOKEN` | ASK-specific GitHub token (takes priority over `GITHUB_TOKEN`) |
 
 ### Example
 

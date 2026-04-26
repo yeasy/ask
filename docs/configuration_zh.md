@@ -104,6 +104,7 @@ skills:
 | 变量 | 描述 |
 |----------|-------------|
 | `GITHUB_TOKEN` / `GH_TOKEN` | 用于提高速率限制的 GitHub API 令牌 |
+| `ASK_GITHUB_TOKEN` | ASK 专用 GitHub 令牌（优先级高于 `GITHUB_TOKEN`） |
 
 ### 示例
 

@@ -175,6 +175,7 @@ Skills are automatically installed to detected agent directories:
 
 ## Environment Variables
 
+- `ASK_GITHUB_TOKEN=xxx` - ASK-specific GitHub token (highest priority)
 - `GITHUB_TOKEN=xxx` or `GH_TOKEN=xxx` - Increase GitHub API rate limits
 
 ## Error Handling

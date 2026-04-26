@@ -28,11 +28,26 @@ ASK 是一个用于管理 AI Agent 技能的命令行工具，类似于 Homebrew
 | `ask skill update [skill]` | 更新技能到最新版本 | ✅ |
 | `ask skill outdated` | 检查可更新的技能 | ✅ |
 | `ask skill create <name>` | 创建技能模板 | ✅ |
+| `ask skill check [skill-path]` | 检查技能安全问题 | ✅ |
+| `ask skill score <path-or-url>` | 计算技能信任评分 | ✅ |
+| `ask skill test [skill-path]` | 运行技能验证检查 | ✅ |
+| `ask skill prompt [paths...]` | 生成 XML 技能列表供 Agent 使用 | ✅ |
+| `ask skill publish [skill-path]` | 验证并准备技能发布 | ✅ |
 | **仓库管理 (ask repo)** | | |
 | `ask repo add <NAME\|URL>` | 添加技能仓库来源 | ✅ |
 | `ask repo list` | 列出所有来源 | ✅ |
 | `ask repo remove <name>` | 移除来源 | ✅ |
-| `ask completion <shell>` | 生成shell补全脚本 | ✅ |
+| `ask repo sync [repo-name]` | 同步仓库到本地缓存 | ✅ |
+| **系统命令** | | |
+| `ask doctor` | 诊断并报告 ASK 健康状态 | ✅ |
+| `ask serve [path]` | 启动 Web UI 服务器 | ✅ |
+| `ask service {start\|stop\|status}` | 管理后台服务 | ✅ |
+| `ask audit` | 生成已安装技能的安全审计报告 | ✅ |
+| `ask benchmark` | 运行性能基准测试 | ✅ |
+| `ask lock-install` | 从 ask.lock 安装精确版本 | ✅ |
+| `ask quickstart [pack-name]` | 安装推荐技能包 | ✅ |
+| `ask version` | 显示版本号 | ✅ |
+| `ask completion <shell>` | 生成 shell 补全脚本 | ✅ |
 
 ### 待实现功能 ⏳
 

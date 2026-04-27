@@ -24,14 +24,6 @@ var benchmarkCmd = &cobra.Command{
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 		_, _ = fmt.Fprintln(w, "OPERATION\tTIME\tNOTES")
 
-		// 1. Search (Cold) - Use a temporary cache directory for benchmarking
-		tmpCacheDir, err := os.MkdirTemp("", "ask-bench-cache-*")
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error creating temp cache: %v\n", err)
-			return
-		}
-		defer func() { _ = os.RemoveAll(tmpCacheDir) }()
-
 		start := time.Now()
 		// We simulate search by calling the internal function directly to avoid printing to stdout
 		// But since searchCmd prints to stdout, we might just want to measure the internal call

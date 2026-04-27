@@ -44,6 +44,11 @@ func runSearch(cmd *cobra.Command, args []string) {
 		keyword = strings.Join(args, " ")
 	}
 
+	if len(keyword) > maxInputLength {
+		fmt.Fprintf(os.Stderr, "Error: Search keyword is too long (max %d chars)\n", maxInputLength)
+		os.Exit(1)
+	}
+
 	forceLocal, _ := cmd.Flags().GetBool("local")
 	forceRemote, _ := cmd.Flags().GetBool("remote")
 	minStars, _ := cmd.Flags().GetInt("min-stars")

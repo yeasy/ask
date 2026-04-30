@@ -515,6 +515,7 @@ func runWatchMode(targetPath, severityFilter string) {
 
 	if err != nil && !errors.Is(err, context.Canceled) {
 		fmt.Fprintf(os.Stderr, "Watch error: %v\n", err)
+		stop()
 		os.Exit(1)
 	}
 }

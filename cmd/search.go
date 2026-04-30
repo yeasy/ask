@@ -23,6 +23,7 @@ const (
 	cacheStalenessThreshold = 72 * time.Hour
 	maxConcurrentSearches   = 5
 	searchTimeout           = 60 * time.Second
+	backgroundSyncTimeout   = 5 * time.Minute
 )
 
 // searchCmd represents the search command
@@ -133,7 +134,7 @@ func runSearch(cmd *cobra.Command, args []string) {
 				exe, err := os.Executable()
 				if err == nil {
 					// Run sync synchronously for the first time
-					syncCtx, syncCancel := context.WithTimeout(context.Background(), 5*time.Minute)
+					syncCtx, syncCancel := context.WithTimeout(context.Background(), backgroundSyncTimeout)
 					defer syncCancel()
 					cmd := exec.CommandContext(syncCtx, exe, "repo", "sync")
 					cmd.Stdout = os.Stdout
@@ -168,7 +169,7 @@ func runSearch(cmd *cobra.Command, args []string) {
 					exe, err := os.Executable()
 					if err == nil {
 						// Background sync: start child process and wait to prevent zombie
-						bgSyncCtx, bgSyncCancel := context.WithTimeout(context.Background(), 5*time.Minute)
+						bgSyncCtx, bgSyncCancel := context.WithTimeout(context.Background(), backgroundSyncTimeout)
 						cmd := exec.CommandContext(bgSyncCtx, exe, "repo", "sync")
 						if err := cmd.Start(); err == nil {
 							go func() {

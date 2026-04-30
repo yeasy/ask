@@ -21,11 +21,14 @@ import (
 	"github.com/yeasy/ask/internal/ui"
 )
 
-const maxResponseBodySize = 5 * 1024 * 1024 // 5MB
+const (
+	maxResponseBodySize = 5 * 1024 * 1024 // 5MB
+	repoHTTPTimeout     = 10 * time.Second
+)
 
 var (
 	githubAPIBaseURL = "https://api.github.com"
-	githubHTTPClient = &http.Client{Timeout: 10 * time.Second}
+	githubHTTPClient = &http.Client{Timeout: repoHTTPTimeout}
 )
 
 type githubRepoContent struct {
@@ -527,7 +530,7 @@ func init() {
 
 // detectGHToken attempts to get a GitHub token from the gh CLI
 func detectGHToken() string {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), repoHTTPTimeout)
 	defer cancel()
 	out, err := exec.CommandContext(ctx, "gh", "auth", "token").Output()
 	if err != nil {

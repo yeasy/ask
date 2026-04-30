@@ -16,6 +16,10 @@ import (
 	"github.com/yeasy/ask/internal/skill"
 )
 
+const (
+	publishGitTimeout = 10 * time.Second
+)
+
 var publishCmd = &cobra.Command{
 	Use:   "publish [skill-path]",
 	Short: "Validate and prepare a skill for publishing",
@@ -156,7 +160,7 @@ func runPublish(cmd *cobra.Command, args []string) {
 	// Step 7: Check git status
 	fmt.Print("  Checking git status... ")
 	gitRemote := getGitRemote(targetPath)
-	gitCtx, gitCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	gitCtx, gitCancel := context.WithTimeout(context.Background(), publishGitTimeout)
 	defer gitCancel()
 	gitCmd := exec.CommandContext(gitCtx, "git", "-C", targetPath, "status", "--porcelain")
 	gitOutput, err := gitCmd.Output()
@@ -171,7 +175,7 @@ func runPublish(cmd *cobra.Command, args []string) {
 	// Step 8: Check git tag
 	fmt.Print("  Checking git tag... ")
 	if meta.Version != "" {
-		tagCtx, tagCancel := context.WithTimeout(context.Background(), 10*time.Second)
+		tagCtx, tagCancel := context.WithTimeout(context.Background(), publishGitTimeout)
 		defer tagCancel()
 		tagCmd := exec.CommandContext(tagCtx, "git", "-C", targetPath, "tag", "-l", "v"+meta.Version)
 		tagOutput, tagErr := tagCmd.Output()
@@ -290,7 +294,7 @@ func generateRegistryEntry(meta *skill.Meta, skillPath, gitRemote string) regist
 }
 
 func getGitRemote(path string) string {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), publishGitTimeout)
 	defer cancel()
 	cmd := exec.CommandContext(ctx, "git", "-C", path, "remote", "get-url", "origin")
 	out, err := cmd.Output()

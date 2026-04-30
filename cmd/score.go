@@ -17,6 +17,10 @@ import (
 	"github.com/yeasy/ask/internal/skill"
 )
 
+const (
+	scoreContextTimeout = 5 * time.Minute
+)
+
 var scoreCmd = &cobra.Command{
 	Use:   "score <path-or-url>",
 	Short: "Compute a trust score for a skill",
@@ -351,7 +355,7 @@ func cloneForScore(target string) (cloneRoot, scorePath string, err error) {
 		}
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), scoreContextTimeout)
 	defer cancel()
 
 	cloneErr := git.Clone(ctx, url, tmpDir)

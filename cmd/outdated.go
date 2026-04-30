@@ -90,7 +90,7 @@ Use --global to check global skills.`,
 
 			isOffline := config.IsOffline()
 			if !isOffline {
-				fetchCtx, fetchCancel := context.WithTimeout(context.Background(), 30*time.Second)
+				fetchCtx, fetchCancel := context.WithTimeout(context.Background(), gitFetchTimeout)
 				fetchCmd := exec.CommandContext(fetchCtx, "git", "fetch", "--quiet")
 				fetchCmd.Dir = skillPath
 				if err := fetchCmd.Run(); err != nil {
@@ -145,6 +145,7 @@ Use --global to check global skills.`,
 }
 
 const (
+	gitFetchTimeout    = 30 * time.Second
 	gitRevParseTimeout = 10 * time.Second
 	unknownCommit      = "-"
 )

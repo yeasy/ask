@@ -15,6 +15,8 @@ import (
 	"github.com/yeasy/ask/internal/ui"
 )
 
+const browserOpenDelay = 500 * time.Millisecond
+
 var (
 	servePort int
 	noOpen    bool
@@ -88,7 +90,7 @@ func runServe(_ *cobra.Command, args []string) {
 	if !noOpen {
 		go func() {
 			// Wait a bit for server to start
-			time.Sleep(500 * time.Millisecond)
+			time.Sleep(browserOpenDelay)
 			url := fmt.Sprintf("http://127.0.0.1:%d", servePort)
 			if err := server.OpenBrowser(url); err != nil {
 				ui.Debug("Failed to open browser", "error", err)

@@ -8,6 +8,8 @@ import (
 	"github.com/schollz/progressbar/v3"
 )
 
+const progressThrottle = 65 * time.Millisecond
+
 // NewSpinner creates a spinner for operations without known size
 func NewSpinner(description string) *progressbar.ProgressBar {
 	return progressbar.NewOptions(-1,
@@ -15,7 +17,7 @@ func NewSpinner(description string) *progressbar.ProgressBar {
 		progressbar.OptionSetWriter(os.Stderr),
 		progressbar.OptionShowBytes(false),
 		progressbar.OptionSetWidth(15),
-		progressbar.OptionThrottle(65*time.Millisecond),
+		progressbar.OptionThrottle(progressThrottle),
 		progressbar.OptionShowCount(),
 		progressbar.OptionSpinnerType(14),
 		progressbar.OptionOnCompletion(func() {
@@ -31,7 +33,7 @@ func NewProgressBar(total int, description string) *progressbar.ProgressBar {
 		progressbar.OptionSetWriter(os.Stderr),
 		progressbar.OptionShowBytes(false),
 		progressbar.OptionSetWidth(40),
-		progressbar.OptionThrottle(65*time.Millisecond),
+		progressbar.OptionThrottle(progressThrottle),
 		progressbar.OptionShowCount(),
 		progressbar.OptionSetPredictTime(true),
 		progressbar.OptionFullWidth(),

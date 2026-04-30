@@ -11,6 +11,11 @@ import (
 	"time"
 )
 
+const (
+	// templateRenderTimeout is the timeout for template render context operations.
+	templateRenderTimeout = 10 * time.Second
+)
+
 // TemplateData holds data for the skill template
 type TemplateData struct {
 	Name        string
@@ -48,7 +53,7 @@ Explain how to use this skill here.
 // GetGitAuthor returns the git author name from git config.
 // Falls back to "User" if git config is unavailable.
 func GetGitAuthor() string {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), templateRenderTimeout)
 	defer cancel()
 	cmd := exec.CommandContext(ctx, "git", "config", "user.name")
 	output, err := cmd.Output()

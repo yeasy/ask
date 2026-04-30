@@ -13,6 +13,8 @@ import (
 	"github.com/yeasy/ask/internal/ui"
 )
 
+const gitPullTimeout = 60 * time.Second
+
 // updateCmd represents the update command
 var updateCmd = &cobra.Command{
 	Use:   "update [skill-name]",
@@ -104,7 +106,7 @@ Use --global to update global skills.`,
 			ui.Debug(fmt.Sprintf("Updating %s...", skillName))
 
 			// Run git pull (use --ff-only to avoid leaving broken rebase state)
-			pullCtx, pullCancel := context.WithTimeout(context.Background(), 60*time.Second)
+			pullCtx, pullCancel := context.WithTimeout(context.Background(), gitPullTimeout)
 			gitCmd := exec.CommandContext(pullCtx, "git", "pull", "--ff-only")
 			gitCmd.Dir = skillPath
 			gitCmd.Stdout = os.Stdout

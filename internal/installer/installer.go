@@ -26,6 +26,9 @@ const maxInstallDepth = 3
 // gitOpTimeout is the maximum time allowed for lightweight git operations (checkout, rev-parse).
 const gitOpTimeout = 30 * time.Second
 
+// cacheStalenessThreshold is the maximum age before a repo cache is considered stale.
+const cacheStalenessThreshold = 24 * time.Hour
+
 // InstallOptions contains options for installing a skill
 type InstallOptions struct {
 	Global    bool
@@ -93,7 +96,7 @@ func Install(input string, opts InstallOptions) error {
 				if cacheErr == nil && reposCache != nil && reposCache.HasRepo(repoName) {
 					// Check for staleness (24 hours)
 					// Only refresh if NOT in offline mode
-					if !config.IsOffline() && reposCache.IsStale(repoName, 24*time.Hour) {
+					if !config.IsOffline() && reposCache.IsStale(repoName, cacheStalenessThreshold) {
 						ui.Debug(fmt.Sprintf("Repo '%s' is stale, refreshing...", repoName))
 						// We need to fetch the repo URL from config to refresh
 						var refreshURL string

@@ -22,6 +22,8 @@ const (
 	maxResponseBodySize = 2 * 1024 * 1024
 	// defaultSearchLimit is the maximum number of results for quick search.
 	defaultSearchLimit = "50"
+	// httpClientTimeout is the timeout for HTTP client requests.
+	httpClientTimeout = 30 * time.Second
 )
 
 // Pre-compiled regexes for Resolve()
@@ -57,7 +59,7 @@ type Client struct {
 func NewClient() *Client {
 	return &Client{
 		HTTPClient: &http.Client{
-			Timeout: 30 * time.Second,
+			Timeout: httpClientTimeout,
 		},
 	}
 }

@@ -12,6 +12,17 @@ import (
 	"github.com/yeasy/ask/internal/ui"
 )
 
+const (
+	// serviceShutdownTimeout is the maximum time to wait for the service to
+	// exit gracefully after sending SIGTERM (the server's internal shutdown
+	// deadline is 5 s, so 6 s gives it a comfortable margin).
+	serviceShutdownTimeout = 6 * time.Second
+
+	// portReleaseDelay is the short pause between stop and start during a
+	// restart to allow the OS to release the listening port.
+	portReleaseDelay = 1 * time.Second
+)
+
 var serviceCmd = &cobra.Command{
 	Use:   "service",
 	Short: "Manage the ASK background service (start, stop, status)",
@@ -158,7 +169,7 @@ func runServiceStop(_ *cobra.Command, _ []string) {
 		_ = signalTerm(pid)
 
 		// Poll until process exits or timeout (server uses a 5s shutdown internally)
-		deadline := time.Now().Add(6 * time.Second)
+		deadline := time.Now().Add(serviceShutdownTimeout)
 		for time.Now().Before(deadline) && mgr.IsRunning(pid) {
 			time.Sleep(200 * time.Millisecond)
 		}
@@ -190,6 +201,6 @@ func runServiceStatus(_ *cobra.Command, _ []string) {
 
 func runServiceRestart(cmd *cobra.Command, args []string) {
 	runServiceStop(cmd, args)
-	time.Sleep(1 * time.Second) // Give it a moment to release ports
+	time.Sleep(portReleaseDelay) // Give it a moment to release ports
 	runServiceStart(cmd, args)
 }

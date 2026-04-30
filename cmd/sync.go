@@ -17,6 +17,9 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+// repoSyncTimeout is the per-repo timeout for a git clone or pull operation.
+const repoSyncTimeout = 2 * time.Minute
+
 // syncCmd represents the sync command
 var syncCmd = &cobra.Command{
 	Use:   "sync [repo-name]",
@@ -112,7 +115,7 @@ If no repo name is specified, syncs all configured repositories.`,
 
 				// Create context with timeout for each repo sync
 				// Note: using errgroup context as parent to support cancellation if needed
-				repoCtx, cancel := context.WithTimeout(ctx, 2*time.Minute)
+				repoCtx, cancel := context.WithTimeout(ctx, repoSyncTimeout)
 				defer cancel()
 
 				err := reposCache.CloneOrPull(repoCtx, repoURL, repoName)

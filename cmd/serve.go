@@ -15,7 +15,10 @@ import (
 	"github.com/yeasy/ask/internal/ui"
 )
 
-const browserOpenDelay = 500 * time.Millisecond
+const (
+	browserOpenDelay      = 500 * time.Millisecond
+	serverShutdownTimeout = 5 * time.Second
+)
 
 var (
 	servePort int
@@ -77,7 +80,7 @@ func runServe(_ *cobra.Command, args []string) {
 		<-quit
 		ui.Info("Shutting down server...")
 
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), serverShutdownTimeout)
 		defer cancel()
 
 		if err := srv.Stop(ctx); err != nil {

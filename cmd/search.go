@@ -18,6 +18,13 @@ import (
 	"github.com/yeasy/ask/internal/ui"
 )
 
+const (
+	popularSkillsLimit      = 20
+	cacheStalenessThreshold = 72 * time.Hour
+	maxConcurrentSearches   = 5
+	searchTimeout           = 60 * time.Second
+)
+
 // searchCmd represents the search command
 var searchCmd = &cobra.Command{
 	Use:   "search [keyword]",
@@ -87,7 +94,7 @@ func runSearch(cmd *cobra.Command, args []string) {
 
 				count := 0
 				for _, s := range skills {
-					if count >= 20 {
+					if count >= popularSkillsLimit {
 						break
 					}
 					installed := ""
@@ -156,7 +163,7 @@ func runSearch(cmd *cobra.Command, args []string) {
 					}
 				}
 
-				if time.Since(oldestSync) > 72*time.Hour {
+				if time.Since(oldestSync) > cacheStalenessThreshold {
 					ui.Debug("Cache is stale, updating in background...")
 					exe, err := os.Executable()
 					if err == nil {
@@ -223,11 +230,11 @@ func runSearch(cmd *cobra.Command, args []string) {
 	results := make(chan searchResult, len(cfg.Repos))
 
 	// Overall timeout for all remote search goroutines
-	searchCtx, searchCancel := context.WithTimeout(context.Background(), 60*time.Second)
+	searchCtx, searchCancel := context.WithTimeout(context.Background(), searchTimeout)
 	defer searchCancel()
 
 	// Limit concurrent goroutines to avoid excessive parallel requests
-	sem := make(chan struct{}, 5)
+	sem := make(chan struct{}, maxConcurrentSearches)
 	for _, repo := range cfg.Repos {
 		go func(r config.Repo) {
 			select {

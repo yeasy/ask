@@ -47,6 +47,13 @@ func (m *Manager) WritePID(pid int) error {
 // ReadPID reads the PID from the PID file
 func (m *Manager) ReadPID() (int, error) {
 	pidFile := m.GetPIDFilePath()
+	info, err := os.Lstat(pidFile)
+	if err != nil {
+		return 0, err
+	}
+	if !info.Mode().IsRegular() {
+		return 0, fmt.Errorf("PID file is not a regular file: %s", pidFile)
+	}
 	data, err := os.ReadFile(pidFile)
 	if err != nil {
 		return 0, err

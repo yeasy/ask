@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -221,6 +222,11 @@ func (s *Server) handleConfigUpdate(w http.ResponseWriter, r *http.Request) {
 	if req.Agent != "" {
 		// Normalize agent name
 		req.Agent = strings.ToLower(req.Agent)
+
+		if !config.IsValidAgent(req.Agent) {
+			jsonError(w, fmt.Sprintf("unknown agent: %s", req.Agent), http.StatusBadRequest)
+			return
+		}
 
 		// Update or add tool target
 		found := false

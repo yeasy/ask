@@ -90,7 +90,7 @@ jobs:
           Copy-Item build/bin/ask-desktop.exe release-artifacts/ask-desktop-windows-amd64.exe
 
       - name: Upload Release Assets
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: release-artifacts/*

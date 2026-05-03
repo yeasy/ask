@@ -676,7 +676,8 @@ func generateJSON(result *CheckResult) string {
 
 	jsonData, err := json.MarshalIndent(output, "", "  ")
 	if err != nil {
-		return fmt.Sprintf("{\"error\": \"failed to marshal json: %v\"}", err)
+		errMsg, _ := json.Marshal(fmt.Sprintf("failed to marshal json: %v", err))
+		return fmt.Sprintf("{\"error\": %s}", string(errMsg))
 	}
 	return string(jsonData)
 }

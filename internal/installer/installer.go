@@ -380,12 +380,12 @@ func Install(input string, opts InstallOptions) error {
 		return fmt.Errorf("could not resolve repository URL for %q", originalInput)
 	} else {
 		cloneCtx, cloneCancel := context.WithTimeout(context.Background(), git.CloneTimeout)
-		defer cloneCancel()
 		if subDir != "" {
 			err = git.InstallSubdir(cloneCtx, repoURL, branch, subDir, tempSkillPath)
 		} else {
 			err = git.Clone(cloneCtx, repoURL, tempSkillPath)
 		}
+		cloneCancel()
 
 		if err != nil {
 			return fmt.Errorf("git operation failed: %w", err)
@@ -427,9 +427,10 @@ func Install(input string, opts InstallOptions) error {
 	if version != "" && subDir == "" {
 		fmt.Printf("Checking out version %s...\n", version)
 		checkoutCtx, checkoutCancel := context.WithTimeout(context.Background(), gitOpTimeout)
-		defer checkoutCancel()
-		if err := git.Checkout(checkoutCtx, tempSkillPath, version); err != nil {
-			fmt.Fprintf(os.Stderr, "Warning: Failed to checkout version %s: %v\n", version, err)
+		checkoutErr := git.Checkout(checkoutCtx, tempSkillPath, version)
+		checkoutCancel()
+		if checkoutErr != nil {
+			fmt.Fprintf(os.Stderr, "Warning: Failed to checkout version %s: %v\n", version, checkoutErr)
 		}
 	}
 
@@ -437,9 +438,9 @@ func Install(input string, opts InstallOptions) error {
 	var commitHash string
 	if subDir == "" {
 		commitCtx, commitCancel := context.WithTimeout(context.Background(), gitOpTimeout)
-		defer commitCancel()
 		var commitErr error
 		commitHash, commitErr = git.GetCurrentCommit(commitCtx, tempSkillPath)
+		commitCancel()
 		if commitErr != nil {
 			ui.Debug(fmt.Sprintf("Warning: could not get commit hash for %s: %v", skillName, commitErr))
 		}

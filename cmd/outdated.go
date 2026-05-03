@@ -93,10 +93,11 @@ Use --global to check global skills.`,
 				fetchCtx, fetchCancel := context.WithTimeout(context.Background(), gitFetchTimeout)
 				fetchCmd := exec.CommandContext(fetchCtx, "git", "fetch", "--quiet")
 				fetchCmd.Dir = skillPath
-				if err := fetchCmd.Run(); err != nil {
-					ui.Debug(fmt.Sprintf("Failed to fetch %s: %v", skillName, err))
-				}
+				fetchErr := fetchCmd.Run()
 				fetchCancel()
+				if fetchErr != nil {
+					ui.Debug(fmt.Sprintf("Failed to fetch %s: %v", skillName, fetchErr))
+				}
 
 				// Get remote HEAD commit
 				remoteCommit = getRemoteHeadCommit(skillPath)

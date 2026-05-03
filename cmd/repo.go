@@ -162,10 +162,10 @@ Examples:
 			}
 
 			// We can run sync in foreground here since user explicitly asked for it
-			cmd := exec.Command(exe, "repo", "sync", repoName)
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-			if err := cmd.Run(); err != nil {
+			syncCmd := exec.Command(exe, "repo", "sync", repoName)
+			syncCmd.Stdout = os.Stdout
+			syncCmd.Stderr = os.Stderr
+			if err := syncCmd.Run(); err != nil {
 				fmt.Fprintf(os.Stderr, "Error syncing repo: %v\n", err)
 				// Don't exit 1, as add was successful
 			}

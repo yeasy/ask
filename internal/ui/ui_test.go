@@ -35,7 +35,7 @@ func TestNewProgressBar(t *testing.T) {
 	_ = bar.Finish()
 }
 
-func TestUpdateDescription(t *testing.T) {
+func TestUpdateDescription(_ *testing.T) {
 	bar := NewProgressBar(10, "Initial description")
 
 	newDescription := "Updated description"
@@ -68,7 +68,7 @@ func TestSpinnerWithEmptyDescription(t *testing.T) {
 	_ = spinner.Finish()
 }
 
-func TestProgressBarSequence(t *testing.T) {
+func TestProgressBarSequence(_ *testing.T) {
 	// Test a realistic progress bar usage sequence
 	total := 5
 	bar := NewProgressBar(total, "Processing items")
@@ -99,7 +99,7 @@ func TestMultipleProgressBars(t *testing.T) {
 	_ = bar2.Finish()
 }
 
-func TestSpinnerAndProgressBar(t *testing.T) {
+func TestSpinnerAndProgressBar(_ *testing.T) {
 	// Test using both spinner and progress bar
 	spinner := NewSpinner("Initializing...")
 	_ = spinner.Add(1)

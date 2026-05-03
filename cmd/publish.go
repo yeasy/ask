@@ -321,7 +321,7 @@ func parseOwnerFromRemote(remote string) string {
 	return ""
 }
 
-var semverRe = regexp.MustCompile(`^\d+\.\d+\.\d+(-[a-zA-Z0-9.]+)?$`)
+var semverRe = regexp.MustCompile(`^v?\d+\.\d+\.\d+(-[a-zA-Z0-9.]+)?$`)
 
 func isValidSemver(v string) bool {
 	return semverRe.MatchString(v)

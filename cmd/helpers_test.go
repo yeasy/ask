@@ -319,7 +319,7 @@ func TestIsValidSemver(t *testing.T) {
 		{name: "pre-release rc.1", version: "2.1.0-rc.1", want: true},
 		{name: "missing patch", version: "1.0", want: false},
 		{name: "missing minor and patch", version: "1", want: false},
-		{name: "v prefix", version: "v1.0.0", want: false},
+		{name: "v prefix", version: "v1.0.0", want: true},
 		{name: "empty string", version: "", want: false},
 		{name: "letters", version: "abc", want: false},
 		{name: "extra dot segment", version: "1.0.0.0", want: false},

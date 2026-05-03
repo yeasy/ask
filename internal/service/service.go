@@ -3,6 +3,7 @@ package service
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -47,14 +48,19 @@ func (m *Manager) WritePID(pid int) error {
 // ReadPID reads the PID from the PID file
 func (m *Manager) ReadPID() (int, error) {
 	pidFile := m.GetPIDFilePath()
-	info, err := os.Lstat(pidFile)
+	f, err := os.Open(pidFile)
+	if err != nil {
+		return 0, err
+	}
+	defer f.Close()
+	info, err := f.Stat()
 	if err != nil {
 		return 0, err
 	}
 	if !info.Mode().IsRegular() {
 		return 0, fmt.Errorf("PID file is not a regular file: %s", pidFile)
 	}
-	data, err := os.ReadFile(pidFile)
+	data, err := io.ReadAll(io.LimitReader(f, 64))
 	if err != nil {
 		return 0, err
 	}

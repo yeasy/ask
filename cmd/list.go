@@ -206,10 +206,7 @@ func showAgentSkills(agentName, dir, scope string, jsonOutput bool) []SkillListI
 				if d == "" {
 					d = "-"
 				}
-				// Truncate description to keep output clean
-				if len(d) > 50 {
-					d = d[:47] + "..."
-				}
+				d = truncateStr(d, 50)
 				fmt.Printf("  %-*s  %-*s  %s\n", nameW, r.name, verW, ver, d)
 			}
 		}

@@ -103,9 +103,7 @@ func runSearch(cmd *cobra.Command, args []string) {
 						installed = "✓"
 					}
 					desc := s.Description
-					if len(desc) > 50 {
-						desc = desc[:47] + "..."
-					}
+					desc = truncateStr(desc, 50)
 					_, _ = fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", s.Name, s.RepoName, installed, desc)
 					count++
 				}
@@ -353,11 +351,7 @@ func displaySearchResults(repos []github.Repository, installedSkills map[string]
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 	_, _ = fmt.Fprintln(w, "NAME\tSOURCE\tINSTALLED\tSTARS\tDESCRIPTION")
 	for _, repo := range displayRepos {
-		// Truncate description if too long
-		desc := repo.Description
-		if len(desc) > 40 {
-			desc = desc[:37] + "..."
-		}
+		desc := truncateStr(repo.Description, 40)
 
 		// Check if installed
 		installed := ""

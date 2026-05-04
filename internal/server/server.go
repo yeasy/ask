@@ -151,10 +151,16 @@ func OpenBrowser(rawURL string) error {
 	return nil
 }
 
+// maxSkillNameLength is the maximum allowed length for a skill name.
+const maxSkillNameLength = 255
+
 // validateSkillName checks if a skill name is safe (alphanumeric, -, _, .)
 func validateSkillName(name string) error {
 	if name == "" {
 		return fmt.Errorf("skill name is required")
+	}
+	if len(name) > maxSkillNameLength {
+		return fmt.Errorf("skill name too long (max %d characters)", maxSkillNameLength)
 	}
 	// Allow alphanumeric, dash, underscore, dot, slash (for repo/path)
 	// But disallow characters that could be used for shell injection like ; & | $ ` > <

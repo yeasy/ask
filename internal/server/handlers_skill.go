@@ -743,6 +743,10 @@ func (s *Server) handleSkillFiles(w http.ResponseWriter, r *http.Request) {
 			jsonError(w, "File path is required", http.StatusBadRequest)
 			return
 		}
+		if len(relPath) > maxSkillNameLength {
+			jsonError(w, "File path too long", http.StatusBadRequest)
+			return
+		}
 
 		// Security check: prevent ../ traversal
 		cleanRel := filepath.Clean(relPath)

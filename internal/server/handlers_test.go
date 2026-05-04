@@ -34,6 +34,8 @@ func TestValidateSkillName(t *testing.T) {
 		{"shell injection less than", "skill < file", true},
 		{"contains space", "my skill", true},
 		{"newline injection", "skill\necho", true},
+		{"exceeds max length", strings.Repeat("a", 256), true},
+		{"at max length", strings.Repeat("a", 255), false},
 	}
 
 	for _, tt := range tests {

@@ -7,6 +7,17 @@ import (
 	"github.com/yeasy/ask/internal/config"
 )
 
+// truncateStr truncates s to maxLen characters, appending "..." if truncated.
+func truncateStr(s string, maxLen int) string {
+	if len(s) <= maxLen {
+		return s
+	}
+	if maxLen < 4 {
+		return s[:maxLen]
+	}
+	return s[:maxLen-3] + "..."
+}
+
 // ensureInitialized checks if ask.yaml exists. If not, auto-initializes.
 // Returns true if initialization succeeded, false otherwise.
 func ensureInitialized() bool {

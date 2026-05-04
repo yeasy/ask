@@ -248,10 +248,7 @@ func printBatchResult(batch *BatchScoreResult) {
 			issues += len(cat.Deducts)
 		}
 
-		name := r.SkillName
-		if len(name) > 30 {
-			name = name[:27] + "..."
-		}
+		name := truncateStr(r.SkillName, 30)
 		fmt.Printf("  %-30s  %5.1f   %s      %d\n", name, r.TotalScore, gradeStr, issues)
 	}
 

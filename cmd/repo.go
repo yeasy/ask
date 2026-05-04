@@ -325,11 +325,7 @@ Examples:
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 		_, _ = fmt.Fprintln(w, "NAME\tSTARS\tDESCRIPTION")
 		for _, repo := range repos {
-			// Truncate description if too long
-			desc := repo.Description
-			if len(desc) > 50 {
-				desc = desc[:47] + "..."
-			}
+			desc := truncateStr(repo.Description, 50)
 
 			// Format stars
 			stars := fmt.Sprintf("%d", repo.StargazersCount)

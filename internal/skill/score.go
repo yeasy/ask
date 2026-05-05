@@ -4,6 +4,7 @@ package skill
 import (
 	"fmt"
 	"io"
+	"log"
 	"math"
 	"os"
 	"path/filepath"
@@ -442,7 +443,11 @@ func scoreTransparencyCategory(skillPath string) ScoreCategory {
 		}
 
 		for _, p := range exfilPatterns {
-			matched, _ := matchPattern(text, p.pattern)
+			matched, matchErr := matchPattern(text, p.pattern)
+			if matchErr != nil {
+				log.Printf("score: pattern %q failed to compile: %v", p.name, matchErr)
+				continue
+			}
 			if matched {
 				cat.Score -= p.deduct
 				cat.Deducts = append(cat.Deducts, Deduction{

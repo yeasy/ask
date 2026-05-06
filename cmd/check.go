@@ -400,11 +400,11 @@ func scanProject(rootDir string, label string) {
 					}
 
 					// Add to aggregated results
-					relSkillPath, _ := filepath.Rel(cwd, path)
-					if relSkillPath == "" || strings.HasPrefix(relSkillPath, "..") {
-						relSkillPath, _ = filepath.Rel(rootDir, path)
+					relSkillPath, relErr := filepath.Rel(cwd, path)
+					if relErr != nil || relSkillPath == "" || strings.HasPrefix(relSkillPath, "..") {
+						relSkillPath, relErr = filepath.Rel(rootDir, path)
 					}
-					if relSkillPath == "" || strings.HasPrefix(relSkillPath, "..") {
+					if relErr != nil || relSkillPath == "" || strings.HasPrefix(relSkillPath, "..") {
 						relSkillPath = filepath.Base(path)
 					}
 

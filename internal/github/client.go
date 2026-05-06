@@ -139,15 +139,6 @@ func GetTokenForRepo(repo config.Repo) string {
 	return getAuthToken()
 }
 
-// GetAPIBaseURL returns the API base URL for a repo.
-// Defaults to "https://api.github.com" if not specified.
-func GetAPIBaseURL(repo config.Repo) string {
-	if repo.BaseURL != "" {
-		return strings.TrimRight(repo.BaseURL, "/")
-	}
-	return "https://api.github.com"
-}
-
 // SearchTopic searches GitHub for repositories with a specific topic and keyword
 func SearchTopic(topic, keyword string) ([]Repository, error) {
 	cacheKey := fmt.Sprintf("topic:%s:%s", topic, keyword)

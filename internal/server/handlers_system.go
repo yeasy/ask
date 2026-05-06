@@ -270,6 +270,7 @@ func (s *Server) handleConfigUpdate(w http.ResponseWriter, r *http.Request) {
 
 	if updated {
 		if err := cfg.Save(); err != nil {
+			log.Printf("Error saving configuration: %v", err)
 			jsonError(w, "failed to save configuration", http.StatusInternalServerError)
 			return
 		}

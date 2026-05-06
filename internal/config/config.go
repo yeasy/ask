@@ -185,8 +185,9 @@ const GlobalConfigFileName = "config.yaml"
 // GlobalSkillsDirName is the name of the global skills directory
 const GlobalSkillsDirName = "skills"
 
-// GlobalLockFileName is the name of the global lock file
-const GlobalLockFileName = "ask.lock"
+// GlobalLockFileName is the name of the global lock file.
+// Same as LockFileName; kept as a separate alias for readability in global-path helpers.
+const GlobalLockFileName = LockFileName
 
 // GetGlobalConfigDir returns the global config directory path (~/.ask).
 // Returns an error if the user's home directory cannot be determined.

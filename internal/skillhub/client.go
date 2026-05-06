@@ -14,8 +14,8 @@ import (
 	"github.com/yeasy/ask/internal/config"
 )
 
-// SearchURL is the endpoint for quick search
-const SearchURL = "https://www.skillhub.club/api/search/quick"
+// searchURL is the endpoint for quick search
+const searchURL = "https://www.skillhub.club/api/search/quick"
 
 const (
 	// maxResponseBodySize is the maximum number of bytes read from HTTP responses.
@@ -52,7 +52,7 @@ type searchResponse struct {
 // Client handles interaction with SkillHub
 type Client struct {
 	HTTPClient *http.Client
-	BaseURL    string // override for testing; empty means use default SearchURL
+	BaseURL    string // override for testing; empty means use default searchURL
 }
 
 // NewClient creates a new SkillHub client
@@ -78,7 +78,7 @@ func (c *Client) Search(query string) ([]Skill, error) {
 		return nil, fmt.Errorf("search is not available in offline mode")
 	}
 
-	baseURL := SearchURL
+	baseURL := searchURL
 	if c.BaseURL != "" {
 		baseURL = c.BaseURL + "/api/search/quick"
 	}

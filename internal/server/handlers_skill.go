@@ -401,13 +401,13 @@ type InstallRequest struct {
 }
 
 func (s *Server) handleSkillInstall(w http.ResponseWriter, r *http.Request) {
-	s.cwdMu.RLock()
-	defer s.cwdMu.RUnlock()
-
 	if r.Method != http.MethodPost {
 		jsonError(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
+
+	s.cwdMu.RLock()
+	defer s.cwdMu.RUnlock()
 	limitRequestBody(w, r)
 	if !requireJSONContentType(w, r) {
 		return
@@ -457,13 +457,13 @@ func (s *Server) handleSkillInstall(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleSkillUninstall(w http.ResponseWriter, r *http.Request) {
-	s.cwdMu.RLock()
-	defer s.cwdMu.RUnlock()
-
 	if r.Method != http.MethodPost {
 		jsonError(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
+
+	s.cwdMu.RLock()
+	defer s.cwdMu.RUnlock()
 	limitRequestBody(w, r)
 	if !requireJSONContentType(w, r) {
 		return
@@ -766,7 +766,7 @@ func (s *Server) handleSkillFiles(w http.ResponseWriter, r *http.Request) {
 		data, err := readFileNoSymlink(absPath, maxSkillFileSize)
 		if err != nil {
 			if os.IsPermission(err) {
-				jsonError(w, "Symlinks are not allowed", http.StatusForbidden)
+				jsonError(w, "Access denied: symlinks are not allowed or permission denied", http.StatusForbidden)
 			} else if os.IsNotExist(err) {
 				jsonError(w, "File not found", http.StatusNotFound)
 			} else {

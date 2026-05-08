@@ -40,7 +40,7 @@ func (s *Server) handleConfig(w http.ResponseWriter, r *http.Request) {
 			def := config.DefaultConfig()
 			cfg = &def
 		} else {
-			jsonError(w, "failed to load configuration", http.StatusInternalServerError)
+			jsonError(w, "Failed to load configuration", http.StatusInternalServerError)
 			return
 		}
 	}
@@ -194,7 +194,7 @@ func (s *Server) handleConfigUpdate(w http.ResponseWriter, r *http.Request) {
 				if rollbackErr := os.Chdir(oldCwd); rollbackErr != nil {
 					log.Printf("CRITICAL: failed to rollback working directory to %s: %v", oldCwd, rollbackErr)
 				}
-				jsonError(w, "failed to load config in new root", http.StatusInternalServerError)
+				jsonError(w, "Failed to load config in new root", http.StatusInternalServerError)
 				return
 			}
 		} else {
@@ -271,7 +271,7 @@ func (s *Server) handleConfigUpdate(w http.ResponseWriter, r *http.Request) {
 	if updated {
 		if err := cfg.Save(); err != nil {
 			log.Printf("Error saving configuration: %v", err)
-			jsonError(w, "failed to save configuration", http.StatusInternalServerError)
+			jsonError(w, "Failed to save configuration", http.StatusInternalServerError)
 			return
 		}
 	}
@@ -301,7 +301,7 @@ func (s *Server) handleStats(w http.ResponseWriter, r *http.Request) {
 			def := config.DefaultConfig()
 			cfg = &def
 		} else {
-			jsonError(w, "failed to load configuration", http.StatusInternalServerError)
+			jsonError(w, "Failed to load configuration", http.StatusInternalServerError)
 			return
 		}
 	}

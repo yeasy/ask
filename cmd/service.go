@@ -179,7 +179,9 @@ func runServiceStop(_ *cobra.Command, _ []string) {
 		}
 	}
 
-	_ = mgr.ClearPID()
+	if err := mgr.ClearPID(); err != nil {
+		ui.Warn("Failed to clear PID file: %s", err)
+	}
 	fmt.Printf("Service stopped.\n")
 }
 

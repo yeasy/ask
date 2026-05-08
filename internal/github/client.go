@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -93,7 +94,9 @@ func cacheSet(key string, value interface{}) {
 	cacheMu.Lock()
 	defer cacheMu.Unlock()
 	if searchCache != nil {
-		_ = searchCache.Set(key, value)
+		if err := searchCache.Set(key, value); err != nil {
+			log.Printf("cache write failed for key %s: %v", key, err)
+		}
 	}
 }
 

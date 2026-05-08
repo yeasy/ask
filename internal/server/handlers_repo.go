@@ -159,13 +159,13 @@ func (s *Server) handleRepoAdd(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleRepoRemove(w http.ResponseWriter, r *http.Request) {
-	s.cwdMu.RLock()
-	defer s.cwdMu.RUnlock()
-
 	if r.Method != http.MethodPost {
 		jsonError(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
+
+	s.cwdMu.RLock()
+	defer s.cwdMu.RUnlock()
 	limitRequestBody(w, r)
 	if !requireJSONContentType(w, r) {
 		return
@@ -207,13 +207,13 @@ func (s *Server) handleRepoRemove(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleRepoSync(w http.ResponseWriter, r *http.Request) {
-	s.cwdMu.RLock()
-	defer s.cwdMu.RUnlock()
-
 	if r.Method != http.MethodPost {
 		jsonError(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
+
+	s.cwdMu.RLock()
+	defer s.cwdMu.RUnlock()
 	limitRequestBody(w, r)
 	if !requireJSONContentType(w, r) {
 		return

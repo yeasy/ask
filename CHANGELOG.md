@@ -7,6 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.9] - 2026-05-08
+
+### Security
+- Harden HTTP redirects, security headers, and input validation across server.
+- Harden security headers and fix reflected XSS in error responses.
+- Add length limits to skill name and path validation.
+- Harden PID file read and JSON error escaping.
+- Validate search keyword length in CLI.
+
+### Fixed
+- Fix `ASK_GITHUB_TOKEN` priority order in token resolution.
+- Fix `webkit2gtk` package version in docs.
+- Fix unchecked file close in PID reader.
+- Fix variable shadowing and test parameter names.
+- Handle `filepath.Rel` errors in batch check.
+- Log pattern compile errors in score scanner.
+- Log config save errors before returning JSON error.
+- Log discarded errors in service stop and cache write.
+- Release signal context before `os.Exit` in watch command.
+- Scope context cancel in loops and long-running functions.
+- Accept `v` prefix in semver validation.
+- Check HTTP method before acquiring mutex lock in handlers.
+
+### Changed
+- Extract timeout constants across service, sync, serve, search, repo, score, publish, skill, and skillhub.
+- Extract magic numbers to named constants in search and serve.
+- Extract progress throttle, cache staleness, and git pull timeout to constants.
+- Precompile skill name regex in create command.
+- Extract `truncateStr` helper to deduplicate truncation logic.
+- Deduplicate `GlobalLockFileName` via `LockFileName`.
+- Unexport package-internal `SearchURL` constant.
+- Remove unused `GetAPIBaseURL` function and benchmark temp cache dir.
+- Capitalize `jsonError` messages for consistency.
+- Update SPEC feature table and add `ASK_GITHUB_TOKEN` to docs.
+
+### Dependencies
+- Bump `github.com/fsnotify/fsnotify` from 1.9.0 to 1.10.0.
+- Bump `softprops/action-gh-release` from 2 to 3.
+- Bump `golang.org/x` dependencies.
+
 ## [1.9.8] - 2026-04-19
 
 ### Fixed
@@ -597,7 +637,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configuration file support (`ask.yaml`)
 - Default repositories: Community, Anthropic, MCP-Servers, Scientific, Superpowers
 
-[Unreleased]: https://github.com/yeasy/ask/compare/v1.9.8...HEAD
+[Unreleased]: https://github.com/yeasy/ask/compare/v1.9.9...HEAD
+[1.9.9]: https://github.com/yeasy/ask/compare/v1.9.8...v1.9.9
 [1.9.8]: https://github.com/yeasy/ask/compare/v1.9.7...v1.9.8
 [1.9.7]: https://github.com/yeasy/ask/compare/v1.9.6...v1.9.7
 [1.9.6]: https://github.com/yeasy/ask/compare/v1.9.5...v1.9.6

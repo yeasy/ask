@@ -119,7 +119,7 @@ func (s *Server) handleSkills(w http.ResponseWriter, r *http.Request) {
 			def := config.DefaultConfig()
 			cfg = &def
 		} else {
-			jsonError(w, "failed to load configuration", http.StatusInternalServerError)
+			jsonError(w, "Failed to load configuration", http.StatusInternalServerError)
 			return
 		}
 	}
@@ -375,7 +375,7 @@ func (s *Server) handleSkillSearch(w http.ResponseWriter, r *http.Request) {
 			jsonResponse(w, results)
 			return
 		}
-		jsonError(w, "search failed", http.StatusInternalServerError)
+		jsonError(w, "Search failed", http.StatusInternalServerError)
 		return
 	}
 

@@ -317,7 +317,7 @@ func getExecutable(w http.ResponseWriter) (string, bool) {
 func jsonResponse(w http.ResponseWriter, data interface{}) {
 	buf, err := json.Marshal(data)
 	if err != nil {
-		jsonError(w, "failed to encode response", http.StatusInternalServerError)
+		jsonError(w, "Failed to encode response", http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")

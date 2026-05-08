@@ -38,7 +38,7 @@ func (s *Server) handleRepos(w http.ResponseWriter, r *http.Request) {
 			def := config.DefaultConfig()
 			cfg = &def
 		} else {
-			jsonError(w, "failed to load configuration", http.StatusInternalServerError)
+			jsonError(w, "Failed to load configuration", http.StatusInternalServerError)
 			return
 		}
 	}

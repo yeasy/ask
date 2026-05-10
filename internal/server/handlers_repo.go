@@ -106,6 +106,11 @@ func (s *Server) handleRepoAdd(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if len(req.URL) > 2048 {
+		jsonError(w, "Repository URL too long", http.StatusBadRequest)
+		return
+	}
+
 	if strings.HasPrefix(req.URL, "-") {
 		jsonError(w, "Invalid repository URL", http.StatusBadRequest)
 		return

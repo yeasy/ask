@@ -606,6 +606,11 @@ func TestHandleRepoAddValidation(t *testing.T) {
 			body:       `{"url":"http://example.com/repo"}`,
 			wantStatus: http.StatusBadRequest,
 		},
+		{
+			name:       "url too long",
+			body:       `{"url":"https://github.com/` + strings.Repeat("a", 2048) + `"}`,
+			wantStatus: http.StatusBadRequest,
+		},
 	}
 
 	for _, tt := range tests {

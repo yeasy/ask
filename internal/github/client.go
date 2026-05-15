@@ -324,7 +324,7 @@ func fetchSkillDescription(owner, repo, skillPath string) string {
 	if err != nil {
 		return ""
 	}
-	limitedBody := io.LimitReader(resp.Body, maxResponseBodySize)
+	limitedBody := io.LimitReader(resp.Body, maxDescriptionReadBytes)
 	defer func() {
 		_, _ = io.Copy(io.Discard, limitedBody)
 		_ = resp.Body.Close()
@@ -334,7 +334,7 @@ func fetchSkillDescription(owner, repo, skillPath string) string {
 		return ""
 	}
 
-	data, err := io.ReadAll(io.LimitReader(limitedBody, maxDescriptionReadBytes))
+	data, err := io.ReadAll(limitedBody)
 	if err != nil || len(data) == 0 {
 		return ""
 	}

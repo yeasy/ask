@@ -38,6 +38,11 @@ author, version, and compatible agents. Use --yes to skip prompts.`,
 func runCreate(cmd *cobra.Command, args []string) {
 	name := args[0]
 
+	if len(name) > maxInputLength {
+		fmt.Fprintf(os.Stderr, "Error: Skill name is too long (max %d chars)\n", maxInputLength)
+		os.Exit(1)
+	}
+
 	// Validate name
 	if !validSkillName.MatchString(name) {
 		fmt.Fprintln(os.Stderr, "Error: Skill name must start with an alphanumeric character and contain only alphanumeric characters and dashes.")

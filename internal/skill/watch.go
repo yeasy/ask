@@ -81,7 +81,7 @@ func WatchAndCheck(ctx context.Context, skillPath string, callback func(event st
 
 			// If a new directory was created, watch it too
 			if event.Has(fsnotify.Create) {
-				if info, statErr := os.Stat(event.Name); statErr == nil && info.IsDir() {
+				if info, statErr := os.Lstat(event.Name); statErr == nil && info.IsDir() {
 					if watchErr := addDirRecursive(watcher, event.Name); watchErr != nil {
 						callback(event.Name, nil, fmt.Errorf("failed to watch new directory: %w", watchErr))
 					}

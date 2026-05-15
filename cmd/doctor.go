@@ -1,12 +1,14 @@
 package cmd
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/yeasy/ask/internal/cache"
@@ -338,7 +340,9 @@ func checkSystem() DoctorResult {
 	}
 
 	// Check git
-	gitCmd := exec.Command("git", "--version")
+	gitCtx, gitCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer gitCancel()
+	gitCmd := exec.CommandContext(gitCtx, "git", "--version")
 	output, err := gitCmd.Output()
 	if err != nil {
 		result.Children = append(result.Children, CheckItem{

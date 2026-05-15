@@ -134,10 +134,10 @@ func runSearch(cmd *cobra.Command, args []string) {
 					// Run sync synchronously for the first time
 					syncCtx, syncCancel := context.WithTimeout(context.Background(), backgroundSyncTimeout)
 					defer syncCancel()
-					cmd := exec.CommandContext(syncCtx, exe, "repo", "sync")
-					cmd.Stdout = os.Stdout
-					cmd.Stderr = os.Stderr
-					syncErr := cmd.Run()
+					syncCmd := exec.CommandContext(syncCtx, exe, "repo", "sync")
+					syncCmd.Stdout = os.Stdout
+					syncCmd.Stderr = os.Stderr
+					syncErr := syncCmd.Run()
 					if syncErr != nil {
 						ui.Warn(fmt.Sprintf("Initial sync failed: %v", syncErr))
 					} else {
@@ -168,11 +168,11 @@ func runSearch(cmd *cobra.Command, args []string) {
 					if err == nil {
 						// Background sync: start child process and wait to prevent zombie
 						bgSyncCtx, bgSyncCancel := context.WithTimeout(context.Background(), backgroundSyncTimeout)
-						cmd := exec.CommandContext(bgSyncCtx, exe, "repo", "sync")
-						if err := cmd.Start(); err == nil {
+						bgCmd := exec.CommandContext(bgSyncCtx, exe, "repo", "sync")
+						if err := bgCmd.Start(); err == nil {
 							go func() {
 								defer bgSyncCancel()
-								if waitErr := cmd.Wait(); waitErr != nil {
+								if waitErr := bgCmd.Wait(); waitErr != nil {
 									ui.Debug(fmt.Sprintf("Background sync failed: %v", waitErr))
 								}
 							}()

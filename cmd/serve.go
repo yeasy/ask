@@ -49,6 +49,12 @@ Examples:
 }
 
 func runServe(_ *cobra.Command, args []string) {
+	if servePort < 1 || servePort > 65535 {
+		ui.Error("Invalid port number", "port", servePort)
+		fmt.Fprintln(os.Stderr, "Error: Port must be between 1 and 65535")
+		os.Exit(1)
+	}
+
 	// Handle project path if provided
 	if len(args) > 0 {
 		targetDir := args[0]

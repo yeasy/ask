@@ -181,6 +181,9 @@ func checkSingleSkill(absPath string) (*skill.CheckResult, error) {
 }
 
 func hasCriticalIssues(result *skill.CheckResult) bool {
+	if result == nil {
+		return false
+	}
 	for _, f := range result.Findings {
 		if f.Severity == skill.SeverityCritical {
 			return true
@@ -256,6 +259,9 @@ func printReport(result *skill.CheckResult) {
 }
 
 func printCompactReport(result *skill.CheckResult) {
+	if result == nil {
+		return
+	}
 	if len(result.Findings) == 0 {
 		fmt.Printf("  %s %s: No issues\n", color.GreenString("✓"), result.SkillName)
 		return

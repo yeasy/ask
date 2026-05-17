@@ -53,7 +53,8 @@ Use --all to remove both symlinks AND the source files in .agent/skills/.`,
 		targetName := filepath.Base(skillName)
 
 		// Validate skill name to prevent path traversal
-		if targetName == "." || targetName == ".." || targetName == "" {
+		if targetName == "." || targetName == ".." || targetName == "" ||
+			strings.ContainsAny(targetName, "/\\") {
 			fmt.Fprintf(os.Stderr, "Error: Invalid skill name '%s'\n", skillName)
 			os.Exit(1)
 		}

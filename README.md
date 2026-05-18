@@ -80,10 +80,13 @@ ASK provides a beautiful web interface for skill discovery and management — av
 
 ### Launch
 ```bash
-# Web Server
+# Web Server (any platform)
 ask serve
 
-# Desktop App (requires Wails CLI)
+# Desktop App (macOS): install via Homebrew Cask (see Quick Start below)
+open -a "ASK Desktop"
+
+# Desktop App (build from source — for contributors only)
 wails build && ./build/bin/ask-desktop
 ```
 

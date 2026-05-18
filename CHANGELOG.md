@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.10.0] - 2026-05-17
+
+### Security
+- Fix path traversal in uninstall via slash skill name.
+- Validate repo URL length in `repo add`.
+- Validate skill name length and port range.
+- Add nil guards in check report functions.
+
+### Fixed
+- Fix LimitReader waste and symlink resolution in watch.
+- Fix timeout and variable shadowing in cmd.
+
+### Changed
+- Migrate Homebrew formula to cask for desktop app.
+- Clarify desktop app launch instructions in README.
+
 ## [1.9.9] - 2026-05-08
 
 ### Security

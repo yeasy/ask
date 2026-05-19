@@ -80,10 +80,13 @@ ASK 提供精美的 Web 界面进行技能发现和管理 — 支持 **Web 服�
 
 ### 启动
 ```bash
-# Web 服务器
+# Web 服务器 (所有平台)
 ask serve
 
-# 桌面应用 (需要 Wails CLI)
+# 桌面应用 (macOS)：通过 Homebrew Cask 安装后（见下方快速开始）
+open -a "ASK Desktop"
+
+# 桌面应用 (源码构建 — 仅限贡献者)
 wails build && ./build/bin/ask-desktop
 ```
 
@@ -96,7 +99,7 @@ wails build && ./build/bin/ask-desktop
 **Homebrew (macOS/Linux):**
 ```bash
 brew tap yeasy/tap
-brew install yeasy/tap/ask              # 命令行版本
+brew install --cask yeasy/tap/ask          # 命令行版本
 brew install --cask yeasy/tap/ask-desktop  # 桌面应用 (仅 macOS)
 ```
 

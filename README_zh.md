@@ -116,7 +116,7 @@ go install github.com/yeasy/ask@latest
 git clone https://github.com/yeasy/ask.git
 cd ask
 make build && mv ask /usr/local/bin/
-make build-desktop # 构建桌面应用
+make build-desktop # 构建桌面应用（需要 Wails）
 ```
 
 **二进制 / 手动安装 (Windows / Linux / Desktop):**

@@ -653,7 +653,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configuration file support (`ask.yaml`)
 - Default repositories: Community, Anthropic, MCP-Servers, Scientific, Superpowers
 
-[Unreleased]: https://github.com/yeasy/ask/compare/v1.9.9...HEAD
+[Unreleased]: https://github.com/yeasy/ask/compare/v1.10.0...HEAD
+[1.10.0]: https://github.com/yeasy/ask/compare/v1.9.9...v1.10.0
 [1.9.9]: https://github.com/yeasy/ask/compare/v1.9.8...v1.9.9
 [1.9.8]: https://github.com/yeasy/ask/compare/v1.9.7...v1.9.8
 [1.9.7]: https://github.com/yeasy/ask/compare/v1.9.6...v1.9.7

@@ -109,8 +109,7 @@ func TestGetEntry_Existing(t *testing.T) {
 	entry := lf.GetEntry("skill-b")
 	if entry == nil {
 		t.Fatal("expected non-nil entry for skill-b")
-	}
-	if entry.Version != "2.0.0" {
+	} else if entry.Version != "2.0.0" {
 		t.Fatalf("expected version 2.0.0, got %s", entry.Version)
 	}
 }
@@ -135,10 +134,9 @@ func TestGetEntry_ReturnsMutablePointer(t *testing.T) {
 	entry := lf.GetEntry("skill-a")
 	if entry == nil {
 		t.Fatal("expected non-nil entry")
+	} else {
+		entry.Version = "9.9.9"
 	}
-
-	// Mutating through the pointer should affect the original
-	entry.Version = "9.9.9"
 	if lf.Skills[0].Version != "9.9.9" {
 		t.Fatalf("expected mutation through pointer to affect original, got %s", lf.Skills[0].Version)
 	}

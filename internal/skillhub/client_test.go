@@ -12,8 +12,7 @@ func TestNewClient(t *testing.T) {
 	c := NewClient()
 	if c == nil {
 		t.Fatal("NewClient returned nil")
-	}
-	if c.HTTPClient == nil {
+	} else if c.HTTPClient == nil {
 		t.Fatal("HTTPClient is nil")
 	}
 }

@@ -362,15 +362,15 @@ func TestNewClient_Defaults(t *testing.T) {
 	c := NewClient()
 	if c == nil {
 		t.Fatal("NewClient() returned nil")
-	}
-	if c.httpClient == nil {
+	} else if c.httpClient == nil {
 		t.Fatal("NewClient().httpClient is nil")
-	}
-	if c.httpClient.Timeout != httpTimeoutDefault {
-		t.Errorf("expected timeout %v, got %v", httpTimeoutDefault, c.httpClient.Timeout)
-	}
-	if c.httpClient.Timeout != 10*time.Second {
-		t.Errorf("expected timeout 10s, got %v", c.httpClient.Timeout)
+	} else {
+		if c.httpClient.Timeout != httpTimeoutDefault {
+			t.Errorf("expected timeout %v, got %v", httpTimeoutDefault, c.httpClient.Timeout)
+		}
+		if c.httpClient.Timeout != 10*time.Second {
+			t.Errorf("expected timeout 10s, got %v", c.httpClient.Timeout)
+		}
 	}
 }
 

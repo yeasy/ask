@@ -12,8 +12,7 @@ func TestNew(t *testing.T) {
 	s := New(port, "test-version")
 	if s == nil {
 		t.Fatal("New() returned nil")
-	}
-	if s.port != port {
+	} else if s.port != port {
 		t.Errorf("New() port = %d; want %d", s.port, port)
 	}
 }

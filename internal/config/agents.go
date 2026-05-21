@@ -114,7 +114,7 @@ var SupportedAgents = map[AgentType]AgentConfig{
 		Name:       "Amp",
 		ProjectDir: ".agents/skills",
 		GlobalDir:  ".config/agents/skills",
-		Aliases:    []string{},
+		Aliases:    []string{"agents"},
 	},
 	AgentGoose: {
 		Name:       "Goose",

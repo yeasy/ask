@@ -13,7 +13,7 @@ echo "=== Pre-commit checks ==="
 # 1. Check go fmt
 echo ""
 echo "[1/4] Checking formatting (go fmt)..."
-UNFORMATTED=$(gofmt -l . 2>&1 | grep -v vendor || true)
+UNFORMATTED=$(gofmt -l . 2>&1 | grep -v vendor | grep -v '\.agent/' || true)
 if [ -n "$UNFORMATTED" ]; then
     echo "FAIL: The following files are not formatted:"
     echo "$UNFORMATTED"

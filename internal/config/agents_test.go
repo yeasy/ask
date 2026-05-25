@@ -13,8 +13,13 @@ func TestGetSupportedAgentNames(t *testing.T) {
 		t.Fatal("Expected non-empty list of agent names")
 	}
 
-	// Should contain known agents
-	knownAgents := []string{"claude", "cursor", "codex", "gemini", "copilot"}
+	// Should contain all supported agents
+	knownAgents := []string{
+		"amp", "antigravity", "claude", "clawdbot", "codebuddy",
+		"codex", "copilot", "cursor", "droid", "gemini",
+		"goose", "kilo", "kiro", "neovate", "openclaw",
+		"opencode", "roo", "trae", "windsurf",
+	}
 	for _, known := range knownAgents {
 		found := false
 		for _, name := range names {

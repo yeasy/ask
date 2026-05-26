@@ -28,6 +28,8 @@ test:
 clean:
 	go clean
 	rm -f $(BINARY_NAME)
+	rm -f coverage.out coverage.html
+	rm -rf build/bin/
 
 run:
 	go run main.go

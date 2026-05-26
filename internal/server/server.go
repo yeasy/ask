@@ -314,7 +314,7 @@ func getExecutable(w http.ResponseWriter) (string, bool) {
 
 // JSON response helpers.
 // Marshals to buffer first to avoid partial writes on encoding errors.
-func jsonResponse(w http.ResponseWriter, data interface{}) {
+func jsonResponse(w http.ResponseWriter, data any) {
 	buf, err := json.Marshal(data)
 	if err != nil {
 		jsonError(w, "Failed to encode response", http.StatusInternalServerError)

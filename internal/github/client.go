@@ -80,7 +80,7 @@ func init() {
 }
 
 // cacheGet safely reads from the global cache under a read lock.
-func cacheGet(key string, dest interface{}) bool {
+func cacheGet(key string, dest any) bool {
 	cacheMu.RLock()
 	defer cacheMu.RUnlock()
 	if searchCache == nil {
@@ -90,7 +90,7 @@ func cacheGet(key string, dest interface{}) bool {
 }
 
 // cacheSet safely writes to the global cache under a write lock.
-func cacheSet(key string, value interface{}) {
+func cacheSet(key string, value any) {
 	cacheMu.Lock()
 	defer cacheMu.Unlock()
 	if searchCache != nil {

@@ -63,7 +63,7 @@ func hashKey(key string) string {
 }
 
 // Get retrieves a value from the cache if it exists and is not expired
-func (c *Cache) Get(key string, v interface{}) bool {
+func (c *Cache) Get(key string, v any) bool {
 	filename := filepath.Join(c.dir, hashKey(key)+".json")
 
 	f, err := os.Open(filename)
@@ -96,7 +96,7 @@ func (c *Cache) Get(key string, v interface{}) bool {
 }
 
 // Set stores a value in the cache
-func (c *Cache) Set(key string, v interface{}) error {
+func (c *Cache) Set(key string, v any) error {
 	data, err := json.Marshal(v)
 	if err != nil {
 		return fmt.Errorf("failed to marshal value: %w", err)

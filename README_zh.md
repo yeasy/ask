@@ -203,6 +203,8 @@ ask skill install --repo anthropics
 | `ask init` | 初始化 ASK 项目配置 |
 | `ask benchmark` | 运行已配置仓库的性能基准测试 |
 | `ask quickstart` | 安装推荐技能包 |
+| `ask service {start\|stop\|status}` | 管理后台文件监听服务 |
+| `ask completion <shell>` | 生成 Shell 补全脚本（bash/zsh/fish） |
 | `ask version` | 显示当前版本 |
 
 ## 🌐 技能来源

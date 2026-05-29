@@ -203,6 +203,8 @@ ask skill install --repo anthropics
 | `ask init` | Initialize ASK project configuration |
 | `ask benchmark` | Run performance benchmarks on configured repos |
 | `ask quickstart` | Install recommended skill packs |
+| `ask service {start\|stop\|status}` | Manage background file-watch service |
+| `ask completion <shell>` | Generate shell completion script (bash/zsh/fish) |
 | `ask version` | Show current version |
 
 ## 🌐 Skill Sources

@@ -47,5 +47,9 @@ ask.lock
 build/
 frontend/dist/
 
+# Test artifacts
+test_repo/
+test_validation/
+
 # Logs
 *.log

@@ -462,6 +462,31 @@ ask serve --no-open    # 不自动打开浏览器
 
 ---
 
+### ask service
+
+管理 ASK 后台服务。
+
+```bash
+ask service {start|stop|status|restart}
+```
+
+**示例：**
+
+```bash
+ask service start     # 在后台启动 Web 服务器
+ask service stop      # 停止后台服务
+ask service status    # 检查服务是否正在运行
+ask service restart   # 重启后台服务
+```
+
+**功能说明：**
+- 将 Web 界面服务器（`ask serve`）作为后台进程启动
+- 写入 PID 文件以跟踪运行中的进程
+- 支持可配置超时的优雅关闭
+- 将输出日志记录到 `~/.ask/` 目录下的文件
+
+---
+
 ### ask audit
 
 为所有已安装的技能生成安全审计报告。

@@ -462,6 +462,31 @@ ask serve --no-open    # Don't open browser automatically
 
 ---
 
+### ask service
+
+Manage the ASK background service.
+
+```bash
+ask service {start|stop|status|restart}
+```
+
+**Examples:**
+
+```bash
+ask service start     # Start the web server in background
+ask service stop      # Stop the background service
+ask service status    # Check if the service is running
+ask service restart   # Restart the background service
+```
+
+**What it does:**
+- Starts the web UI server (`ask serve`) as a background process
+- Writes a PID file to track the running process
+- Supports graceful shutdown with configurable timeout
+- Logs output to a file in `~/.ask/`
+
+---
+
 ### ask audit
 
 Generate a security audit report for all installed skills.

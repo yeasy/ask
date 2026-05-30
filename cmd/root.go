@@ -46,11 +46,13 @@ Repository Commands (ask repo <command>):
 System Commands:
   doctor       Diagnose and report on ASK health
   serve        Start web UI for visual skill management
+  service      Manage background service (start|stop|status)
   audit        Generate security audit report
   lock-install Install exact versions from ask.lock
   init         Initialize ASK project configuration
   benchmark    Run performance benchmarks
   quickstart   Install recommended skill packs
+  completion   Generate shell completion script
   version      Show current version
 
 Supported Agents: %s

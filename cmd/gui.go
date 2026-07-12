@@ -1,22 +1,21 @@
 package cmd
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/spf13/cobra"
-	"github.com/wailsapp/wails/v2"
-	"github.com/wailsapp/wails/v2/pkg/options"
-	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
-	"github.com/yeasy/ask/internal/app"
-	"github.com/yeasy/ask/internal/server"
-	"github.com/yeasy/ask/internal/server/web"
 )
 
+// guiCmd launches the native desktop interface. The actual implementation is
+// build-tag gated: the real Wails-backed GUI is compiled only into desktop
+// builds (see gui_desktop.go, built via `make build-desktop`). The standard
+// CLI release uses the stub in gui_default.go, which points users at the web
+// UI (`ask serve`). This keeps Wails out of the CLI binary entirely.
 var guiCmd = &cobra.Command{
 	Use:   "gui",
-	Short: "Launch the ask desktop interface",
-	Long:  "Launch the ask desktop interface in a native window.",
+	Short: "Launch the desktop UI (desktop builds only; use `ask serve` for the web UI)",
+	Long: "Launch the ask desktop interface in a native window.\n\n" +
+		"The desktop UI is only available in desktop builds produced by " +
+		"`make build-desktop`. In the standard CLI build, run `ask serve` to open " +
+		"the same interface in your browser.",
 	Run: func(_ *cobra.Command, _ []string) {
 		startGUI()
 	},
@@ -24,38 +23,4 @@ var guiCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(guiCmd)
-}
-
-// ExecuteGUI starts the GUI application
-func ExecuteGUI() {
-	startGUI()
-}
-
-func startGUI() {
-	// Create an instance of the app structure
-	app := app.NewApp()
-
-	// Create and configure server for API handling (port 0 as we only use the handler)
-	srv := server.New(0, Version)
-
-	// Create application with options
-	err := wails.Run(&options.App{
-		Title:  "Ask",
-		Width:  1024,
-		Height: 768,
-		AssetServer: &assetserver.Options{
-			Assets:  web.Assets,
-			Handler: srv.Handler(),
-		},
-		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
-		OnStartup:        app.Startup,
-		Bind: []any{
-			app,
-		},
-	})
-
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error starting application: %v\n", err)
-		os.Exit(1)
-	}
 }

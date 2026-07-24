@@ -629,6 +629,51 @@ func TestSaveIndexWithStars_FetchFailurePreservesStars(t *testing.T) {
 	}
 }
 
+// TestSaveIndexWithStars_SanitizedKeyAlignment guards C2: callers key the star/
+// url/synced maps by the configured repo name (which may contain "/"), while the
+// on-disk directory uses the sanitized name. The index must still pick up the
+// URL, stars, and sync time for such repos.
+func TestSaveIndexWithStars_SanitizedKeyAlignment(t *testing.T) {
+	dir := t.TempDir()
+	// On-disk dir uses the sanitized form of "owner/repo".
+	if err := os.MkdirAll(filepath.Join(dir, "owner-repo"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	c := &ReposCache{baseDir: dir}
+
+	// Maps are keyed by the raw configured name.
+	if err := c.SaveIndexWithStars(
+		map[string]int{"owner/repo": 7},
+		map[string]string{"owner/repo": "https://github.com/owner/repo"},
+		map[string]bool{"owner/repo": true},
+	); err != nil {
+		t.Fatalf("SaveIndexWithStars() error: %v", err)
+	}
+
+	infos, err := c.LoadIndex()
+	if err != nil {
+		t.Fatalf("LoadIndex() error: %v", err)
+	}
+	var info *RepoInfo
+	for i := range infos {
+		if infos[i].Name == "owner-repo" {
+			info = &infos[i]
+		}
+	}
+	if info == nil {
+		t.Fatal("owner-repo missing from index")
+	}
+	if info.Stars != 7 {
+		t.Errorf("stars = %d, want 7 (raw key should map onto sanitized dir name)", info.Stars)
+	}
+	if info.URL != "https://github.com/owner/repo" {
+		t.Errorf("URL = %q, want the configured URL", info.URL)
+	}
+	if info.LastSyncedAt.IsZero() {
+		t.Error("LastSyncedAt not advanced for a synced repo with a sanitized name")
+	}
+}
+
 func TestLoadIndex_ErrorCases(t *testing.T) {
 	t.Run("missing index file", func(t *testing.T) {
 		dir := t.TempDir()

@@ -66,33 +66,7 @@ func FetchSkillsFromRegistry(registryURL string, keyword string) ([]github.Repos
 		return nil, fmt.Errorf("invalid registry URL: empty segment in %s", registryURL)
 	}
 
-	rawURL := fmt.Sprintf("%s/%s/%s/main/%s", rawBaseURL, owner, repo, path)
-
-	req, err := http.NewRequest("GET", rawURL, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Set("User-Agent", "ask-cli")
-	if token := github.GetTokenForRepo(config.Repo{}); token != "" {
-		req.Header.Set("Authorization", "Bearer "+token)
-	}
-
-	resp, err := registryHTTPClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	limitedBody := io.LimitReader(resp.Body, maxResponseBodySize)
-	defer func() {
-		_, _ = io.Copy(io.Discard, limitedBody)
-		_ = resp.Body.Close()
-	}()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("registry returned status %d", resp.StatusCode)
-	}
-
-	body, err := io.ReadAll(limitedBody)
+	body, err := fetchRegistryIndex(owner, repo, path)
 	if err != nil {
 		return nil, err
 	}
@@ -134,4 +108,57 @@ func FetchSkillsFromRegistry(registryURL string, keyword string) ([]github.Repos
 	}
 
 	return results, nil
+}
+
+// registryBranches lists the default-branch names tried, in order, when fetching
+// a registry index. GitHub raw URLs require an explicit branch, so a registry
+// hosted on a repo whose default branch is "master" would 404 if only "main"
+// were tried.
+var registryBranches = []string{"main", "master"}
+
+// fetchRegistryIndex downloads the registry index bytes, trying each candidate
+// default branch until one is found. A 404 falls through to the next branch;
+// any other non-200 status (or a transport error) is returned immediately.
+func fetchRegistryIndex(owner, repo, path string) ([]byte, error) {
+	lastStatus := http.StatusNotFound
+	for _, branch := range registryBranches {
+		rawURL := fmt.Sprintf("%s/%s/%s/%s/%s", rawBaseURL, owner, repo, branch, path)
+
+		req, err := http.NewRequest("GET", rawURL, nil)
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Set("User-Agent", "ask-cli")
+		if token := github.GetTokenForRepo(config.Repo{}); token != "" {
+			req.Header.Set("Authorization", "Bearer "+token)
+		}
+
+		resp, err := registryHTTPClient.Do(req)
+		if err != nil {
+			return nil, err
+		}
+		limitedBody := io.LimitReader(resp.Body, maxResponseBodySize)
+
+		if resp.StatusCode == http.StatusNotFound {
+			lastStatus = resp.StatusCode
+			_, _ = io.Copy(io.Discard, limitedBody)
+			_ = resp.Body.Close()
+			continue // branch may not exist; try the next candidate
+		}
+		if resp.StatusCode != http.StatusOK {
+			status := resp.StatusCode
+			_, _ = io.Copy(io.Discard, limitedBody)
+			_ = resp.Body.Close()
+			return nil, fmt.Errorf("registry returned status %d", status)
+		}
+
+		body, err := io.ReadAll(limitedBody)
+		_, _ = io.Copy(io.Discard, limitedBody)
+		_ = resp.Body.Close()
+		if err != nil {
+			return nil, err
+		}
+		return body, nil
+	}
+	return nil, fmt.Errorf("registry returned status %d", lastStatus)
 }

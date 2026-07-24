@@ -462,6 +462,22 @@ ask serve --no-open    # Don't open browser automatically
 
 ---
 
+### ask gui
+
+Launch the native desktop interface in a window.
+
+```bash
+ask gui
+```
+
+**What it does:**
+- Opens the same UI as `ask serve`, but in a native desktop window.
+- Available **only in desktop builds** produced by `make build-desktop`, which
+  compile the Wails backend. The standard CLI release ships a stub that tells
+  you to run `ask serve` instead, keeping Wails out of the CLI binary.
+
+---
+
 ### ask service
 
 Manage the ASK background service.

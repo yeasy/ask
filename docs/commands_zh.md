@@ -462,6 +462,21 @@ ask serve --no-open    # 不自动打开浏览器
 
 ---
 
+### ask gui
+
+在原生桌面窗口中启动界面。
+
+```bash
+ask gui
+```
+
+**功能说明：**
+- 打开与 `ask serve` 相同的界面，但以原生桌面窗口呈现。
+- 仅在通过 `make build-desktop` 生成的 **desktop 构建** 中可用（编译 Wails 后端）。
+  标准 CLI 版本提供一个占位命令，提示改用 `ask serve`，从而将 Wails 排除在 CLI 二进制之外。
+
+---
+
 ### ask service
 
 管理 ASK 后台服务。

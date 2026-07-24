@@ -204,28 +204,32 @@ skills:
 ```
 ask/
 ├── cmd/                  # 命令实现
-│   ├── root.go
-│   ├── init.go
-│   ├── skill.go          # 技能父命令
-│   ├── search.go
-│   ├── install.go
-│   ├── uninstall.go
-│   ├── update.go
-│   ├── outdated.go
-│   ├── list.go
-│   ├── info.go
-│   ├── create.go
-│   └── repo.go
+│   ├── root.go           # 根命令与帮助
+│   ├── skill.go          # 技能父命令（install/uninstall/update/list/info/
+│   │                     #   create/search/outdated/publish/score/check）
+│   ├── repo.go           # 仓库父命令（list/add/remove/sync）
+│   ├── serve.go          # Web UI 服务
+│   ├── service.go        # 后台服务管理
+│   ├── gui.go            # 桌面 UI（仅 desktop 构建，见 gui_desktop.go）
+│   ├── doctor.go         # 健康诊断
+│   ├── audit.go          # 安全审计报告
+│   └── ...               # init/quickstart/lock_install/completion/version/benchmark 等
 ├── internal/
-│   ├── config/           # 配置管理（含 lock.go）
+│   ├── app/              # Wails 桌面应用绑定（desktop 构建）
+│   ├── config/           # 配置管理（含 lock.go、agents.go）
 │   ├── github/           # GitHub API 客户端
 │   ├── git/              # Git 操作
-│   ├── skill/            # SKILL.md 解析
-│   ├── deps/             # 依赖解析
-│   ├── server/           # HTTP 服务器
-│   └── service/          # 进程管理
+│   ├── skill/            # SKILL.md 解析、安全扫描、评分
+│   ├── installer/        # 安装/同步到各 agent 目录
+│   ├── repository/       # 注册表与来源解析
+│   ├── skillhub/         # SkillHub 来源客户端
+│   ├── cache/            # 仓库缓存与索引
+│   ├── filesystem/       # 文件复制与符号链接安全
+│   ├── server/           # HTTP 服务器（Web UI）
+│   ├── service/          # 进程管理
+│   └── ui/               # 终端 UI（进度条/spinner）
 ├── assets/               # 静态资源（logo等）
-├── .github/workflows/    # CI/CD
+├── .github/workflows/    # CI/CD（含 security.yml）
 ├── Makefile
 ├── README.md
 └── README_zh.md

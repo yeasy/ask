@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+- Reject non-loopback `Host` headers on the standalone `ask serve` server, preventing DNS-rebinding attacks from reaching the localhost-bound APIs.
+- Prevent a skill-bundled `.askcheck.yaml` from hiding CRITICAL scan findings via `ignore_paths`; such configs may now only suppress INFO/WARNING findings.
+
+### Added
+- CI security workflow running `govulncheck` and `gosec` on push, PR, and weekly.
+
+### Fixed
+- Advance `LastSyncedAt` for every successfully-synced repository, not just starred ones, so 0-star or rate-limited repos are no longer treated as permanently stale.
+- Align repo-index keys with sanitized on-disk directory names so repos whose configured name contains `/` keep their URL, stars, and sync time.
+- Release the per-skill git-fetch context immediately in `ask skill outdated` instead of accumulating one per skill until the command exits.
+- Enforce the overall search timeout on result collection in `ask skill search`.
+- Fetch the registry index from `main` or `master` instead of assuming `main`.
+
+### Removed
+- Dead `internal/deps` package and other unused helpers.
+
+## [1.11.0] - 2026-07-12
+
+### Security
+- Fix dependency and toolchain vulnerabilities (Go toolchain upgrade and dependency bumps).
+
+### Changed
+- Show CLI help by default, and isolate the Wails desktop GUI behind a `desktop` build tag so the standard CLI binary no longer links Wails.
+
+### Added
+- Support the `.agents` directory via the `agents` alias.
+- Document the `service` and `completion` commands in help and README.
+
+### Fixed
+- Fix pre-commit hook permission and exclude `.agent` from checks.
+- Fix SA5011 nil-check warnings in tests.
+
 ## [1.10.0] - 2026-05-17
 
 ### Security
@@ -653,7 +686,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configuration file support (`ask.yaml`)
 - Default repositories: Community, Anthropic, MCP-Servers, Scientific, Superpowers
 
-[Unreleased]: https://github.com/yeasy/ask/compare/v1.10.0...HEAD
+[Unreleased]: https://github.com/yeasy/ask/compare/v1.11.0...HEAD
+[1.11.0]: https://github.com/yeasy/ask/compare/v1.10.0...v1.11.0
 [1.10.0]: https://github.com/yeasy/ask/compare/v1.9.9...v1.10.0
 [1.9.9]: https://github.com/yeasy/ask/compare/v1.9.8...v1.9.9
 [1.9.8]: https://github.com/yeasy/ask/compare/v1.9.7...v1.9.8

@@ -356,3 +356,46 @@ func TestCheckSafety_GitDirExcluded(t *testing.T) {
 		}
 	}
 }
+
+// TestCheckSafety_BundledIgnorePathsCannotHideCritical ensures a malicious skill
+// cannot defeat the audit by bundling a .askcheck.yaml with `ignore_paths: ["*"]`.
+// CRITICAL findings must still surface; lower-severity noise may be suppressed.
+func TestCheckSafety_BundledIgnorePathsCannotHideCritical(t *testing.T) {
+	dir := t.TempDir()
+
+	if err := os.WriteFile(filepath.Join(dir, "SKILL.md"),
+		[]byte("---\nname: evil-skill\ndescription: \"x\"\n---\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	// A CRITICAL secret and a WARNING-level command in the same payload file.
+	payload := "-----BEGIN RSA PRIVATE KEY-----\nsudo rm -rf /tmp/x\n"
+	if err := os.WriteFile(filepath.Join(dir, "payload.sh"), []byte(payload), 0644); err != nil {
+		t.Fatal(err)
+	}
+	// Malicious bundled config attempting to skip every file.
+	if err := os.WriteFile(filepath.Join(dir, ".askcheck.yaml"),
+		[]byte("ignore_paths:\n  - \"*\"\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	result, err := CheckSafety(dir)
+	if err != nil {
+		t.Fatalf("CheckSafety failed: %v", err)
+	}
+
+	var sawCritical, sawWarning bool
+	for _, f := range result.Findings {
+		if f.RuleID == "SECRET-PRIVATE-KEY" {
+			sawCritical = true
+		}
+		if f.RuleID == "CMD-SUDO" {
+			sawWarning = true
+		}
+	}
+	if !sawCritical {
+		t.Error("bundled ignore_paths hid a CRITICAL finding — audit bypass not closed")
+	}
+	if sawWarning {
+		t.Error("expected WARNING finding on an ignored path to be suppressed, but it surfaced")
+	}
+}

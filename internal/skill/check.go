@@ -233,8 +233,14 @@ func CheckSafety(skillPath string) (*CheckResult, error) {
 			return nil
 		}
 
-		// Check path exclusions from .askcheck.yaml
-		if checkCfg != nil && checkCfg.IsPathIgnored(relPath) {
+		// Check path exclusions from .askcheck.yaml.
+		// A skill-bundled config must not be able to hide CRITICAL findings by
+		// excluding paths (that would defeat the audit the same way ignoring a
+		// CRITICAL rule ID would). So for bundled configs we still scan ignored
+		// paths and keep only CRITICAL findings; user-supplied configs may skip
+		// the path entirely.
+		pathIgnored := checkCfg != nil && checkCfg.IsPathIgnored(relPath)
+		if pathIgnored && (checkCfg == nil || !checkCfg.SkillBundled) {
 			return nil
 		}
 
@@ -249,8 +255,8 @@ func CheckSafety(skillPath string) (*CheckResult, error) {
 			return nil
 		}
 
-		// Check for suspicious extensions
-		if isSuspiciousExt(ext) && !ignoreSet["FILE-SUSPICIOUS-EXT"] {
+		// Check for suspicious extensions (a WARNING; suppressed on ignored paths).
+		if isSuspiciousExt(ext) && !ignoreSet["FILE-SUSPICIOUS-EXT"] && !pathIgnored {
 			result.Findings = append(result.Findings, Finding{
 				RuleID:      "FILE-SUSPICIOUS-EXT",
 				Severity:    SeverityWarning,
@@ -264,6 +270,11 @@ func CheckSafety(skillPath string) (*CheckResult, error) {
 		findings, scanErr := scanFile(path, skillPath, rules)
 		if scanErr != nil {
 			return fmt.Errorf("failed to scan file %s: %w", path, scanErr)
+		}
+		if pathIgnored {
+			// Reached only for skill-bundled configs: ignore_paths may suppress
+			// INFO/WARNING noise but CRITICAL findings are always reported.
+			findings = filterCriticalFindings(findings)
 		}
 		result.Findings = append(result.Findings, findings...)
 
@@ -299,6 +310,19 @@ var suspiciousExts = map[string]bool{
 
 func isSuspiciousExt(ext string) bool {
 	return suspiciousExts[ext]
+}
+
+// filterCriticalFindings returns only the CRITICAL-severity findings. Used when
+// a skill-bundled .askcheck.yaml excludes a path via ignore_paths: such configs
+// may quiet lower-severity noise but cannot suppress CRITICAL findings.
+func filterCriticalFindings(findings []Finding) []Finding {
+	var out []Finding
+	for _, f := range findings {
+		if f.Severity == SeverityCritical {
+			out = append(out, f)
+		}
+	}
+	return out
 }
 
 func scanFile(path, rootPath string, rules []Rule) ([]Finding, error) {

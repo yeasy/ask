@@ -14,16 +14,6 @@ import (
 	"time"
 )
 
-// verifyWeights checks that score category weights sum to 1.0.
-// Called from tests to catch configuration errors at test time.
-func verifyWeights() error {
-	sum := weightSecurity + weightQuality + weightPublisher + weightTransparency
-	if math.Abs(sum-1.0) > 0.001 {
-		return fmt.Errorf("score category weights must sum to 1.0, got %f", sum)
-	}
-	return nil
-}
-
 // ScoreGrade represents the trust grade of a skill
 type ScoreGrade string
 

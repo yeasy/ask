@@ -162,17 +162,6 @@ func InstallSubdir(ctx context.Context, repoURL, branch, subDir, dest string) er
 	return filesystem.CopyDir(srcPath, dest)
 }
 
-// GetLatestTag returns the latest tag for a repository in the given path
-func GetLatestTag(ctx context.Context, repoPath string) (string, error) {
-	cmd := exec.CommandContext(ctx, "git", "describe", "--tags", "--abbrev=0")
-	cmd.Dir = repoPath
-	output, err := cmd.Output()
-	if err != nil {
-		return "", err
-	}
-	return strings.TrimSpace(string(output)), nil
-}
-
 // Checkout checks out a specific tag or branch.
 // The ref is validated to prevent unexpected git behavior from malformed references.
 func Checkout(ctx context.Context, repoPath, ref string) error {

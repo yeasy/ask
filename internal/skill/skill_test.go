@@ -129,7 +129,11 @@ func TestCreateSkillTemplate(t *testing.T) {
 	skillName := "my-test-skill"
 
 	// Create skill template
-	err := CreateSkillTemplate(skillName, tmpDir)
+	err := CreateSkillTemplateWithData(TemplateData{
+		Name:        skillName,
+		Description: "A new skill for AI Agents",
+		Author:      GetGitAuthor(),
+	}, tmpDir)
 	if err != nil {
 		t.Fatalf("Failed to create skill template: %v", err)
 	}

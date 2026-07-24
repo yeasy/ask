@@ -284,11 +284,6 @@ func extractDescription(skillMDPath string) string {
 	return ""
 }
 
-// SaveIndex saves the current repo index to disk (without stars)
-func (c *ReposCache) SaveIndex() error {
-	return c.SaveIndexWithStars(nil, nil, nil)
-}
-
 // SaveIndexWithStars saves the current repo index to disk with star counts and URLs.
 //
 // synced holds the set of repos that were synced this run (keyed the same as the

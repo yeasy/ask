@@ -241,34 +241,3 @@ func GetAgentSkillsDir(agent AgentType, global bool) (string, error) {
 
 	return config.ProjectDir, nil
 }
-
-// GetAllAgentSkillsDirs returns all unique skill directories for discovery.
-// Returns both project-level and global directories for all supported agents.
-func GetAllAgentSkillsDirs() []string {
-	seen := make(map[string]bool)
-	var dirs []string
-	add := func(d string) {
-		if !seen[d] {
-			seen[d] = true
-			dirs = append(dirs, d)
-		}
-	}
-
-	// Add default ASK directory
-	add(DefaultSkillsDir)
-
-	// Add project-level directories
-	for _, config := range SupportedAgents {
-		add(config.ProjectDir)
-	}
-
-	// Add global directories
-	home, err := os.UserHomeDir()
-	if err == nil {
-		for _, config := range SupportedAgents {
-			add(filepath.Join(home, config.GlobalDir))
-		}
-	}
-
-	return dirs
-}

@@ -9,8 +9,9 @@ import (
 )
 
 func TestVerifyWeights(t *testing.T) {
-	if err := verifyWeights(); err != nil {
-		t.Fatal(err)
+	sum := weightSecurity + weightQuality + weightPublisher + weightTransparency
+	if math.Abs(sum-1.0) > 0.001 {
+		t.Fatalf("score category weights must sum to 1.0, got %f", sum)
 	}
 }
 

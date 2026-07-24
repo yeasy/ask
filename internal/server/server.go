@@ -7,12 +7,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/fs"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -53,7 +55,7 @@ func (s *Server) Start() error {
 
 	server := &http.Server{
 		Addr:              fmt.Sprintf("127.0.0.1:%d", s.port),
-		Handler:           securityHeadersMiddleware(corsMiddleware(mux)),
+		Handler:           securityHeadersMiddleware(s.hostCheckMiddleware(corsMiddleware(mux))),
 		ReadHeaderTimeout: serverReadHeaderTimeout,
 		ReadTimeout:       serverReadTimeout,
 		WriteTimeout:      serverWriteTimeout,
@@ -213,6 +215,49 @@ func sanitizeAndRestrictPath(rawPath string) (string, error) {
 	}
 
 	return cleanPath, nil
+}
+
+// hostCheckMiddleware rejects requests whose Host header is not a loopback
+// address. The server binds to 127.0.0.1, but that alone does not stop a
+// DNS-rebinding attack: a remote page can rebind its own hostname to 127.0.0.1
+// and reach this server as a same-origin request, bypassing the CORS and
+// content-type CSRF defenses. Validating the Host header closes that gap.
+//
+// This is applied only to the standalone `ask serve` server (a real TCP socket
+// reachable by a browser), not the Wails desktop Handler(), whose webview uses
+// a non-loopback Host such as "wails.localhost".
+func (s *Server) hostCheckMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !isLoopbackHost(r.Host, s.port) {
+			jsonError(w, "Invalid Host header", http.StatusForbidden)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+// isLoopbackHost reports whether an HTTP Host header refers to the loopback
+// interface (localhost / 127.0.0.1 / ::1). When a port is present it must match
+// the server's port. An empty Host is permitted for non-browser clients; a
+// DNS-rebinding attack always carries the attacker's hostname in Host.
+func isLoopbackHost(host string, port int) bool {
+	if host == "" {
+		return true
+	}
+	h, p, err := net.SplitHostPort(host)
+	if err != nil {
+		// No port component in the Host header.
+		h, p = host, ""
+	}
+	switch h {
+	case "localhost", "127.0.0.1", "::1":
+	default:
+		return false
+	}
+	if p != "" && p != strconv.Itoa(port) {
+		return false
+	}
+	return true
 }
 
 // securityHeadersMiddleware adds security headers to prevent clickjacking and other attacks.

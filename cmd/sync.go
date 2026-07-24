@@ -95,6 +95,7 @@ If no repo name is specified, syncs all configured repositories.`,
 			successCount int
 			starCounts   = make(map[string]int)
 			repoURLs     = make(map[string]string)
+			syncedRepos  = make(map[string]bool)
 			syncErrors   []string
 		)
 
@@ -155,6 +156,7 @@ If no repo name is specified, syncs all configured repositories.`,
 				}
 
 				successCount++
+				syncedRepos[repoName] = true
 				if stars > 0 {
 					starCounts[repoName] = stars
 				}
@@ -178,7 +180,7 @@ If no repo name is specified, syncs all configured repositories.`,
 		fmt.Printf("Synced %d/%d repositories.\n", successCount, len(targetRepos))
 
 		// Save index with star counts and URLs
-		if err := reposCache.SaveIndexWithStars(starCounts, repoURLs); err != nil {
+		if err := reposCache.SaveIndexWithStars(starCounts, repoURLs, syncedRepos); err != nil {
 			ui.Warn(fmt.Sprintf("Failed to save index: %v", err))
 		}
 

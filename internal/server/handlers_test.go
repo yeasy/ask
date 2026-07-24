@@ -95,6 +95,65 @@ func TestCorsMiddleware(t *testing.T) {
 	}
 }
 
+func TestIsLoopbackHost(t *testing.T) {
+	tests := []struct {
+		name string
+		host string
+		port int
+		want bool
+	}{
+		{"empty host allowed", "", 8125, true},
+		{"127.0.0.1 with matching port", "127.0.0.1:8125", 8125, true},
+		{"localhost with matching port", "localhost:8125", 8125, true},
+		{"ipv6 loopback with matching port", "[::1]:8125", 8125, true},
+		{"127.0.0.1 without port", "127.0.0.1", 8125, true},
+		{"localhost without port", "localhost", 8125, true},
+		{"rebinding attacker host", "attacker.com:8125", 8125, false},
+		{"rebinding attacker host without port", "evil.example", 8125, false},
+		{"loopback wrong port", "127.0.0.1:9999", 8125, false},
+		{"localhost subdomain trick", "localhost.evil.com:8125", 8125, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := isLoopbackHost(tt.host, tt.port); got != tt.want {
+				t.Errorf("isLoopbackHost(%q, %d) = %v, want %v", tt.host, tt.port, got, tt.want)
+			}
+		})
+	}
+}
+
+// TestHostCheckMiddleware ensures the middleware rejects DNS-rebinding requests
+// whose Host header points at an attacker-controlled name, while allowing
+// legitimate loopback access.
+func TestHostCheckMiddleware(t *testing.T) {
+	s := &Server{port: 8125}
+	handler := s.hostCheckMiddleware(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	tests := []struct {
+		name       string
+		host       string
+		wantStatus int
+	}{
+		{"loopback host allowed", "127.0.0.1:8125", http.StatusOK},
+		{"localhost allowed", "localhost:8125", http.StatusOK},
+		{"rebinding host rejected", "attacker.com:8125", http.StatusForbidden},
+		{"wrong port rejected", "127.0.0.1:9999", http.StatusForbidden},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodPost, "/api/skills/install", nil)
+			req.Host = tt.host
+			rr := httptest.NewRecorder()
+			handler.ServeHTTP(rr, req)
+			if rr.Code != tt.wantStatus {
+				t.Errorf("Host %q: status = %d, want %d", tt.host, rr.Code, tt.wantStatus)
+			}
+		})
+	}
+}
+
 func TestJsonResponse(t *testing.T) {
 	t.Run("map of strings", func(t *testing.T) {
 		rr := httptest.NewRecorder()

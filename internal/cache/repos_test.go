@@ -248,7 +248,7 @@ func TestSaveAndLoadIndex(t *testing.T) {
 		stars := map[string]int{"alpha": 42, "beta": 100}
 		urls := map[string]string{"alpha": "https://github.com/a/alpha", "beta": "https://github.com/b/beta"}
 
-		err := c.SaveIndexWithStars(stars, urls)
+		err := c.SaveIndexWithStars(stars, urls, nil)
 		if err != nil {
 			t.Fatalf("SaveIndexWithStars() error: %v", err)
 		}
@@ -420,7 +420,7 @@ func TestIsStale(t *testing.T) {
 		// Save index with one repo
 		stars := map[string]int{"other-repo": 10}
 		urls := map[string]string{"other-repo": "https://github.com/x/y"}
-		_ = c.SaveIndexWithStars(stars, urls)
+		_ = c.SaveIndexWithStars(stars, urls, nil)
 
 		if !c.IsStale("missing-repo", time.Hour) {
 			t.Error("IsStale() = false, want true for repo not in index")
@@ -435,7 +435,7 @@ func TestIsStale(t *testing.T) {
 		c := &ReposCache{baseDir: dir}
 		stars := map[string]int{"fresh-repo": 5}
 		urls := map[string]string{"fresh-repo": "https://github.com/a/b"}
-		_ = c.SaveIndexWithStars(stars, urls)
+		_ = c.SaveIndexWithStars(stars, urls, nil)
 
 		// Just saved, so LastSyncedAt is ~now; 1 hour TTL should not be stale
 		if c.IsStale("fresh-repo", time.Hour) {
@@ -451,7 +451,7 @@ func TestIsStale(t *testing.T) {
 		c := &ReposCache{baseDir: dir}
 		stars := map[string]int{"old-repo": 5}
 		urls := map[string]string{"old-repo": "https://github.com/a/b"}
-		_ = c.SaveIndexWithStars(stars, urls)
+		_ = c.SaveIndexWithStars(stars, urls, nil)
 
 		// Use a TTL of 0 so it's immediately stale
 		if !c.IsStale("old-repo", 0) {
@@ -532,14 +532,14 @@ func TestSaveIndexPreservesExistingData(t *testing.T) {
 		"repo-a": "https://github.com/x/a",
 		"repo-b": "https://github.com/x/b",
 	}
-	if err := c.SaveIndexWithStars(stars1, urls1); err != nil {
+	if err := c.SaveIndexWithStars(stars1, urls1, nil); err != nil {
 		t.Fatalf("first SaveIndexWithStars() error: %v", err)
 	}
 
 	// Second save: only repo-a synced (repo-b should preserve old data)
 	stars2 := map[string]int{"repo-a": 55}
 	urls2 := map[string]string{"repo-a": "https://github.com/x/a"}
-	if err := c.SaveIndexWithStars(stars2, urls2); err != nil {
+	if err := c.SaveIndexWithStars(stars2, urls2, nil); err != nil {
 		t.Fatalf("second SaveIndexWithStars() error: %v", err)
 	}
 
@@ -564,6 +564,68 @@ func TestSaveIndexPreservesExistingData(t *testing.T) {
 	// repo-b should preserve old URL
 	if infoMap["repo-b"].URL != "https://github.com/x/b" {
 		t.Errorf("repo-b URL = %q, want preserved URL", infoMap["repo-b"].URL)
+	}
+}
+
+// TestSaveIndexWithStars_SyncedAdvancesLastSyncedAt guards the fix for repos that
+// sync successfully but have 0 stars (or a failed star fetch): they are absent
+// from starCounts but present in the synced set, and must not be left stale.
+func TestSaveIndexWithStars_SyncedAdvancesLastSyncedAt(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(dir, "zero-star"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	c := &ReposCache{baseDir: dir}
+
+	synced := map[string]bool{"zero-star": true}
+	urls := map[string]string{"zero-star": "https://github.com/a/zero-star"}
+	if err := c.SaveIndexWithStars(nil, urls, synced); err != nil {
+		t.Fatalf("SaveIndexWithStars() error: %v", err)
+	}
+
+	if c.IsStale("zero-star", time.Hour) {
+		t.Error("IsStale() = true for a freshly synced 0-star repo; LastSyncedAt was not advanced")
+	}
+}
+
+// TestSaveIndexWithStars_FetchFailurePreservesStars ensures a successful sync
+// whose star fetch failed (in synced, absent from starCounts) keeps the
+// previously cached star count instead of resetting it to zero.
+func TestSaveIndexWithStars_FetchFailurePreservesStars(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(dir, "repo"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	c := &ReposCache{baseDir: dir}
+
+	if err := c.SaveIndexWithStars(
+		map[string]int{"repo": 123},
+		map[string]string{"repo": "https://github.com/a/repo"},
+		map[string]bool{"repo": true},
+	); err != nil {
+		t.Fatalf("first save error: %v", err)
+	}
+
+	// Second sync succeeds but the star fetch failed.
+	if err := c.SaveIndexWithStars(nil, nil, map[string]bool{"repo": true}); err != nil {
+		t.Fatalf("second save error: %v", err)
+	}
+
+	infos, err := c.LoadIndex()
+	if err != nil {
+		t.Fatalf("LoadIndex() error: %v", err)
+	}
+	var found bool
+	for _, info := range infos {
+		if info.Name == "repo" {
+			found = true
+			if info.Stars != 123 {
+				t.Errorf("repo stars = %d, want 123 (preserved across a failed star fetch)", info.Stars)
+			}
+		}
+	}
+	if !found {
+		t.Fatal("repo missing from index")
 	}
 }
 

@@ -271,11 +271,17 @@ func extractDescription(skillMDPath string) string {
 
 // SaveIndex saves the current repo index to disk (without stars)
 func (c *ReposCache) SaveIndex() error {
-	return c.SaveIndexWithStars(nil, nil)
+	return c.SaveIndexWithStars(nil, nil, nil)
 }
 
-// SaveIndexWithStars saves the current repo index to disk with star counts and URLs
-func (c *ReposCache) SaveIndexWithStars(starCounts map[string]int, urls map[string]string) error {
+// SaveIndexWithStars saves the current repo index to disk with star counts and URLs.
+//
+// synced holds the set of repos that were synced this run (keyed the same as the
+// on-disk repo directory names). Their LastSyncedAt is advanced to now regardless
+// of star count, so a genuinely 0-star repo — or one whose star fetch failed — is
+// not left permanently stale. A repo present in starCounts is also treated as
+// synced, since a fresh star count can only come from a successful sync.
+func (c *ReposCache) SaveIndexWithStars(starCounts map[string]int, urls map[string]string, synced map[string]bool) error {
 	indexPath := filepath.Join(c.baseDir, "index.json")
 	repos := c.GetCachedRepos()
 
@@ -298,21 +304,19 @@ func (c *ReposCache) SaveIndexWithStars(starCounts map[string]int, urls map[stri
 			continue
 		}
 
-		// Use new star count if provided, otherwise use existing
-		// Logic: if provided in map, it means we just synced it (successfully or attempted)
-		// So we update LastSyncedAt if starCounts has entry?
-		// Actually starCounts is populated only on success in syncCmd.
-
+		// Advance LastSyncedAt for any repo synced this run, independent of its
+		// star count. A repo carrying a fresh star count was necessarily synced.
 		stars := 0
 		lastSyncedAt := existingSyncTimes[repo]
+		_, freshStars := starCounts[repo]
+		if (synced != nil && synced[repo]) || freshStars {
+			lastSyncedAt = time.Now()
+		}
 
-		if starCounts != nil {
-			if count, ok := starCounts[repo]; ok {
-				stars = count
-				lastSyncedAt = time.Now()
-			} else if existingCount, ok := existingStars[repo]; ok {
-				stars = existingCount
-			}
+		// Use the fresh star count when we have one, otherwise keep the existing
+		// value so a transient star-fetch failure does not wipe a known count.
+		if freshStars {
+			stars = starCounts[repo]
 		} else if existingCount, ok := existingStars[repo]; ok {
 			stars = existingCount
 		}

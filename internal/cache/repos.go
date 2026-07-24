@@ -219,6 +219,21 @@ func sanitizeRepoName(name string) string {
 	return name
 }
 
+// sanitizeMapKeys re-keys a map from configured repo names to the sanitized,
+// on-disk directory names used by GetCachedRepos, so index lookups line up.
+// Without this, a repo whose configured name contains "/", "\\" or ".." would
+// never match its directory entry and lose its URL/stars/sync time.
+func sanitizeMapKeys[V any](m map[string]V) map[string]V {
+	if m == nil {
+		return nil
+	}
+	out := make(map[string]V, len(m))
+	for k, v := range m {
+		out[sanitizeRepoName(k)] = v
+	}
+	return out
+}
+
 // maxDescriptionFileSize is the maximum SKILL.md file size to read for description extraction
 const maxDescriptionFileSize = 8192
 
@@ -284,6 +299,12 @@ func (c *ReposCache) SaveIndex() error {
 func (c *ReposCache) SaveIndexWithStars(starCounts map[string]int, urls map[string]string, synced map[string]bool) error {
 	indexPath := filepath.Join(c.baseDir, "index.json")
 	repos := c.GetCachedRepos()
+
+	// Callers key these maps by the configured repo name; the on-disk repo dirs
+	// (and thus GetCachedRepos) use sanitized names. Normalize so lookups align.
+	starCounts = sanitizeMapKeys(starCounts)
+	urls = sanitizeMapKeys(urls)
+	synced = sanitizeMapKeys(synced)
 
 	// Load existing index to preserve stars, URLs, and sync times for repos not synced in this run
 	existingStars := make(map[string]int)

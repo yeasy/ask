@@ -106,6 +106,33 @@ func TestFetchSkillsFromRegistry_ValidJSON(t *testing.T) {
 	}
 }
 
+func TestFetchSkillsFromRegistry_MasterBranchFallback(t *testing.T) {
+	config.SetOffline(false)
+
+	index := validRegistryIndex()
+	data, _ := json.Marshal(index)
+
+	_, cleanup := setupTestServer(func(w http.ResponseWriter, r *http.Request) {
+		// Registry repo whose default branch is "master": "main" must 404,
+		// and the fetch should fall back to "master".
+		if contains(r.URL.Path, "/main/") {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(data)
+	})
+	defer cleanup()
+
+	results, err := FetchSkillsFromRegistry("owner/repo/registry/index.json", "")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(results) != 3 {
+		t.Fatalf("expected 3 results via master fallback, got %d", len(results))
+	}
+}
+
 func TestFetchSkillsFromRegistry_HTTPError404(t *testing.T) {
 	config.SetOffline(false)
 

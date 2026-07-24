@@ -286,14 +286,25 @@ func runSearch(cmd *cobra.Command, args []string) {
 		}(repo)
 	}
 
+	// Collect results, honoring the overall search timeout. The results channel
+	// is buffered to len(cfg.Repos), so any goroutines still running after a
+	// timeout finish and exit without blocking (no leak).
+collect:
 	for i := 0; i < len(cfg.Repos); i++ {
-		result := <-results
-		_ = bar.Add(1)
-		if result.err != nil {
-			searchErrors = append(searchErrors, fmt.Sprintf("%s: %v", result.source, result.err))
-			continue
+		select {
+		case result := <-results:
+			_ = bar.Add(1)
+			if result.err != nil {
+				searchErrors = append(searchErrors, fmt.Sprintf("%s: %v", result.source, result.err))
+			} else {
+				allRepos = append(allRepos, result.repos...)
+			}
+		case <-searchCtx.Done():
+			remaining := len(cfg.Repos) - i
+			searchErrors = append(searchErrors,
+				fmt.Sprintf("search timed out after %s; %d source(s) did not finish", searchTimeout, remaining))
+			break collect
 		}
-		allRepos = append(allRepos, result.repos...)
 	}
 
 	fmt.Println()

@@ -91,10 +91,13 @@ Use --global to check global skills.`,
 			isOffline := config.IsOffline()
 			if !isOffline {
 				fetchCtx, fetchCancel := context.WithTimeout(context.Background(), gitFetchTimeout)
-				defer fetchCancel()
 				fetchCmd := exec.CommandContext(fetchCtx, "git", "fetch", "--quiet")
 				fetchCmd.Dir = skillPath
 				fetchErr := fetchCmd.Run()
+				// Release the context immediately; deferring here would leak one
+				// context (and its watchdog goroutine) per skill until the whole
+				// command returns.
+				fetchCancel()
 				if fetchErr != nil {
 					ui.Debug(fmt.Sprintf("Failed to fetch %s: %v", skillName, fetchErr))
 				}

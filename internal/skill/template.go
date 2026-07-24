@@ -78,18 +78,6 @@ func CreateSkillTemplateWithData(data TemplateData, destDir string) error {
 	return createSkillDir(data, destDir)
 }
 
-// CreateSkillTemplate creates a new skill directory with template files
-func CreateSkillTemplate(name, destDir string) error {
-	data := TemplateData{
-		Name:        name,
-		Description: "A new skill for AI Agents",
-		Author:      GetGitAuthor(),
-		Version:     "0.1.0",
-		Tags:        []string{"agent-skill"},
-	}
-	return createSkillDir(data, destDir)
-}
-
 func createSkillDir(data TemplateData, destDir string) error {
 	name := data.Name
 	skillDir := filepath.Join(destDir, name)

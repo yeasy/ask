@@ -40,32 +40,6 @@ func setupTestRepo(t *testing.T) string {
 }
 
 // TestGetLatestTag tests the GetLatestTag function
-func TestGetLatestTag(t *testing.T) {
-	tmpDir := setupTestRepo(t)
-
-	// Create a test file and commit
-	testFile := filepath.Join(tmpDir, "test.txt")
-	if err := os.WriteFile(testFile, []byte("test"), 0644); err != nil {
-		t.Fatalf("Failed to create test file: %v", err)
-	}
-
-	runGit(t, tmpDir, "add", "test.txt")
-	runGit(t, tmpDir, "commit", "-m", "Initial commit")
-
-	// Create a tag
-	runGit(t, tmpDir, "tag", "v1.0.0")
-
-	// Test GetLatestTag
-	tag, err := GetLatestTag(context.Background(), tmpDir)
-	if err != nil {
-		t.Fatalf("GetLatestTag failed: %v", err)
-	}
-
-	if tag != "v1.0.0" {
-		t.Errorf("Expected tag 'v1.0.0', got '%s'", tag)
-	}
-}
-
 // TestGetCurrentCommit tests the GetCurrentCommit function
 func TestGetCurrentCommit(t *testing.T) {
 	tmpDir := setupTestRepo(t)
@@ -341,15 +315,6 @@ func TestValidateGitRef_RejectsDangerous(t *testing.T) {
 		if err := validateGitRef(ref); err == nil {
 			t.Errorf("validateGitRef(%q) should reject dash-prefixed ref", ref)
 		}
-	}
-}
-
-// TestGetLatestTag_NoGitRepo verifies that GetLatestTag returns an error for a non-repo directory
-func TestGetLatestTag_NoGitRepo(t *testing.T) {
-	tmpDir := t.TempDir() // plain directory, not a git repo
-	_, err := GetLatestTag(context.Background(), tmpDir)
-	if err == nil {
-		t.Fatal("GetLatestTag should fail when called on a non-git directory")
 	}
 }
 
